@@ -1,0 +1,165 @@
+Build a full-featured, production-grade Exploratory Data Analysis (EDA) 
+web application using React (frontend) + Python/FastAPI (backend).
+
+=== STACK ===
+Frontend: React + Tailwind CSS + Recharts/Plotly.js
+Backend: FastAPI + Python
+Core EDA Libraries: pandas, numpy, ydata-profiling, sweetviz, scipy, 
+                    scikit-learn, matplotlib, seaborn
+
+=== FILE UPLOAD ===
+- Drag-and-drop + click-to-upload file input
+- Support: CSV, XLSX, JSON, Parquet, TSV
+- Show file name, size, and row/column count after upload
+- Preview first 10 rows in a styled table
+- Handle encoding detection automatically (chardet)
+
+=== SECTION 1: DATASET OVERVIEW ===
+- Total rows, columns, memory usage (MB)
+- File format and encoding
+- Duplicate rows count + option to drop
+- Fully missing rows count
+- Column data types summary (numeric, categorical, datetime, boolean, text)
+- Schema table: [column name | dtype | non-null count | null count | null % | unique count | sample values]
+
+=== SECTION 2: MISSING VALUE ANALYSIS ===
+- Missing value heatmap (seaborn/matplotlib or plotly)
+- Bar chart: columns sorted by missing %
+- Table: column | missing count | missing % | recommended action
+- Correlation of missingness between columns (missingno-style matrix)
+- Options to: drop columns above X% missing, fill with mean/median/mode/custom
+
+=== SECTION 3: UNIVARIATE ANALYSIS ===
+For each numeric column:
+  - Histogram with KDE overlay
+  - Box plot
+  - Violin plot
+  - Stats: mean, median, mode, std, variance, min, max, range, 
+            IQR, Q1, Q3, skewness, kurtosis, coefficient of variation
+  - Outlier detection: IQR method + Z-score method (flag count)
+  - Normality test: Shapiro-Wilk (small data) or K-S test
+
+For each categorical column:
+  - Bar chart (top 20 values by frequency)
+  - Pie chart (top 10)
+  - Table: value | count | percentage
+  - Cardinality label (low/medium/high/unique)
+  - Entropy value
+
+For datetime columns:
+  - Timeline/line chart of frequency over time
+  - Decompose into: year, month, day, weekday, hour distributions
+
+=== SECTION 4: BIVARIATE ANALYSIS ===
+- Numeric vs Numeric: scatter plot + Pearson/Spearman correlation + regression line
+- Numeric vs Categorical: grouped box plots, violin plots, strip plots
+- Categorical vs Categorical: grouped bar chart, stacked bar, chi-square test result
+- Heatmap of Pearson correlation matrix (full dataset, numeric cols only)
+- Spearman correlation matrix option
+- Point-biserial correlation for binary categoricals
+
+=== SECTION 5: MULTIVARIATE ANALYSIS ===
+- Pairplot (scatter matrix) for all numeric columns (sample up to 1000 rows)
+- Parallel coordinates plot
+- 3D scatter plot (select 3 axes + optional color axis)
+- PCA:
+    - Explained variance ratio per component (bar + cumulative line chart)
+    - 2D PCA scatter (PC1 vs PC2)
+    - 3D PCA scatter (PC1 vs PC2 vs PC3)
+    - Loadings plot
+- t-SNE visualization (2D, with perplexity slider)
+- UMAP (optional, if umap-learn installed)
+- Cluster detection: KMeans elbow chart + silhouette scores
+
+=== SECTION 6: OUTLIER ANALYSIS ===
+- IQR-based outlier detection per column
+- Z-score based (threshold configurable: default 3)
+- Isolation Forest (global outlier score)
+- LOF (Local Outlier Factor)
+- Visual: scatter plot with outliers highlighted in red
+- Table: row index | column | value | method | outlier score
+- Download outlier rows as CSV
+
+=== SECTION 7: DISTRIBUTION FITTING ===
+- For each numeric column, attempt to fit: normal, log-normal, exponential, 
+  gamma, beta, uniform distributions
+- Show best-fit distribution with parameters
+- Overlay fitted PDF on histogram
+- Q-Q plot against best-fit distribution
+
+=== SECTION 8: TIME SERIES ANALYSIS (auto-detect datetime index) ===
+- Line chart with zoom/pan
+- Rolling mean and std (window configurable)
+- Seasonal decomposition (trend, seasonal, residual)
+- Autocorrelation (ACF) and partial autocorrelation (PACF) plots
+- Stationarity test: ADF test result with p-value interpretation
+
+=== SECTION 9: TEXT COLUMN ANALYSIS ===
+- Word frequency bar chart + word cloud
+- Average text length distribution
+- Character count vs word count scatter
+- Top bigrams and trigrams
+- Sentiment analysis (TextBlob: polarity + subjectivity distribution)
+- Language detection
+
+=== SECTION 10: AUTOMATED INSIGHTS ENGINE ===
+- Auto-generate plain-English insights such as:
+    "Column 'Age' is right-skewed (skewness=1.8). Consider log transform."
+    "Columns 'Income' and 'Spend' have strong positive correlation (r=0.87)."
+    "Column 'Email' has 100% unique values — likely an ID column."
+    "23% of rows in 'Revenue' are missing — exceeds recommended threshold."
+    "3 columns detected as constant — consider dropping."
+- Severity tags: [INFO] [WARNING] [CRITICAL]
+- Downloadable insights as PDF or Markdown
+
+=== SECTION 11: DATA QUALITY SCORE ===
+- Composite score (0–100) based on:
+    - Completeness (missing %)
+    - Uniqueness (duplicate %)
+    - Consistency (type uniformity)
+    - Validity (outlier %)
+- Radar/spider chart showing sub-scores
+- Recommendations to improve score
+
+=== SECTION 12: REPORT EXPORT ===
+- "Generate Full Report" button using ydata-profiling:
+    - Exports complete interactive HTML report
+- sweetviz report export (comparison report if 2 datasets uploaded)
+- Export all charts as PNG/SVG
+- Export summary stats as Excel (.xlsx)
+- Export cleaned dataset as CSV
+
+=== UI/UX REQUIREMENTS ===
+- Dark mode default with light mode toggle
+- Sidebar navigation with section jump links
+- Sticky header with: file name, row count, col count, data quality score badge
+- Loading skeletons during computation
+- Column selector dropdowns for all bivariate/multivariate plots
+- Responsive design (works on tablet and desktop)
+- Tooltips on all charts (hover for exact values)
+- Search/filter columns in schema table
+- Pin/favorite specific charts to a custom dashboard view
+- Toast notifications for errors and successes
+
+=== PERFORMANCE ===
+- For datasets > 100k rows: auto-sample to 50k for visualizations
+- Show "sampled" badge when sampling is active
+- Chunked file reading for large files
+- Async API calls with progress indicators
+
+=== BONUS FEATURES ===
+- Compare two datasets side-by-side (upload Dataset A and Dataset B)
+- Column-level chatbot: "Tell me about the 'Revenue' column" → AI summary
+- Auto-suggest transformations: log, sqrt, one-hot encoding, binning
+- Data type override: user can manually change detected dtype per column
+
+=== API ENDPOINTS ===
+POST /upload          → upload file, return dataset metadata
+POST /analyze         → run full EDA, return JSON
+GET  /report/html     → stream ydata-profiling HTML report
+GET  /report/sweetviz → stream sweetviz HTML report  
+POST /export/excel    → return xlsx summary
+POST /outliers        → return outlier rows JSON
+POST /pca             → return PCA results JSON
+POST /tsne            → return t-SNE coordinates JSON
+POST /fit-distribution → return best-fit params per column

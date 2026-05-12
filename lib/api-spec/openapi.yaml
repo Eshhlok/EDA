@@ -1,22 +1,27 @@
 openapi: 3.1.0
 info:
-  # Do not change the title, if the title changes, the import paths will be broken
   title: Api
   version: 0.1.0
-  description: API specification
+  description: EDA Explorer API
 servers:
   - url: /api
     description: Base API path
 tags:
   - name: health
     description: Health operations
+  - name: datasets
+    description: Dataset management
+  - name: analysis
+    description: EDA analysis operations
+  - name: export
+    description: Export and report generation
+
 paths:
   /healthz:
     get:
       operationId: healthCheck
       tags: [health]
       summary: Health check
-      description: Returns server health status
       responses:
         "200":
           description: Healthy
@@ -24,6 +29,473 @@ paths:
             application/json:
               schema:
                 $ref: "#/components/schemas/HealthStatus"
+
+  /upload:
+    post:
+      operationId: uploadDataset
+      tags: [datasets]
+      summary: Upload a dataset file
+      requestBody:
+        required: true
+        content:
+          multipart/form-data:
+            schema:
+              $ref: "#/components/schemas/UploadInput"
+      responses:
+        "200":
+          description: Dataset uploaded successfully
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/DatasetInfo"
+        "400":
+          description: Invalid file
+
+  /datasets:
+    get:
+      operationId: listDatasets
+      tags: [datasets]
+      summary: List all uploaded datasets
+      responses:
+        "200":
+          description: List of datasets
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/DatasetInfo"
+
+  /datasets/{datasetId}:
+    get:
+      operationId: getDataset
+      tags: [datasets]
+      summary: Get dataset info
+      parameters:
+        - name: datasetId
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        "200":
+          description: Dataset info
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/DatasetInfo"
+        "404":
+          description: Dataset not found
+    delete:
+      operationId: deleteDataset
+      tags: [datasets]
+      summary: Delete a dataset
+      parameters:
+        - name: datasetId
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        "204":
+          description: Deleted
+
+  /datasets/{datasetId}/preview:
+    get:
+      operationId: getDatasetPreview
+      tags: [datasets]
+      summary: Get first N rows of dataset
+      parameters:
+        - name: datasetId
+          in: path
+          required: true
+          schema:
+            type: string
+        - name: rows
+          in: query
+          schema:
+            type: integer
+            default: 10
+      responses:
+        "200":
+          description: Preview rows
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/DatasetPreview"
+
+  /datasets/{datasetId}/overview:
+    get:
+      operationId: getDatasetOverview
+      tags: [analysis]
+      summary: Dataset overview and schema
+      parameters:
+        - name: datasetId
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        "200":
+          description: Overview
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/DatasetOverview"
+
+  /datasets/{datasetId}/missing:
+    get:
+      operationId: getMissingAnalysis
+      tags: [analysis]
+      summary: Missing value analysis
+      parameters:
+        - name: datasetId
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        "200":
+          description: Missing analysis
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/MissingAnalysis"
+
+  /datasets/{datasetId}/univariate:
+    get:
+      operationId: getUnivariateAnalysis
+      tags: [analysis]
+      summary: Univariate analysis for all columns
+      parameters:
+        - name: datasetId
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        "200":
+          description: Univariate analysis
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/UnivariateAnalysis"
+
+  /datasets/{datasetId}/bivariate:
+    get:
+      operationId: getBivariateAnalysis
+      tags: [analysis]
+      summary: Bivariate analysis and correlations
+      parameters:
+        - name: datasetId
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        "200":
+          description: Bivariate analysis
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/BivariateAnalysis"
+
+  /datasets/{datasetId}/bivariate/scatter:
+    get:
+      operationId: getScatterData
+      tags: [analysis]
+      summary: Get scatter data for two columns
+      parameters:
+        - name: datasetId
+          in: path
+          required: true
+          schema:
+            type: string
+        - name: col_x
+          in: query
+          required: true
+          schema:
+            type: string
+        - name: col_y
+          in: query
+          required: true
+          schema:
+            type: string
+        - name: color_col
+          in: query
+          schema:
+            type: string
+      responses:
+        "200":
+          description: Scatter data
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ScatterData"
+
+  /datasets/{datasetId}/multivariate:
+    get:
+      operationId: getMultivariateAnalysis
+      tags: [analysis]
+      summary: Multivariate analysis
+      parameters:
+        - name: datasetId
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        "200":
+          description: Multivariate analysis
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/MultivariateAnalysis"
+
+  /datasets/{datasetId}/outliers:
+    get:
+      operationId: getOutlierAnalysis
+      tags: [analysis]
+      summary: Outlier detection results
+      parameters:
+        - name: datasetId
+          in: path
+          required: true
+          schema:
+            type: string
+        - name: zscore_threshold
+          in: query
+          schema:
+            type: number
+            default: 3
+      responses:
+        "200":
+          description: Outlier analysis
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/OutlierAnalysis"
+
+  /datasets/{datasetId}/insights:
+    get:
+      operationId: getInsights
+      tags: [analysis]
+      summary: Automated plain-English insights
+      parameters:
+        - name: datasetId
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        "200":
+          description: Insights
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/Insight"
+
+  /datasets/{datasetId}/quality-score:
+    get:
+      operationId: getQualityScore
+      tags: [analysis]
+      summary: Data quality composite score
+      parameters:
+        - name: datasetId
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        "200":
+          description: Quality score
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/QualityScore"
+
+  /datasets/{datasetId}/pca:
+    get:
+      operationId: getPcaAnalysis
+      tags: [analysis]
+      summary: PCA analysis
+      parameters:
+        - name: datasetId
+          in: path
+          required: true
+          schema:
+            type: string
+        - name: n_components
+          in: query
+          schema:
+            type: integer
+            default: 10
+      responses:
+        "200":
+          description: PCA result
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/PcaResult"
+
+  /datasets/{datasetId}/tsne:
+    get:
+      operationId: getTsneAnalysis
+      tags: [analysis]
+      summary: t-SNE visualization
+      parameters:
+        - name: datasetId
+          in: path
+          required: true
+          schema:
+            type: string
+        - name: perplexity
+          in: query
+          schema:
+            type: number
+            default: 30
+      responses:
+        "200":
+          description: t-SNE coordinates
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/TsneResult"
+
+  /datasets/{datasetId}/distribution-fit:
+    get:
+      operationId: getDistributionFit
+      tags: [analysis]
+      summary: Distribution fitting per numeric column
+      parameters:
+        - name: datasetId
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        "200":
+          description: Distribution fit results
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/DistributionFitResult"
+
+  /datasets/{datasetId}/timeseries:
+    get:
+      operationId: getTimeSeriesAnalysis
+      tags: [analysis]
+      summary: Time series analysis for datetime columns
+      parameters:
+        - name: datasetId
+          in: path
+          required: true
+          schema:
+            type: string
+        - name: date_col
+          in: query
+          required: true
+          schema:
+            type: string
+        - name: value_col
+          in: query
+          schema:
+            type: string
+      responses:
+        "200":
+          description: Time series analysis
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/TimeSeriesAnalysis"
+
+  /datasets/{datasetId}/transform:
+    post:
+      operationId: applyTransform
+      tags: [datasets]
+      summary: Apply transformation to dataset
+      parameters:
+        - name: datasetId
+          in: path
+          required: true
+          schema:
+            type: string
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/TransformInput"
+      responses:
+        "200":
+          description: Updated dataset info
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/DatasetInfo"
+
+  /datasets/{datasetId}/export/csv:
+    get:
+      operationId: exportCsv
+      tags: [export]
+      summary: Export dataset as CSV
+      parameters:
+        - name: datasetId
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        "200":
+          description: CSV file
+          content:
+            text/csv:
+              schema:
+                type: string
+
+  /datasets/{datasetId}/export/excel:
+    get:
+      operationId: exportExcel
+      tags: [export]
+      summary: Export summary stats as Excel
+      parameters:
+        - name: datasetId
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        "200":
+          description: Excel file
+          content:
+            application/vnd.openxmlformats-officedocument.spreadsheetml.sheet:
+              schema:
+                type: string
+                format: binary
+
+  /datasets/{datasetId}/export/outliers:
+    get:
+      operationId: exportOutliersCsv
+      tags: [export]
+      summary: Export outlier rows as CSV
+      parameters:
+        - name: datasetId
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        "200":
+          description: CSV of outlier rows
+          content:
+            text/csv:
+              schema:
+                type: string
+
 components:
   schemas:
     HealthStatus:
@@ -34,3 +506,754 @@ components:
       required:
         - status
 
+    UploadInput:
+      type: object
+      properties:
+        file:
+          type: string
+          format: binary
+      required:
+        - file
+
+    DatasetInfo:
+      type: object
+      properties:
+        id:
+          type: string
+        filename:
+          type: string
+        rows:
+          type: integer
+        cols:
+          type: integer
+        size_mb:
+          type: number
+        format:
+          type: string
+        encoding:
+          type: string
+        is_sampled:
+          type: boolean
+        sample_size:
+          type: ["integer", "null"]
+        created_at:
+          type: string
+      required:
+        - id
+        - filename
+        - rows
+        - cols
+        - size_mb
+        - format
+        - encoding
+        - is_sampled
+        - created_at
+
+    DatasetPreview:
+      type: object
+      properties:
+        columns:
+          type: array
+          items:
+            type: string
+        rows:
+          type: array
+          items:
+            type: object
+            additionalProperties: true
+      required:
+        - columns
+        - rows
+
+    ColumnInfo:
+      type: object
+      properties:
+        name:
+          type: string
+        dtype:
+          type: string
+        dtype_category:
+          type: string
+        non_null_count:
+          type: integer
+        null_count:
+          type: integer
+        null_pct:
+          type: number
+        unique_count:
+          type: integer
+        sample_values:
+          type: array
+          items: {}
+      required:
+        - name
+        - dtype
+        - dtype_category
+        - non_null_count
+        - null_count
+        - null_pct
+        - unique_count
+        - sample_values
+
+    DatasetOverview:
+      type: object
+      properties:
+        info:
+          $ref: "#/components/schemas/DatasetInfo"
+        columns:
+          type: array
+          items:
+            $ref: "#/components/schemas/ColumnInfo"
+        duplicate_count:
+          type: integer
+        fully_missing_rows:
+          type: integer
+        dtype_summary:
+          type: object
+          additionalProperties:
+            type: integer
+      required:
+        - info
+        - columns
+        - duplicate_count
+        - fully_missing_rows
+        - dtype_summary
+
+    MissingColumnStat:
+      type: object
+      properties:
+        column:
+          type: string
+        missing_count:
+          type: integer
+        missing_pct:
+          type: number
+        recommended_action:
+          type: string
+      required:
+        - column
+        - missing_count
+        - missing_pct
+        - recommended_action
+
+    MissingAnalysis:
+      type: object
+      properties:
+        stats:
+          type: array
+          items:
+            $ref: "#/components/schemas/MissingColumnStat"
+        heatmap_columns:
+          type: array
+          items:
+            type: string
+        heatmap_data:
+          type: array
+          items:
+            type: array
+            items:
+              type: ["number", "null"]
+        missingness_correlation:
+          type: array
+          items:
+            type: object
+            properties:
+              col_a:
+                type: string
+              col_b:
+                type: string
+              correlation:
+                type: number
+            required: [col_a, col_b, correlation]
+      required:
+        - stats
+        - heatmap_columns
+        - heatmap_data
+        - missingness_correlation
+
+    NumericStats:
+      type: object
+      properties:
+        column:
+          type: string
+        mean:
+          type: ["number", "null"]
+        median:
+          type: ["number", "null"]
+        mode:
+          type: ["number", "null"]
+        std:
+          type: ["number", "null"]
+        variance:
+          type: ["number", "null"]
+        min:
+          type: ["number", "null"]
+        max:
+          type: ["number", "null"]
+        range:
+          type: ["number", "null"]
+        iqr:
+          type: ["number", "null"]
+        q1:
+          type: ["number", "null"]
+        q3:
+          type: ["number", "null"]
+        skewness:
+          type: ["number", "null"]
+        kurtosis:
+          type: ["number", "null"]
+        cv:
+          type: ["number", "null"]
+        outlier_iqr_count:
+          type: integer
+        outlier_zscore_count:
+          type: integer
+        normality_test:
+          type: string
+        normality_pvalue:
+          type: ["number", "null"]
+        histogram:
+          type: array
+          items:
+            type: object
+            properties:
+              bin:
+                type: string
+              count:
+                type: integer
+            required: [bin, count]
+        kde_x:
+          type: array
+          items:
+            type: number
+        kde_y:
+          type: array
+          items:
+            type: number
+        box_data:
+          type: object
+          additionalProperties: true
+      required:
+        - column
+        - outlier_iqr_count
+        - outlier_zscore_count
+        - normality_test
+        - histogram
+
+    CategoricalStats:
+      type: object
+      properties:
+        column:
+          type: string
+        cardinality:
+          type: string
+        entropy:
+          type: ["number", "null"]
+        top_values:
+          type: array
+          items:
+            type: object
+            properties:
+              value:
+                type: string
+              count:
+                type: integer
+              pct:
+                type: number
+            required: [value, count, pct]
+      required:
+        - column
+        - cardinality
+        - top_values
+
+    DatetimeStats:
+      type: object
+      properties:
+        column:
+          type: string
+        min_date:
+          type: string
+        max_date:
+          type: string
+        frequency_by_year:
+          type: array
+          items:
+            type: object
+            properties:
+              label:
+                type: string
+              count:
+                type: integer
+            required: [label, count]
+        frequency_by_month:
+          type: array
+          items:
+            type: object
+            properties:
+              label:
+                type: string
+              count:
+                type: integer
+            required: [label, count]
+        frequency_by_weekday:
+          type: array
+          items:
+            type: object
+            properties:
+              label:
+                type: string
+              count:
+                type: integer
+            required: [label, count]
+      required:
+        - column
+        - min_date
+        - max_date
+        - frequency_by_year
+        - frequency_by_month
+        - frequency_by_weekday
+
+    UnivariateAnalysis:
+      type: object
+      properties:
+        numeric:
+          type: array
+          items:
+            $ref: "#/components/schemas/NumericStats"
+        categorical:
+          type: array
+          items:
+            $ref: "#/components/schemas/CategoricalStats"
+        datetime:
+          type: array
+          items:
+            $ref: "#/components/schemas/DatetimeStats"
+      required:
+        - numeric
+        - categorical
+        - datetime
+
+    CorrelationEntry:
+      type: object
+      properties:
+        row:
+          type: string
+        col:
+          type: string
+        value:
+          type: ["number", "null"]
+      required:
+        - row
+        - col
+        - value
+
+    ScatterData:
+      type: object
+      properties:
+        x:
+          type: array
+          items:
+            type: ["number", "null"]
+        y:
+          type: array
+          items:
+            type: ["number", "null"]
+        color:
+          type: array
+          items: {}
+        pearson_r:
+          type: ["number", "null"]
+        spearman_r:
+          type: ["number", "null"]
+        regression_slope:
+          type: ["number", "null"]
+        regression_intercept:
+          type: ["number", "null"]
+      required:
+        - x
+        - y
+        - color
+
+    BivariateAnalysis:
+      type: object
+      properties:
+        pearson_matrix:
+          type: array
+          items:
+            $ref: "#/components/schemas/CorrelationEntry"
+        spearman_matrix:
+          type: array
+          items:
+            $ref: "#/components/schemas/CorrelationEntry"
+        numeric_columns:
+          type: array
+          items:
+            type: string
+        categorical_columns:
+          type: array
+          items:
+            type: string
+      required:
+        - pearson_matrix
+        - spearman_matrix
+        - numeric_columns
+        - categorical_columns
+
+    PcaResult:
+      type: object
+      properties:
+        explained_variance_ratio:
+          type: array
+          items:
+            type: number
+        cumulative_variance:
+          type: array
+          items:
+            type: number
+        components_2d:
+          type: array
+          items:
+            type: object
+            properties:
+              pc1:
+                type: number
+              pc2:
+                type: number
+            required: [pc1, pc2]
+        components_3d:
+          type: array
+          items:
+            type: object
+            properties:
+              pc1:
+                type: number
+              pc2:
+                type: number
+              pc3:
+                type: number
+            required: [pc1, pc2, pc3]
+        loadings:
+          type: array
+          items:
+            type: object
+            properties:
+              feature:
+                type: string
+              pc1:
+                type: number
+              pc2:
+                type: number
+            required: [feature, pc1, pc2]
+        n_samples:
+          type: integer
+      required:
+        - explained_variance_ratio
+        - cumulative_variance
+        - components_2d
+        - loadings
+        - n_samples
+
+    TsneResult:
+      type: object
+      properties:
+        coordinates:
+          type: array
+          items:
+            type: object
+            properties:
+              x:
+                type: number
+              y:
+                type: number
+            required: [x, y]
+        perplexity:
+          type: number
+        n_samples:
+          type: integer
+      required:
+        - coordinates
+        - perplexity
+        - n_samples
+
+    MultivariateAnalysis:
+      type: object
+      properties:
+        pairplot_columns:
+          type: array
+          items:
+            type: string
+        pairplot_sample:
+          type: array
+          items:
+            type: object
+            additionalProperties: true
+        cluster_elbow:
+          type: array
+          items:
+            type: object
+            properties:
+              k:
+                type: integer
+              inertia:
+                type: number
+            required: [k, inertia]
+        silhouette_scores:
+          type: array
+          items:
+            type: object
+            properties:
+              k:
+                type: integer
+              score:
+                type: number
+            required: [k, score]
+      required:
+        - pairplot_columns
+        - pairplot_sample
+        - cluster_elbow
+        - silhouette_scores
+
+    OutlierRow:
+      type: object
+      properties:
+        row_index:
+          type: integer
+        column:
+          type: string
+        value:
+          type: ["number", "null"]
+        method:
+          type: string
+        score:
+          type: ["number", "null"]
+      required:
+        - row_index
+        - column
+        - value
+        - method
+
+    OutlierAnalysis:
+      type: object
+      properties:
+        iqr_outliers:
+          type: array
+          items:
+            $ref: "#/components/schemas/OutlierRow"
+        zscore_outliers:
+          type: array
+          items:
+            $ref: "#/components/schemas/OutlierRow"
+        isolation_scores:
+          type: array
+          items:
+            type: object
+            properties:
+              row_index:
+                type: integer
+              score:
+                type: number
+              is_outlier:
+                type: boolean
+            required: [row_index, score, is_outlier]
+        total_outlier_rows:
+          type: integer
+      required:
+        - iqr_outliers
+        - zscore_outliers
+        - isolation_scores
+        - total_outlier_rows
+
+    DistributionFitResult:
+      type: object
+      properties:
+        column:
+          type: string
+        best_fit:
+          type: string
+        parameters:
+          type: object
+          additionalProperties: true
+        aic:
+          type: ["number", "null"]
+        histogram:
+          type: array
+          items:
+            type: object
+            properties:
+              bin:
+                type: string
+              count:
+                type: number
+            required: [bin, count]
+        pdf_x:
+          type: array
+          items:
+            type: number
+        pdf_y:
+          type: array
+          items:
+            type: number
+        qq_theoretical:
+          type: array
+          items:
+            type: number
+        qq_sample:
+          type: array
+          items:
+            type: number
+      required:
+        - column
+        - best_fit
+        - parameters
+        - histogram
+        - pdf_x
+        - pdf_y
+        - qq_theoretical
+        - qq_sample
+
+    TimeSeriesAnalysis:
+      type: object
+      properties:
+        date_col:
+          type: string
+        value_col:
+          type: ["string", "null"]
+        timeline:
+          type: array
+          items:
+            type: object
+            properties:
+              date:
+                type: string
+              value:
+                type: ["number", "null"]
+            required: [date, value]
+        rolling_mean:
+          type: array
+          items:
+            type: object
+            properties:
+              date:
+                type: string
+              value:
+                type: ["number", "null"]
+            required: [date, value]
+        rolling_std:
+          type: array
+          items:
+            type: object
+            properties:
+              date:
+                type: string
+              value:
+                type: ["number", "null"]
+            required: [date, value]
+        trend:
+          type: array
+          items:
+            type: object
+            properties:
+              date:
+                type: string
+              value:
+                type: ["number", "null"]
+            required: [date, value]
+        seasonal:
+          type: array
+          items:
+            type: object
+            properties:
+              date:
+                type: string
+              value:
+                type: ["number", "null"]
+            required: [date, value]
+        residual:
+          type: array
+          items:
+            type: object
+            properties:
+              date:
+                type: string
+              value:
+                type: ["number", "null"]
+            required: [date, value]
+        acf:
+          type: array
+          items:
+            type: number
+        pacf:
+          type: array
+          items:
+            type: number
+        adf_statistic:
+          type: ["number", "null"]
+        adf_pvalue:
+          type: ["number", "null"]
+        adf_interpretation:
+          type: string
+      required:
+        - date_col
+        - timeline
+        - rolling_mean
+        - rolling_std
+        - acf
+        - pacf
+        - adf_interpretation
+
+    Insight:
+      type: object
+      properties:
+        message:
+          type: string
+        severity:
+          type: string
+          enum: [INFO, WARNING, CRITICAL]
+        column:
+          type: ["string", "null"]
+        category:
+          type: string
+      required:
+        - message
+        - severity
+        - category
+
+    QualityScore:
+      type: object
+      properties:
+        overall_score:
+          type: number
+        completeness:
+          type: number
+        uniqueness:
+          type: number
+        consistency:
+          type: number
+        validity:
+          type: number
+        recommendations:
+          type: array
+          items:
+            type: string
+      required:
+        - overall_score
+        - completeness
+        - uniqueness
+        - consistency
+        - validity
+        - recommendations
+
+    TransformInput:
+      type: object
+      properties:
+        column:
+          type: string
+        operation:
+          type: string
+          enum: [log, sqrt, one_hot, bin, drop_column, fill_mean, fill_median, fill_mode, fill_custom, drop_duplicates, change_dtype]
+        params:
+          type: object
+          additionalProperties: true
+      required:
+        - column
+        - operation

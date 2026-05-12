@@ -1,0 +1,31 @@
+kind = "web"
+previewPath = "/"
+title = "EDA Explorer"
+version = "1.0.0"
+id = "artifacts/eda-app"
+router = "path"
+
+[[integratedSkills]]
+name = "react-vite"
+version = "1.0.0"
+
+[[services]]
+name = "web"
+paths = [ "/" ]
+localPort = 23287
+
+[services.development]
+run = "pnpm --filter @workspace/eda-app run dev"
+
+[services.production]
+build = [ "pnpm", "--filter", "@workspace/eda-app", "run", "build" ]
+publicDir = "artifacts/eda-app/dist/public"
+serve = "static"
+
+[[services.production.rewrites]]
+from = "/*"
+to = "/index.html"
+
+[services.env]
+PORT = "23287"
+BASE_PATH = "/"
