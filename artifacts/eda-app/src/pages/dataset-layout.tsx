@@ -16,12 +16,10 @@ import Overview from "./sections/overview";
 import MissingValues from "./sections/missing";
 import Insights from "./sections/insights";
 import QualityScore from "./sections/quality-score";
-
-// Placeholder for remaining
-const Univariate = () => <div className="p-6">Univariate Component</div>;
-const Bivariate = () => <div className="p-6">Bivariate Component</div>;
-const Multivariate = () => <div className="p-6">Multivariate Component</div>;
-const Outliers = () => <div className="p-6">Outliers Component</div>;
+import Univariate from "./sections/univariate";
+import Bivariate from "./sections/bivariate";
+import Multivariate from "./sections/multivariate";
+import Outliers from "./sections/outliers";
 
 type NavItem = {
   name: string;
@@ -56,10 +54,10 @@ export default function DatasetLayout() {
     switch (currentSection) {
       case "overview": return <Overview datasetId={datasetId} />;
       case "missing": return <MissingValues datasetId={datasetId} />;
-      case "univariate": return <Univariate />;
-      case "bivariate": return <Bivariate />;
-      case "multivariate": return <Multivariate />;
-      case "outliers": return <Outliers />;
+      case "univariate": return <Univariate datasetId={datasetId} />;
+      case "bivariate": return <Bivariate datasetId={datasetId} />;
+      case "multivariate": return <Multivariate datasetId={datasetId} />;
+      case "outliers": return <Outliers datasetId={datasetId} />;
       case "insights": return <Insights datasetId={datasetId} />;
       case "quality-score": return <QualityScore datasetId={datasetId} />;
       default: return <Overview datasetId={datasetId} />;
@@ -103,16 +101,16 @@ export default function DatasetLayout() {
             return (
               <button
                 key={item.path}
-                onClick={() => setLocation(`/datasets/\${datasetId}/\${item.path}`)}
+                onClick={() => setLocation(`/datasets/${datasetId}/${item.path}`)}
                 className={`
                   w-full flex items-center space-x-3 px-3 py-2 text-sm rounded-md transition-colors
-                  \${isActive 
+                  ${isActive 
                     ? 'bg-primary/10 text-primary font-medium' 
                     : 'text-muted-foreground hover:bg-muted hover:text-foreground'
                   }
                 `}
               >
-                <Icon className={`h-4 w-4 \${isActive ? 'text-primary' : 'text-muted-foreground'}`} />
+                <Icon className={`h-4 w-4 ${isActive ? 'text-primary' : 'text-muted-foreground'}`} />
                 <span>{item.name}</span>
               </button>
             );

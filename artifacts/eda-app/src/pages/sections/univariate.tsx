@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useGetUnivariateAnalysis } from "@workspace/api-client-react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
@@ -12,14 +12,15 @@ export default function Univariate({ datasetId }: { datasetId: string }) {
   const { data, isLoading } = useGetUnivariateAnalysis(datasetId);
   const [selectedCol, setSelectedCol] = useState<string>("");
 
+  useEffect(() => {
+    if (data && !selectedCol) {
+      if (data.numeric.length > 0) setSelectedCol(data.numeric[0].column);
+      else if (data.categorical.length > 0) setSelectedCol(data.categorical[0].column);
+    }
+  }, [data, selectedCol]);
+
   if (isLoading) return <div className="p-6"><Skeleton className="h-96 w-full" /></div>;
   if (!data) return null;
-
-  // Initialize selected column
-  if (!selectedCol) {
-    if (data.numeric.length > 0) setSelectedCol(data.numeric[0].column);
-    else if (data.categorical.length > 0) setSelectedCol(data.categorical[0].column);
-  }
 
   const numericStat = data.numeric.find(n => n.column === selectedCol);
   const catStat = data.categorical.find(c => c.column === selectedCol);
@@ -156,7 +157,7 @@ export default function Univariate({ datasetId }: { datasetId: string }) {
                       label={({ value }) => value}
                     >
                       {catStat.top_values.slice(0, 10).map((entry, index) => (
-                        <Cell key={`cell-\${index}`} fill={COLORS[index % COLORS.length]} />
+                        <Cell key={`cell-${index}`} fill={COLORS[index % COLORS.length]} />
                       ))}
                     </Pie>
                     <Tooltip contentStyle={{backgroundColor: 'hsl(var(--card))', borderColor: 'hsl(var(--border))'}} />

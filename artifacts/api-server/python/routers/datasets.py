@@ -62,7 +62,7 @@ def get_dataset(dataset_id: str):
     entry = store.get(dataset_id)
     if not entry:
         raise HTTPException(status_code=404, detail="Dataset not found")
-    return entry
+    return store._info(entry)
 
 
 @router.delete("/datasets/{dataset_id}", status_code=204)

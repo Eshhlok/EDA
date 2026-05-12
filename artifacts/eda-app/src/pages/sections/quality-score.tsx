@@ -30,7 +30,7 @@ export default function QualityScore({ datasetId }: { datasetId: string }) {
           <CardTitle>Overall Quality Score</CardTitle>
         </CardHeader>
         <CardContent className="flex flex-col items-center justify-center space-y-4 pt-6">
-          <div className={`w-32 h-32 rounded-full border-8 flex items-center justify-center text-4xl font-extrabold \${getColor(data.overall_score)}`}>
+          <div className={`w-32 h-32 rounded-full border-8 flex items-center justify-center text-4xl font-extrabold ${getColor(data.overall_score)}`}>
             {data.overall_score.toFixed(0)}
           </div>
           <p className="text-muted-foreground text-sm text-center px-8">

@@ -99,7 +99,7 @@ export default function Home() {
                 <div className="h-2 w-full bg-secondary rounded-full overflow-hidden">
                   <div 
                     className="h-full bg-primary transition-all duration-200 ease-out"
-                    style={{ width: `\${uploadProgress}%` }}
+                    style={{ width: `${uploadProgress}%` }}
                   />
                 </div>
                 <p className="text-xs text-muted-foreground mt-2 text-center">Processing dataset...</p>
@@ -127,7 +127,7 @@ export default function Home() {
               {datasets?.map((dataset) => (
                 <div 
                   key={dataset.id}
-                  onClick={() => setLocation(`/datasets/\${dataset.id}/overview`)}
+                  onClick={() => setLocation(`/datasets/${dataset.id}/overview`)}
                   className="group flex flex-col justify-between p-6 bg-card border rounded-xl hover:border-primary/50 hover:shadow-md transition-all cursor-pointer"
                 >
                   <div className="space-y-2">

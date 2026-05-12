@@ -23,9 +23,9 @@ export default function Insights({ datasetId }: { datasetId: string }) {
         const Icon = config.icon;
 
         return (
-          <Card key={i} className="border-l-4" style={{ borderLeftColor: `var(--\${insight.severity.toLowerCase()})` }}>
+          <Card key={i} className="border-l-4" style={{ borderLeftColor: `var(--${insight.severity.toLowerCase()})` }}>
             <CardContent className="p-4 flex items-start space-x-4">
-              <div className={`p-2 rounded-full \${config.color}`}>
+              <div className={`p-2 rounded-full ${config.color}`}>
                 <Icon className="h-5 w-5" />
               </div>
               <div className="flex-1 space-y-1">

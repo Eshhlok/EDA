@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useGetBivariateAnalysis, useGetScatterData } from "@workspace/api-client-react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Skeleton } from "@/components/ui/skeleton";
@@ -13,12 +13,16 @@ export default function Bivariate({ datasetId }: { datasetId: string }) {
   const [colX, setColX] = useState<string>("");
   const [colY, setColY] = useState<string>("");
 
+  useEffect(() => {
+    if (bivariate) {
+      if (!colX && bivariate.numeric_columns.length > 0) setColX(bivariate.numeric_columns[0]);
+      if (!colY && bivariate.numeric_columns.length > 1) setColY(bivariate.numeric_columns[1]);
+      else if (!colY && bivariate.numeric_columns.length > 0) setColY(bivariate.numeric_columns[0]);
+    }
+  }, [bivariate, colX, colY]);
+
   if (bivLoading) return <div className="p-6"><Skeleton className="h-[500px] w-full" /></div>;
   if (!bivariate) return null;
-
-  if (!colX && bivariate.numeric_columns.length > 0) setColX(bivariate.numeric_columns[0]);
-  if (!colY && bivariate.numeric_columns.length > 1) setColY(bivariate.numeric_columns[1]);
-  else if (!colY && bivariate.numeric_columns.length > 0) setColY(bivariate.numeric_columns[0]);
 
   const matrix = useSpearman ? bivariate.spearman_matrix : bivariate.pearson_matrix;
   
@@ -35,10 +39,10 @@ export default function Bivariate({ datasetId }: { datasetId: string }) {
     // Blue to Red scale (-1 to 1)
     if (val > 0) {
       const alpha = Math.min(val, 1);
-      return `rgba(239, 68, 68, \${alpha})`; // red-500
+      return `rgba(239, 68, 68, ${alpha})`; // red-500
     } else {
       const alpha = Math.min(Math.abs(val), 1);
-      return `rgba(59, 130, 246, \${alpha})`; // blue-500
+      return `rgba(59, 130, 246, ${alpha})`; // blue-500
     }
   };
 
@@ -78,7 +82,7 @@ export default function Bivariate({ datasetId }: { datasetId: string }) {
                             backgroundColor: getHeatmapColor(val),
                             color: val !== null && Math.abs(val) > 0.5 ? '#fff' : 'inherit'
                           }}
-                          title={`\${r} vs \${c}: \${val !== null ? val.toFixed(3) : 'N/A'}`}
+                          title={`${r} vs ${c}: ${val !== null ? val.toFixed(3) : 'N/A'}`}
                         >
                           {val !== null ? val.toFixed(2) : '-'}
                         </td>

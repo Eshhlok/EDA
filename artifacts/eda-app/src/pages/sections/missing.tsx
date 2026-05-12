@@ -33,7 +33,7 @@ export default function MissingValues({ datasetId }: { datasetId: string }) {
                 <BarChart data={chartData} margin={{ top: 10, right: 30, left: 0, bottom: 0 }}>
                   <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="hsl(var(--border))" />
                   <XAxis dataKey="column" stroke="hsl(var(--muted-foreground))" fontSize={12} tickLine={false} axisLine={false} />
-                  <YAxis stroke="hsl(var(--muted-foreground))" fontSize={12} tickLine={false} axisLine={false} tickFormatter={v => `\${v}%`} />
+                  <YAxis stroke="hsl(var(--muted-foreground))" fontSize={12} tickLine={false} axisLine={false} tickFormatter={v => `${v}%`} />
                   <Tooltip 
                     cursor={{fill: 'hsl(var(--muted))'}}
                     contentStyle={{backgroundColor: 'hsl(var(--card))', borderColor: 'hsl(var(--border))'}}
@@ -68,7 +68,7 @@ export default function MissingValues({ datasetId }: { datasetId: string }) {
                           <div className="flex items-center space-x-2">
                             <span className="w-12">{stat.missing_pct.toFixed(1)}%</span>
                             <div className="flex-1 h-2 bg-muted rounded overflow-hidden max-w-[100px]">
-                              <div className="h-full bg-destructive" style={{ width: `\${stat.missing_pct}%` }} />
+                              <div className="h-full bg-destructive" style={{ width: `${stat.missing_pct}%` }} />
                             </div>
                           </div>
                         </TableCell>
