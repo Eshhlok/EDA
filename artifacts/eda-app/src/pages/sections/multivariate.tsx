@@ -55,6 +55,14 @@ export default function Multivariate({ datasetId }: { datasetId: string }) {
   );
 }
 
+const tooltipStyle = {
+  backgroundColor: '#1e1e2e',
+  borderColor: '#3f3f5a',
+  borderRadius: '6px',
+  color: '#e2e2f0',
+  fontSize: '12px',
+};
+
 function PcaSection({ datasetId }: { datasetId: string }) {
   const [enabled, setEnabled] = useState(false);
   const { data, isLoading } = useGetPcaAnalysis(datasetId, { n_components: 2 }, { query: { enabled } });
@@ -66,7 +74,7 @@ function PcaSection({ datasetId }: { datasetId: string }) {
           <CardTitle>Principal Component Analysis (PCA)</CardTitle>
         </CardHeader>
         <CardContent>
-          <Button onClick={() => setEnabled(true)} variant="outline">Run PCA</Button>
+          <Button onClick={() => setEnabled(true)} variant="outline" className="cursor-pointer">Run PCA</Button>
         </CardContent>
       </Card>
     );
@@ -88,8 +96,13 @@ function PcaSection({ datasetId }: { datasetId: string }) {
               <XAxis type="number" dataKey="pc1" name="PC1" stroke="hsl(var(--muted-foreground))" tick={{fontSize: 12}} />
               <YAxis type="number" dataKey="pc2" name="PC2" stroke="hsl(var(--muted-foreground))" tick={{fontSize: 12}} />
               <ZAxis type="number" range={[20]} />
-              <Tooltip cursor={{strokeDasharray: '3 3'}} contentStyle={{backgroundColor: 'hsl(var(--card))', borderColor: 'hsl(var(--border))'}} />
-              <Scatter data={data.components_2d} fill="hsl(var(--chart-3))" opacity={0.6} />
+              <Tooltip
+                cursor={{ strokeDasharray: '3 3', stroke: 'hsl(var(--muted-foreground))' }}
+                contentStyle={tooltipStyle}
+                itemStyle={{ color: '#a5b4fc' }}
+                labelStyle={{ color: '#e2e2f0', fontWeight: 600 }}
+              />
+              <Scatter data={data.components_2d} fill="#818cf8" opacity={0.75} />
             </ScatterChart>
           </ResponsiveContainer>
         </div>
@@ -109,7 +122,7 @@ function TsneSection({ datasetId }: { datasetId: string }) {
           <CardTitle>t-SNE Projection</CardTitle>
         </CardHeader>
         <CardContent>
-          <Button onClick={() => setEnabled(true)} variant="outline">Run t-SNE</Button>
+          <Button onClick={() => setEnabled(true)} variant="outline" className="cursor-pointer">Run t-SNE</Button>
         </CardContent>
       </Card>
     );
@@ -131,8 +144,13 @@ function TsneSection({ datasetId }: { datasetId: string }) {
               <XAxis type="number" dataKey="x" name="X" stroke="hsl(var(--muted-foreground))" tick={{fontSize: 12}} />
               <YAxis type="number" dataKey="y" name="Y" stroke="hsl(var(--muted-foreground))" tick={{fontSize: 12}} />
               <ZAxis type="number" range={[20]} />
-              <Tooltip cursor={{strokeDasharray: '3 3'}} contentStyle={{backgroundColor: 'hsl(var(--card))', borderColor: 'hsl(var(--border))'}} />
-              <Scatter data={data.coordinates} fill="hsl(var(--chart-4))" opacity={0.6} />
+              <Tooltip
+                cursor={{ strokeDasharray: '3 3', stroke: 'hsl(var(--muted-foreground))' }}
+                contentStyle={tooltipStyle}
+                itemStyle={{ color: '#34d399' }}
+                labelStyle={{ color: '#e2e2f0', fontWeight: 600 }}
+              />
+              <Scatter data={data.coordinates} fill="#34d399" opacity={0.75} />
             </ScatterChart>
           </ResponsiveContainer>
         </div>

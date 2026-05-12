@@ -576,7 +576,7 @@ def get_tsne_analysis(dataset_id: str, perplexity: float = 30.0):
     X = StandardScaler().fit_transform(sample)
     perp = min(float(perplexity), len(X) - 1)
 
-    tsne = TSNE(n_components=2, perplexity=perp, random_state=42, n_iter=500)
+    tsne = TSNE(n_components=2, perplexity=perp, random_state=42, max_iter=500)
     coords = tsne.fit_transform(X)
     return {"coordinates": [{"x": float(r[0]), "y": float(r[1])} for r in coords], "perplexity": perp, "n_samples": len(sample)}
 
