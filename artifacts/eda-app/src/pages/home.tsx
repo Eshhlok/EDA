@@ -2,7 +2,7 @@ import { useCallback, useState } from "react";
 import { useDropzone } from "react-dropzone";
 import { useLocation } from "wouter";
 import { useUploadDataset, useListDatasets, getListDatasetsQueryKey } from "@workspace/api-client-react";
-import { UploadCloud, FileSpreadsheet, Trash2, ChevronRight, Loader2 } from "lucide-react";
+import { UploadCloud, FileSpreadsheet, Trash2, ChevronRight, Loader2, Zap } from "lucide-react";
 import { useQueryClient } from "@tanstack/react-query";
 import { format } from "date-fns";
 
@@ -19,7 +19,6 @@ export default function Home() {
     
     setUploadProgress(10);
     
-    // Simulate progress for UI
     const interval = setInterval(() => {
       setUploadProgress(prev => Math.min(prev + 10, 90));
     }, 200);
@@ -59,15 +58,24 @@ export default function Home() {
   return (
     <div className="min-h-screen bg-background flex flex-col items-center pt-24 pb-12 px-4 sm:px-6 lg:px-8">
       <div className="w-full max-w-4xl space-y-12">
+
+        {/* Branding */}
         <div className="text-center space-y-4">
+          <div className="flex items-center justify-center gap-2 mb-2">
+            <div className="p-2 rounded-xl bg-primary/10">
+              <Zap className="h-6 w-6 text-primary" />
+            </div>
+            <span className="text-2xl font-black tracking-tight text-foreground">EDAFlow</span>
+          </div>
           <h1 className="text-4xl font-extrabold tracking-tight text-foreground sm:text-5xl">
-            EDA Explorer
+            Explore your data,<br />instantly.
           </h1>
-          <p className="text-xl text-muted-foreground max-w-2xl mx-auto">
-            Professional-grade exploratory data analysis workspace. Drop your data to instantly generate insights, visualizations, and quality scores.
+          <p className="text-lg text-muted-foreground max-w-2xl mx-auto">
+            Drop any dataset to generate insights, visualisations, quality scores, and outlier reports — all in seconds.
           </p>
         </div>
 
+        {/* Dropzone */}
         <div 
           {...getRootProps()} 
           className={`
@@ -102,12 +110,13 @@ export default function Home() {
                     style={{ width: `${uploadProgress}%` }}
                   />
                 </div>
-                <p className="text-xs text-muted-foreground mt-2 text-center">Processing dataset...</p>
+                <p className="text-xs text-muted-foreground mt-2 text-center">Processing dataset…</p>
               </div>
             )}
           </div>
         </div>
 
+        {/* Recent datasets */}
         <div className="space-y-6">
           <h2 className="text-2xl font-bold tracking-tight text-foreground border-b pb-4">Recent Datasets</h2>
           

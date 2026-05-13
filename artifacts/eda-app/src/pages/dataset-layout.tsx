@@ -9,7 +9,8 @@ import {
   ShieldAlert, 
   Lightbulb, 
   CheckCircle2,
-  ChevronLeft
+  ChevronLeft,
+  Zap,
 } from "lucide-react";
 import { useGetDataset } from "@workspace/api-client-react";
 import Overview from "./sections/overview";
@@ -68,11 +69,25 @@ export default function DatasetLayout() {
     <div className="flex h-screen bg-background overflow-hidden">
       {/* Sidebar */}
       <aside className="w-64 border-r bg-card flex flex-col flex-shrink-0">
-        <div className="h-14 border-b flex items-center px-4 hover:bg-muted/50 cursor-pointer transition-colors" onClick={() => setLocation("/")}>
-          <ChevronLeft className="h-4 w-4 mr-2 text-muted-foreground" />
-          <span className="font-semibold text-sm">Back to Datasets</span>
+
+        {/* EDAFlow logo */}
+        <div className="h-14 border-b flex items-center px-4 gap-2">
+          <div className="p-1.5 rounded-lg bg-primary/10">
+            <Zap className="h-4 w-4 text-primary" />
+          </div>
+          <span className="font-black text-sm tracking-tight text-foreground">EDAFlow</span>
+        </div>
+
+        {/* Back link */}
+        <div
+          className="h-10 border-b flex items-center px-4 hover:bg-muted/50 cursor-pointer transition-colors"
+          onClick={() => setLocation("/")}
+        >
+          <ChevronLeft className="h-3.5 w-3.5 mr-1.5 text-muted-foreground" />
+          <span className="text-xs text-muted-foreground">All datasets</span>
         </div>
         
+        {/* Dataset info */}
         <div className="p-4 border-b space-y-2">
           {isLoading ? (
             <div className="space-y-2">
@@ -93,6 +108,7 @@ export default function DatasetLayout() {
           )}
         </div>
 
+        {/* Nav */}
         <nav className="flex-1 overflow-y-auto p-2 space-y-1">
           {navItems.map((item) => {
             const Icon = item.icon;
@@ -118,7 +134,7 @@ export default function DatasetLayout() {
         </nav>
       </aside>
 
-      {/* Main Content */}
+      {/* Main content */}
       <main className="flex-1 flex flex-col min-w-0">
         <header className="h-14 border-b bg-background flex items-center px-6 justify-between flex-shrink-0">
           <div className="flex items-center space-x-4">
@@ -130,12 +146,6 @@ export default function DatasetLayout() {
                 Sampled ({dataset.sample_size})
               </span>
             )}
-          </div>
-          
-          <div className="flex items-center space-x-4">
-            <div className="flex items-center space-x-2">
-              <span className="text-xs text-muted-foreground">Quality Score calculated in background</span>
-            </div>
           </div>
         </header>
 
