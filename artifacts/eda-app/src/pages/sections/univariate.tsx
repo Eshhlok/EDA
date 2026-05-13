@@ -71,7 +71,14 @@ export default function Univariate({ datasetId }: { datasetId: string }) {
                 <ResponsiveContainer width="100%" height="100%">
                   <ComposedChart data={numericStat.histogram}>
                     <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="hsl(var(--border))" />
-                    <XAxis dataKey="bin" tickFormatter={v => Number(v).toFixed(2)} stroke="hsl(var(--muted-foreground))" fontSize={12} tickLine={false} axisLine={false} />
+                    <XAxis
+                      dataKey="bin"
+                      stroke="hsl(var(--muted-foreground))"
+                      fontSize={12}
+                      tickLine={false}
+                      axisLine={false}
+                      interval="preserveStartEnd"
+                    />
                     <YAxis yAxisId="left" stroke="hsl(var(--muted-foreground))" fontSize={12} tickLine={false} axisLine={false} />
                     <Tooltip contentStyle={{backgroundColor: 'hsl(var(--card))', borderColor: 'hsl(var(--border))'}} />
                     <Bar yAxisId="left" dataKey="count" fill="hsl(var(--primary))" radius={[2, 2, 0, 0]} name="Frequency" />
