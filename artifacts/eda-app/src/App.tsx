@@ -27,8 +27,8 @@ function App() {
     <QueryClientProvider client={queryClient}>
       <ThemeProvider defaultTheme="dark" storageKey="vite-ui-theme">
         <TooltipProvider>
-          <div className="min-h-screen flex flex-col bg-background">
-            <div className="flex-1">
+          <div className="h-full flex flex-col bg-background">
+            <div className="flex-1 overflow-hidden">
               <WouterRouter
                 base={import.meta.env.BASE_URL.replace(/\/$/, "")}
               >
