@@ -74,10 +74,13 @@ export default function Univariate({ datasetId }: { datasetId: string }) {
                     <XAxis
                       dataKey="bin"
                       stroke="hsl(var(--muted-foreground))"
-                      fontSize={12}
+                      fontSize={9}
                       tickLine={false}
                       axisLine={false}
-                      interval="preserveStartEnd"
+                      angle={-45}
+                      textAnchor="end"
+                      height={70}
+                      interval={0}
                     />
                     <YAxis yAxisId="left" stroke="hsl(var(--muted-foreground))" fontSize={12} tickLine={false} axisLine={false} />
                     <Tooltip contentStyle={{backgroundColor: 'hsl(var(--card))', borderColor: 'hsl(var(--border))'}} />
@@ -195,7 +198,7 @@ function StatCard({ title, value }: { title: string, value: any }) {
             </CardContent>
           </Card>
         </UITooltipTrigger>
-        <TooltipContent side="bottom" className="font-mono text-sm px-3 py-2">
+        <TooltipContent side="bottom" className="bg-zinc-900 border border-zinc-700 text-white font-mono text-sm px-3 py-2 shadow-lg">
           <span className="font-semibold text-muted-foreground mr-2">{title}:</span>
           {fullValue}
         </TooltipContent>
