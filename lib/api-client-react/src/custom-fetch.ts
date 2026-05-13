@@ -17,6 +17,11 @@ const DEFAULT_JSON_ACCEPT = "application/json, application/problem+json";
 
 let _baseUrl: string | null = null;
 let _authTokenGetter: AuthTokenGetter | null = null;
+if (typeof window !== "undefined") {
+  setBaseUrl(
+    import.meta.env.VITE_API_URL || "http://localhost:3000",
+  );
+}
 
 /**
  * Set a base URL that is prepended to every relative request URL
