@@ -13,12 +13,12 @@ export default function AnalyticsDashboard() {
   const [sidebarOpen, setSidebarOpen] = useState(true)
 
   return (
-    <div className="h-full bg-background flex flex-col md:flex-row">
+    <div className="bg-background flex flex-col md:flex-row">
       {/* Sidebar */}
       <DashboardSidebar open={sidebarOpen} onClose={() => setSidebarOpen(false)} />
 
       {/* Main Content */}
-      <div className="flex-1 flex flex-col overflow-hidden">
+      <div className="flex-1 flex flex-col">
         {/* Header */}
         <Header 
           onMenuClick={() => setSidebarOpen(!sidebarOpen)} 
@@ -26,7 +26,7 @@ export default function AnalyticsDashboard() {
         />
 
         {/* Dashboard Content */}
-        <main className="flex-1 overflow-auto">
+        <main className="flex-1">
           <div className="p-4 sm:p-6 lg:p-8 max-w-7xl mx-auto w-full">
             {/* Page Title */}
             <div className="mb-8">
