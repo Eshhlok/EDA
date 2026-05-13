@@ -129,8 +129,6 @@ def apply_transform(dataset_id: str, body: dict):
     except Exception as e:
         raise HTTPException(status_code=400, detail=str(e))
 
-    entry["df"] = df
-    entry["rows"] = len(df)
-    entry["cols"] = len(df.columns)
-    entry["size_mb"] = round(df.memory_usage(deep=True).sum() / 1024 / 1024, 3)
-    return {k: v for k, v in entry.items() if k != "df"}
+    store.update_df(dataset_id, df)
+    updated = store.get(dataset_id)
+    return store._info(updated)
