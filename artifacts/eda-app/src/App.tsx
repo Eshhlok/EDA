@@ -6,6 +6,7 @@ import { ThemeProvider } from "@/components/theme-provider";
 import NotFound from "@/pages/not-found";
 import Home from "@/pages/home";
 import DatasetLayout from "@/pages/dataset-layout";
+import AnalyticsDashboard from "@/pages/analytics-dashboard";
 import Footer from "@/components/ui/footer";
 
 const queryClient = new QueryClient();
@@ -14,6 +15,7 @@ function Router() {
   return (
     <Switch>
       <Route path="/" component={Home} />
+      <Route path="/dashboard" component={AnalyticsDashboard} />
       <Route path="/datasets/:id/*?" component={DatasetLayout} />
       <Route component={NotFound} />
     </Switch>
