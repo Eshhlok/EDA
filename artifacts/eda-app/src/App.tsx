@@ -6,6 +6,7 @@ import { ThemeProvider } from "@/components/theme-provider";
 import NotFound from "@/pages/not-found";
 import Home from "@/pages/home";
 import DatasetLayout from "@/pages/dataset-layout";
+import "@/components/ui/footer";
 
 const queryClient = new QueryClient();
 
@@ -24,10 +25,19 @@ function App() {
     <QueryClientProvider client={queryClient}>
       <ThemeProvider defaultTheme="dark" storageKey="vite-ui-theme">
         <TooltipProvider>
-          <WouterRouter base={import.meta.env.BASE_URL.replace(/\/$/, "")}>
-            <Router />
-          </WouterRouter>
-          <Toaster />
+          <div className="min-h-screen flex flex-col">
+            <div className="flex-1">
+              <WouterRouter
+                base={import.meta.env.BASE_URL.replace(/\/$/, "")}
+              >
+                <Router />
+              </WouterRouter>
+            </div>
+
+            <Footer />
+
+            <Toaster />
+          </div>
         </TooltipProvider>
       </ThemeProvider>
     </QueryClientProvider>
