@@ -140,8 +140,7 @@ export default function AnalyticsDashboard() {
               subtitle="Last 10 transactions"
               height="h-auto"
             >
-              <div className="overflow-x-auto">
-                <table className="w-full">
+              <table className="w-full">
                   <thead>
                     <tr className="border-b border-border">
                       <th className="px-6 py-3 text-left text-sm font-semibold text-foreground">
@@ -220,7 +219,6 @@ export default function AnalyticsDashboard() {
                     ))}
                   </tbody>
                 </table>
-              </div>
             </ChartContainer>
           </div>
         </main>

@@ -61,7 +61,7 @@ export default function DashboardSidebar({ open, onClose }: DashboardSidebarProp
       </div>
 
       {/* Navigation */}
-      <nav className="flex-1 overflow-y-auto px-4 py-6 space-y-2">
+      <nav className="flex-1 px-4 py-6 space-y-2">
         {menuItems.map((item) => (
           <a
             key={item.label}
