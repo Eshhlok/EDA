@@ -16,7 +16,7 @@ interface HeaderProps {
 
 export default function Header({ onMenuClick, sidebarOpen }: HeaderProps) {
   return (
-    <header className="bg-card border-b border-card-border sticky top-0 z-40">
+    <header className="bg-card border-b border-card-border flex-shrink-0 z-40">
       <div className="px-4 sm:px-6 lg:px-8 py-4 flex items-center justify-between">
         <div className="flex items-center gap-4 flex-1">
           {/* Mobile Menu Button */}

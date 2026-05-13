@@ -1,4 +1,4 @@
-import { Switch, Route, Router as WouterRouter } from "wouter";
+import { Switch, Route, Router as WouterRouter, useLocation } from "wouter";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { Toaster } from "@/components/ui/toaster";
 import { TooltipProvider } from "@/components/ui/tooltip";
@@ -22,13 +22,16 @@ function Router() {
   );
 }
 
-function App() {
+function AppContent() {
+  const [location] = useLocation();
+  const isDashboard = location === "/dashboard";
+
   return (
     <QueryClientProvider client={queryClient}>
       <ThemeProvider defaultTheme="dark" storageKey="vite-ui-theme">
         <TooltipProvider>
-          <div className="min-h-screen flex flex-col">
-            <div className="flex-1">
+          <div className={isDashboard ? "h-screen flex flex-col overflow-hidden" : "min-h-screen flex flex-col"}>
+            <div className={isDashboard ? "flex-1 overflow-hidden" : "flex-1"}>
               <WouterRouter
                 base={import.meta.env.BASE_URL.replace(/\/$/, "")}
               >
@@ -36,7 +39,7 @@ function App() {
               </WouterRouter>
             </div>
 
-            <Footer />
+            {!isDashboard && <Footer />}
 
             <Toaster />
           </div>
@@ -46,4 +49,6 @@ function App() {
   );
 }
 
-export default App;
+function App() {
+  return <AppContent />;
+}
