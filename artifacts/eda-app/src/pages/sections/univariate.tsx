@@ -3,6 +3,7 @@ import { useGetUnivariateAnalysis } from "@workspace/api-client-react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Skeleton } from "@/components/ui/skeleton";
+import { Tooltip as UITooltip, TooltipContent, TooltipProvider, TooltipTrigger as UITooltipTrigger } from "@/components/ui/tooltip";
 import { BarChart, Bar, XAxis, YAxis, Tooltip, ResponsiveContainer, CartesianGrid, ComposedChart, Line, PieChart, Pie, Cell } from "recharts";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 
@@ -173,12 +174,25 @@ export default function Univariate({ datasetId }: { datasetId: string }) {
 }
 
 function StatCard({ title, value }: { title: string, value: any }) {
+  const displayValue = value ?? '-';
+  const fullValue = value != null ? String(value) : '-';
+
   return (
-    <Card>
-      <CardContent className="p-4 flex flex-col justify-center items-center text-center">
-        <p className="text-xs text-muted-foreground uppercase mb-1">{title}</p>
-        <p className="text-xl font-bold truncate w-full" title={value}>{value ?? '-'}</p>
-      </CardContent>
-    </Card>
+    <TooltipProvider delayDuration={200}>
+      <UITooltip>
+        <UITooltipTrigger asChild>
+          <Card className="cursor-default">
+            <CardContent className="p-4 flex flex-col justify-center items-center text-center">
+              <p className="text-xs text-muted-foreground uppercase mb-1">{title}</p>
+              <p className="text-xl font-bold truncate w-full">{displayValue}</p>
+            </CardContent>
+          </Card>
+        </UITooltipTrigger>
+        <TooltipContent side="bottom" className="font-mono text-sm px-3 py-2">
+          <span className="font-semibold text-muted-foreground mr-2">{title}:</span>
+          {fullValue}
+        </TooltipContent>
+      </UITooltip>
+    </TooltipProvider>
   );
 }
