@@ -39,7 +39,7 @@ export default function DashboardSidebar({ open, onClose }: DashboardSidebarProp
   ]
 
   const sidebarContent = (
-    <div className="flex flex-col h-full bg-sidebar border-r border-sidebar-border">
+    <div className="flex flex-col h-full bg-sidebar border-r border-sidebar-border overflow-hidden">
       {/* Header */}
       <div className="flex items-center justify-between p-6 border-b border-sidebar-border">
         <div className="flex items-center gap-2">
@@ -101,7 +101,7 @@ export default function DashboardSidebar({ open, onClose }: DashboardSidebarProp
   return (
     <>
       {/* Desktop Sidebar */}
-      <div className="hidden md:flex w-64 flex-col">
+      <div className="hidden md:flex w-64 flex-col overflow-hidden">
         {sidebarContent}
       </div>
 
@@ -112,7 +112,7 @@ export default function DashboardSidebar({ open, onClose }: DashboardSidebarProp
             className="fixed inset-0 bg-black/50 z-40 md:hidden"
             onClick={onClose}
           />
-          <div className="fixed left-0 top-0 h-full w-64 z-50 md:hidden">
+          <div className="fixed left-0 top-0 h-full w-64 z-50 md:hidden overflow-hidden">
             {sidebarContent}
           </div>
         </>
