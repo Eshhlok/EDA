@@ -6,7 +6,7 @@ import { ThemeProvider } from "@/components/theme-provider";
 import NotFound from "@/pages/not-found";
 import Home from "@/pages/home";
 import DatasetLayout from "@/pages/dataset-layout";
-import "@/components/ui/footer";
+import Footer from "@/components/ui/footer";
 
 const queryClient = new QueryClient();
 
