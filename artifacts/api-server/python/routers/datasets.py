@@ -40,11 +40,12 @@ def _read_df(content: bytes, filename: str) -> tuple[pd.DataFrame, str, str]:
     except Exception as e:
         raise HTTPException(status_code=400, detail=f"Failed to parse file: {str(e)}")
 
-    # Remove unnamed/empty columns
-    df = df.loc[:, ~df.columns.str.contains("^Unnamed")]
-
-    # Clean column names
+    # Clean column names first
     df.columns = df.columns.astype(str).str.strip()
+
+    # Remove unnamed/empty columns (catches both "Unnamed: X" and empty "" columns)
+    df = df.loc[:, ~df.columns.str.match(r'^(Unnamed[:\s]|)')]
+    df = df.loc[:, df.columns != '']
 
     # Try converting numeric-looking object columns
     for col in df.columns:
