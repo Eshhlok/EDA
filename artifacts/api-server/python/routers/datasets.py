@@ -19,52 +19,151 @@ def _read_df(content: bytes, filename: str) -> tuple[pd.DataFrame, str, str]:
     fmt = _detect_format(filename)
     detected = chardet.detect(content)
     encoding = detected.get("encoding") or "utf-8"
+
     if not encoding:
         encoding = "utf-8"
 
     try:
         if fmt == "csv":
-            df = pd.read_csv(io.BytesIO(content), encoding=encoding, low_memory=False)
+            df = pd.read_csv(
+                io.BytesIO(content),
+                encoding=encoding,
+                low_memory=False
+            )
+
         elif fmt == "tsv":
-            df = pd.read_csv(io.BytesIO(content), sep="\t", encoding=encoding, low_memory=False)
+            df = pd.read_csv(
+                io.BytesIO(content),
+                sep="\t",
+                encoding=encoding,
+                low_memory=False
+            )
+
         elif fmt == "xlsx":
             df = pd.read_excel(io.BytesIO(content))
             encoding = "binary"
+
         elif fmt == "json":
             df = pd.read_json(io.BytesIO(content), encoding=encoding)
+
         elif fmt == "parquet":
             df = pd.read_parquet(io.BytesIO(content))
             encoding = "binary"
+
         else:
-            df = pd.read_csv(io.BytesIO(content), encoding=encoding, low_memory=False)
+            df = pd.read_csv(
+                io.BytesIO(content),
+                encoding=encoding,
+                low_memory=False
+            )
+
     except Exception as e:
-        raise HTTPException(status_code=400, detail=f"Failed to parse file: {str(e)}")
+        raise HTTPException(
+            status_code=400,
+            detail=f"Failed to parse file: {str(e)}"
+        )
 
-    # Clean column names first
-    df.columns = df.columns.astype(str).str.strip()
+    # -----------------------------
+    # CLEAN COLUMN NAMES
+    # -----------------------------
+    df.columns = (
+        df.columns
+        .astype(str)
+        .str.strip()
+    )
 
-    # Remove unnamed/empty columns (catches both "Unnamed: X" and empty "" columns)
-    df = df.loc[:, (df.columns != "") & (~df.columns.str.match(r"^Unnamed[:\s]?\d*$"))]
+    # Remove unnamed/empty columns
+    df = df.loc[
+        :,
+        (df.columns != "") &
+        (~df.columns.str.match(r"^Unnamed[:\s]?\d*$"))
+    ]
 
-    # Try converting numeric-looking object columns
+    # -----------------------------
+    # CLEAN STRING VALUES
+    # -----------------------------
     for col in df.columns:
         if df[col].dtype == "object":
+            df[col] = (
+                df[col]
+                .astype(str)
+                .str.strip()
+            )
+
+    # -----------------------------
+    # AUTO-DETECT DATETIME COLUMNS
+    # -----------------------------
+    for col in df.columns:
+        try:
+            if "date" in col.lower():
+                parsed = pd.to_datetime(
+                    df[col],
+                    errors="coerce"
+                )
+
+                # Convert only if enough valid dates exist
+                if parsed.notna().sum() > len(df) * 0.5:
+                    df[col] = parsed
+
+        except Exception:
+            pass
+
+    # -----------------------------
+    # EXTRACT TIME FEATURES
+    # -----------------------------
+    for col in df.columns:
+        if pd.api.types.is_datetime64_any_dtype(df[col]):
+
+            df[f"{col}_month"] = (
+                df[col]
+                .dt.month_name()
+            )
+
+            df[f"{col}_year"] = (
+                df[col]
+                .dt.year
+            )
+
+            df[f"{col}_quarter"] = (
+                df[col]
+                .dt.quarter
+            )
+
+    # -----------------------------
+    # AUTO-CONVERT NUMERIC COLUMNS
+    # -----------------------------
+    for col in df.columns:
+
+        if df[col].dtype == "object":
+
             try:
                 cleaned = (
                     df[col]
                     .astype(str)
                     .str.replace(",", "", regex=False)
+                    .str.replace("₹", "", regex=False)
                     .str.strip()
                 )
 
-                numeric = pd.to_numeric(cleaned, errors="coerce")
+                numeric = pd.to_numeric(
+                    cleaned,
+                    errors="coerce"
+                )
 
-                # Convert if majority of values are numeric
+                # Convert if majority numeric
                 if numeric.notna().sum() > len(df) * 0.5:
                     df[col] = numeric
 
             except Exception:
                 pass
+
+    # -----------------------------
+    # REPLACE INVALID VALUES
+    # -----------------------------
+    df = df.replace(
+        [np.inf, -np.inf],
+        np.nan
+    )
 
     return df, fmt, encoding
 

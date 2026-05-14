@@ -21,6 +21,7 @@ import Univariate from "./sections/univariate";
 import Bivariate from "./sections/bivariate";
 import Multivariate from "./sections/multivariate";
 import Outliers from "./sections/outliers";
+import BusinessAnalytics from "./sections/business-analytics";
 
 type NavItem = {
   name: string;
@@ -33,6 +34,7 @@ const navItems: NavItem[] = [
   { name: "Missing Values", path: "missing", icon: AlertTriangle },
   { name: "Univariate", path: "univariate", icon: BarChart2 },
   { name: "Bivariate", path: "bivariate", icon: ScatterChart },
+  { name: "Business Analytics", path: "business-analytics", icon: Activity },
   { name: "Multivariate", path: "multivariate", icon: Network },
   { name: "Outliers", path: "outliers", icon: ShieldAlert },
   { name: "Insights", path: "insights", icon: Lightbulb },
@@ -61,6 +63,7 @@ export default function DatasetLayout() {
       case "outliers": return <Outliers datasetId={datasetId} />;
       case "insights": return <Insights datasetId={datasetId} />;
       case "quality-score": return <QualityScore datasetId={datasetId} />;
+      case "business-analytics":return <BusinessAnalytics datasetId={datasetId} />;
       default: return <Overview datasetId={datasetId} />;
     }
   };

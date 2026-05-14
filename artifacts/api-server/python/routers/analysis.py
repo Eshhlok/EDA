@@ -722,3 +722,84 @@ def get_timeseries_analysis(dataset_id: str, date_col: str, value_col: Optional[
         "acf": acf_vals, "pacf": pacf_vals,
         "adf_statistic": adf_stat, "adf_pvalue": adf_pval, "adf_interpretation": adf_interp,
     }
+@router.get("/datasets/{dataset_id}/groupby")
+def get_groupby_analysis(
+    dataset_id: str,
+    group_by: str,
+    metric: str,
+    aggregation: str = "sum",
+    top_n: int = 20
+):
+    df = _get_df_or_404(dataset_id)
+
+    if group_by not in df.columns:
+        raise HTTPException(
+            status_code=400,
+            detail=f"group_by column '{group_by}' not found"
+        )
+
+    if metric not in df.columns:
+        raise HTTPException(
+            status_code=400,
+            detail=f"metric column '{metric}' not found"
+        )
+
+    if not pd.api.types.is_numeric_dtype(df[metric]):
+        raise HTTPException(
+            status_code=400,
+            detail=f"metric column '{metric}' must be numeric"
+        )
+
+    valid_aggs = [
+        "sum",
+        "mean",
+        "median",
+        "max",
+        "min",
+        "count",
+        "std"
+    ]
+
+    if aggregation not in valid_aggs:
+        raise HTTPException(
+            status_code=400,
+            detail=f"aggregation must be one of {valid_aggs}"
+        )
+
+    try:
+        grouped = (
+            df.groupby(group_by)[metric]
+            .agg(aggregation)
+            .reset_index()
+        )
+
+        grouped.columns = [group_by, "value"]
+
+        grouped = grouped.replace(
+            [np.inf, -np.inf],
+            np.nan
+        ).dropna()
+
+        grouped = grouped.sort_values(
+            "value",
+            ascending=False
+        ).head(top_n)
+
+        return {
+            "group_by": group_by,
+            "metric": metric,
+            "aggregation": aggregation,
+            "data": [
+                {
+                    "label": str(row[group_by]),
+                    "value": _safe(float(row["value"]))
+                }
+                for _, row in grouped.iterrows()
+            ]
+        }
+
+    except Exception as e:
+        raise HTTPException(
+            status_code=500,
+            detail=str(e)
+        )
