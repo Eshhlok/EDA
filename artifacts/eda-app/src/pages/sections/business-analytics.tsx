@@ -1,5 +1,8 @@
 import { useEffect, useState } from "react";
+import { useGetUnivariateAnalysis } from "@workspace/api-client-react";
+
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+
 import {
   Select,
   SelectContent,
@@ -7,7 +10,9 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
+
 import { Skeleton } from "@/components/ui/skeleton";
+
 import {
   ResponsiveContainer,
   BarChart,
@@ -20,7 +25,7 @@ import {
 
 const API_BASE =
   import.meta.env.VITE_API_URL ||
-  "https://eda-xqob.onrender.com/api";
+  "https://eda-xqob.onrender.com";
 
 type Props = {
   datasetId: string;
@@ -39,11 +44,12 @@ type GroupByResponse = {
 export default function BusinessAnalytics({
   datasetId,
 }: Props) {
-  const [groupBy, setGroupBy] = useState("Posting Date_month");
 
-  const [metric, setMetric] = useState(
-    "Amt.in loc.cur."
-  );
+  const [groupBy, setGroupBy] =
+    useState("");
+
+  const [metric, setMetric] =
+    useState("");
 
   const [aggregation, setAggregation] =
     useState("sum");
@@ -51,17 +57,87 @@ export default function BusinessAnalytics({
   const [data, setData] =
     useState<GroupByResponse | null>(null);
 
-  const [loading, setLoading] = useState(false);
+  const [loading, setLoading] =
+    useState(false);
+
+  const { data: univariateData } =
+    useGetUnivariateAnalysis(datasetId);
+
+  // -----------------------------
+  // DYNAMIC COLUMN DETECTION
+  // -----------------------------
+
+  const numericColumns =
+    univariateData?.numeric.map(
+      (n) => n.column
+    ) || [];
+
+  const categoricalColumns =
+    univariateData?.categorical.map(
+      (c) => c.column
+    ) || [];
+
+  const groupableColumns = [
+    ...categoricalColumns.filter(
+      (col) =>
+        col.includes("_month") ||
+        col.includes("_year") ||
+        col.includes("_quarter")
+    ),
+
+    ...categoricalColumns.filter(
+      (col) =>
+        !col.includes("_month") &&
+        !col.includes("_year") &&
+        !col.includes("_quarter")
+    ),
+  ];
+
+  // -----------------------------
+  // AUTO DEFAULTS
+  // -----------------------------
+
+  useEffect(() => {
+
+    if (
+      groupableColumns.length > 0 &&
+      !groupBy
+    ) {
+      setGroupBy(groupableColumns[0]);
+    }
+
+    if (
+      numericColumns.length > 0 &&
+      !metric
+    ) {
+      setMetric(numericColumns[0]);
+    }
+
+  }, [
+    groupableColumns,
+    numericColumns,
+    groupBy,
+    metric,
+  ]);
+
+  // -----------------------------
+  // FETCH DATA
+  // -----------------------------
 
   async function fetchData() {
+
+    if (!groupBy || !metric) return;
+
     try {
+
       setLoading(true);
 
-      const params = new URLSearchParams({
-        group_by: groupBy,
-        metric,
-        aggregation,
-      });
+      const params =
+        new URLSearchParams({
+          group_by: groupBy,
+          metric,
+          aggregation,
+        });
 
       const response = await fetch(
         `${API_BASE}/api/datasets/${datasetId}/groupby?${params}`
@@ -70,18 +146,30 @@ export default function BusinessAnalytics({
       const json = await response.json();
 
       setData(json);
+
     } catch (err) {
+
       console.error(err);
+
     } finally {
+
       setLoading(false);
+
     }
   }
 
   useEffect(() => {
     fetchData();
-  }, [groupBy, metric, aggregation]);
+  }, [
+    groupBy,
+    metric,
+    aggregation,
+  ]);
 
-  if (loading) {
+  if (
+    loading ||
+    !univariateData
+  ) {
     return (
       <div className="p-6">
         <Skeleton className="h-96 w-full" />
@@ -92,75 +180,109 @@ export default function BusinessAnalytics({
   return (
     <div className="p-6 space-y-6">
 
-      {/* Controls */}
+      {/* CONTROLS */}
+
       <div className="flex flex-wrap gap-4">
+
+        {/* GROUP BY */}
 
         <Select
           value={groupBy}
           onValueChange={setGroupBy}
         >
+
           <SelectTrigger className="w-[250px]">
             <SelectValue placeholder="Group By" />
           </SelectTrigger>
 
           <SelectContent>
-            <SelectItem value="Posting Date_month">
-              Month
-            </SelectItem>
 
-            <SelectItem value="Posting Date_year">
-              Year
-            </SelectItem>
+            {groupableColumns.map((col) => (
 
-            <SelectItem value="Cost Center Name">
-              Cost Center
-            </SelectItem>
+              <SelectItem
+                key={col}
+                value={col}
+              >
+                {col}
+              </SelectItem>
 
-            <SelectItem value="Movement type">
-              Movement Type
-            </SelectItem>
+            ))}
+
           </SelectContent>
+
         </Select>
+
+        {/* METRIC */}
 
         <Select
           value={metric}
           onValueChange={setMetric}
         >
+
           <SelectTrigger className="w-[250px]">
             <SelectValue placeholder="Metric" />
           </SelectTrigger>
 
           <SelectContent>
-            <SelectItem value="Amt.in loc.cur.">
-              LNG Cost
-            </SelectItem>
 
-            <SelectItem value="Qty in unit of entry">
-              LNG Quantity
-            </SelectItem>
+            {numericColumns.map((col) => (
+
+              <SelectItem
+                key={col}
+                value={col}
+              >
+                {col}
+              </SelectItem>
+
+            ))}
+
           </SelectContent>
+
         </Select>
+
+        {/* AGGREGATION */}
 
         <Select
           value={aggregation}
           onValueChange={setAggregation}
         >
+
           <SelectTrigger className="w-[180px]">
             <SelectValue placeholder="Aggregation" />
           </SelectTrigger>
 
           <SelectContent>
-            <SelectItem value="sum">Sum</SelectItem>
-            <SelectItem value="mean">Mean</SelectItem>
-            <SelectItem value="max">Max</SelectItem>
-            <SelectItem value="min">Min</SelectItem>
-            <SelectItem value="count">Count</SelectItem>
+
+            <SelectItem value="sum">
+              Sum
+            </SelectItem>
+
+            <SelectItem value="mean">
+              Mean
+            </SelectItem>
+
+            <SelectItem value="max">
+              Max
+            </SelectItem>
+
+            <SelectItem value="min">
+              Min
+            </SelectItem>
+
+            <SelectItem value="count">
+              Count
+            </SelectItem>
+
           </SelectContent>
+
         </Select>
+
       </div>
 
-      {/* Chart */}
+      {/* CHART */}
+
       <Card>
+
         <CardHeader>
           <CardTitle>
             Business Analytics
@@ -168,19 +290,23 @@ export default function BusinessAnalytics({
         </CardHeader>
 
         <CardContent className="h-[500px]">
+
           <ResponsiveContainer
             width="100%"
             height="100%"
           >
+
             <BarChart
               data={data?.data || []}
               margin={{
                 top: 20,
                 right: 20,
                 left: 20,
-                bottom: 100,
+                bottom: 120,
               }}
+              barCategoryGap="20%"
             >
+
               <CartesianGrid
                 strokeDasharray="3 3"
                 vertical={false}
@@ -188,6 +314,7 @@ export default function BusinessAnalytics({
 
               <XAxis
                 dataKey="label"
+                type="category"
                 angle={-45}
                 textAnchor="end"
                 interval={0}
@@ -211,10 +338,15 @@ export default function BusinessAnalytics({
                 fill="hsl(var(--primary))"
                 radius={[4, 4, 0, 0]}
               />
+
             </BarChart>
+
           </ResponsiveContainer>
+
         </CardContent>
+
       </Card>
+
     </div>
   );
 }
