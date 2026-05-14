@@ -98,11 +98,12 @@ def _read_df(content: bytes, filename: str) -> tuple[pd.DataFrame, str, str]:
             if "date" in col.lower():
                 parsed = pd.to_datetime(
                     df[col],
-                    errors="coerce"
+                    errors="coerce",
+                    dayfirst=True
                 )
 
                 # Convert only if enough valid dates exist
-                if parsed.notna().sum() > len(df) * 0.5:
+                if parsed.notna().sum() > 0:
                     df[col] = parsed
 
         except Exception:
