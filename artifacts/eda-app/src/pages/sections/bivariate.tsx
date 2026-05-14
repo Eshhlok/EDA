@@ -82,9 +82,11 @@ export default function Bivariate({ datasetId }: { datasetId: string }) {
                             backgroundColor: getHeatmapColor(val),
                             color: val !== null && Math.abs(val) > 0.5 ? '#fff' : 'inherit'
                           }}
-                          title={`${r} vs ${c}: ${val !== null ? val.toFixed(3) : 'N/A'}`}
+                          title={`${r} vs ${c}: ${
+                                  Number.isFinite(val) ? val.toFixed(3) : "N/A"
+                                }`}
                         >
-                          {val !== null ? val.toFixed(2) : '-'}
+                          {Number.isFinite(val) ? val.toFixed(2) : "-"}
                         </td>
                       );
                     })}
