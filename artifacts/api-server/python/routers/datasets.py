@@ -44,8 +44,7 @@ def _read_df(content: bytes, filename: str) -> tuple[pd.DataFrame, str, str]:
     df.columns = df.columns.astype(str).str.strip()
 
     # Remove unnamed/empty columns (catches both "Unnamed: X" and empty "" columns)
-    df = df.loc[:, ~df.columns.str.match(r'^(Unnamed[:\s]|)')]
-    df = df.loc[:, df.columns != '']
+    df = df.loc[:, (df.columns != "") & (~df.columns.str.match(r"^Unnamed[:\s]?\d*$"))]
 
     # Try converting numeric-looking object columns
     for col in df.columns:
