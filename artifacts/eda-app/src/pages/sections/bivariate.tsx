@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+stimport { useState, useEffect } from "react";
 import { useGetBivariateAnalysis, useGetScatterData } from "@workspace/api-client-react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Skeleton } from "@/components/ui/skeleton";
@@ -6,7 +6,33 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { Switch } from "@/components/ui/switch";
 import { Label } from "@/components/ui/label";
 import { ScatterChart, Scatter, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, ZAxis } from 'recharts';
+const chartTooltipStyle = {
+  contentStyle: {
+    backgroundColor: "#111827",
+    border: "1px solid #374151",
+    borderRadius: "12px",
+    padding: "12px",
+    color: "#f9fafb",
+    boxShadow:
+      "0 10px 25px rgba(0,0,0,0.35)",
+  },
 
+  labelStyle: {
+    color: "#ffffff",
+    fontWeight: 600,
+    marginBottom: "6px",
+  },
+
+  itemStyle: {
+    color: "#e5e7eb",
+    fontSize: "13px",
+  },
+
+  cursor: {
+    stroke: "#9ca3af",
+    strokeDasharray: "4 4",
+  },
+};
 export default function Bivariate({ datasetId }: { datasetId: string }) {
   const { data: bivariate, isLoading: bivLoading } = useGetBivariateAnalysis(datasetId);
   const [useSpearman, setUseSpearman] = useState(false);
@@ -152,7 +178,7 @@ function ScatterPlotData({ datasetId, colX, colY }: { datasetId: string, colX: s
             <XAxis type="number" dataKey="x" name={colX} stroke="hsl(var(--muted-foreground))" tick={{fontSize: 12}} />
             <YAxis type="number" dataKey="y" name={colY} stroke="hsl(var(--muted-foreground))" tick={{fontSize: 12}} />
             <ZAxis type="number" range={[20]} />
-            <Tooltip cursor={{strokeDasharray: '3 3'}} contentStyle={{backgroundColor: 'hsl(var(--card))', borderColor: 'hsl(var(--border))'}} />
+            <Tooltip {...chartTooltipStyle} />
             <Scatter data={chartData} fill="hsl(var(--primary))" opacity={0.6} />
           </ScatterChart>
         </ResponsiveContainer>
