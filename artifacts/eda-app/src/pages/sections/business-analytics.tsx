@@ -64,7 +64,7 @@ export default function BusinessAnalytics({
       });
 
       const response = await fetch(
-        `${API_BASE}/datasets/${datasetId}/groupby?${params}`
+        `${API_BASE}/api/datasets/${datasetId}/groupby?${params}`
       );
 
       const json = await response.json();
