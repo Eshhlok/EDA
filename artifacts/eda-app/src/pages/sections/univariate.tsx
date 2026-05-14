@@ -8,7 +8,28 @@ import { BarChart, Bar, XAxis, YAxis, Tooltip, ResponsiveContainer, CartesianGri
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 
 const COLORS = ['#0088FE', '#00C49F', '#FFBB28', '#FF8042', '#8884d8', '#82ca9d', '#ffc658', '#8dd1e1', '#a4de6c', '#d0ed57'];
+const chartTooltipStyle = {
+  contentStyle: {
+    backgroundColor: "#111827",
+    border: "1px solid #374151",
+    borderRadius: "12px",
+    padding: "12px",
+    color: "#f9fafb",
+    boxShadow:
+      "0 10px 25px rgba(0,0,0,0.35)",
+  },
 
+  labelStyle: {
+    color: "#ffffff",
+    fontWeight: 600,
+    marginBottom: "6px",
+  },
+
+  itemStyle: {
+    color: "#e5e7eb",
+    fontSize: "13px",
+  },
+};
 export default function Univariate({ datasetId }: { datasetId: string }) {
   const { data, isLoading } = useGetUnivariateAnalysis(datasetId);
   const [selectedCol, setSelectedCol] = useState<string>("");
@@ -83,7 +104,7 @@ export default function Univariate({ datasetId }: { datasetId: string }) {
                       interval={0}
                     />
                     <YAxis yAxisId="left" stroke="hsl(var(--muted-foreground))" fontSize={12} tickLine={false} axisLine={false} />
-                    <Tooltip contentStyle={{backgroundColor: 'hsl(var(--card))', borderColor: 'hsl(var(--border))'}} />
+                    <Tooltip {...chartTooltipStyle} />
                     <Bar yAxisId="left" dataKey="count" fill="hsl(var(--primary))" radius={[2, 2, 0, 0]} name="Frequency" />
                   </ComposedChart>
                 </ResponsiveContainer>
@@ -143,7 +164,7 @@ export default function Univariate({ datasetId }: { datasetId: string }) {
                     <CartesianGrid strokeDasharray="3 3" horizontal={true} vertical={false} stroke="hsl(var(--border))" />
                     <XAxis type="number" stroke="hsl(var(--muted-foreground))" fontSize={12} tickLine={false} axisLine={false} />
                     <YAxis type="category" dataKey="value" stroke="hsl(var(--muted-foreground))" fontSize={12} tickLine={false} axisLine={false} width={100} />
-                    <Tooltip contentStyle={{backgroundColor: 'hsl(var(--card))', borderColor: 'hsl(var(--border))'}} />
+                    <Tooltip {...chartTooltipStyle} />
                     <Bar dataKey="count" fill="hsl(var(--primary))" radius={[0, 4, 4, 0]} name="Count" />
                   </BarChart>
                 </ResponsiveContainer>
@@ -171,7 +192,7 @@ export default function Univariate({ datasetId }: { datasetId: string }) {
                         <Cell key={`cell-${index}`} fill={COLORS[index % COLORS.length]} />
                       ))}
                     </Pie>
-                    <Tooltip contentStyle={{backgroundColor: 'hsl(var(--card))', borderColor: 'hsl(var(--border))'}} />
+                    <Tooltip {...chartTooltipStyle} />
                   </PieChart>
                 </ResponsiveContainer>
               </CardContent>
