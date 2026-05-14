@@ -40,6 +40,32 @@ def _read_df(content: bytes, filename: str) -> tuple[pd.DataFrame, str, str]:
     except Exception as e:
         raise HTTPException(status_code=400, detail=f"Failed to parse file: {str(e)}")
 
+    # Remove unnamed/empty columns
+    df = df.loc[:, ~df.columns.str.contains("^Unnamed")]
+
+    # Clean column names
+    df.columns = df.columns.astype(str).str.strip()
+
+    # Try converting numeric-looking object columns
+    for col in df.columns:
+        if df[col].dtype == "object":
+            try:
+                cleaned = (
+                    df[col]
+                    .astype(str)
+                    .str.replace(",", "", regex=False)
+                    .str.strip()
+                )
+
+                numeric = pd.to_numeric(cleaned, errors="coerce")
+
+                # Convert if majority of values are numeric
+                if numeric.notna().sum() > len(df) * 0.5:
+                    df[col] = numeric
+
+            except Exception:
+                pass
+
     return df, fmt, encoding
 
 
