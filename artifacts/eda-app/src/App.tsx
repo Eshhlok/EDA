@@ -3,6 +3,7 @@ import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { Toaster } from "@/components/ui/toaster";
 import { TooltipProvider } from "@/components/ui/tooltip";
 import { ThemeProvider } from "@/components/theme-provider";
+import { ThemeToggle } from "@/components/theme-toggle";
 import NotFound from "@/pages/not-found";
 import Home from "@/pages/home";
 import DatasetLayout from "@/pages/dataset-layout";
@@ -23,9 +24,18 @@ function Router() {
 function App() {
   return (
     <QueryClientProvider client={queryClient}>
-      <ThemeProvider defaultTheme="dark" storageKey="vite-ui-theme">
+      <ThemeProvider defaultTheme="system" storageKey="vite-ui-theme">
         <TooltipProvider>
           <div className="min-h-screen flex flex-col">
+            <header className="sticky top-0 z-40 border-b bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60">
+              <div className="flex h-14 items-center justify-between px-4">
+                <div className="flex-1" />
+                <div className="flex items-center gap-2">
+                  <ThemeToggle />
+                </div>
+              </div>
+            </header>
+
             <div className="flex-1">
               <WouterRouter
                 base={import.meta.env.BASE_URL.replace(/\/$/, "")}
