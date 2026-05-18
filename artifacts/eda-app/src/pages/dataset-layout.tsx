@@ -71,7 +71,26 @@ export default function DatasetLayout() {
   };
 
   return (
-    <div className="flex h-screen bg-background overflow-hidden">
+    <div
+        className="
+          flex
+          h-screen
+          overflow-hidden
+          bg-background
+          relative
+
+          before:absolute
+          before:inset-0
+          before:bg-[radial-gradient(circle_at_top,rgba(224,184,75,0.08),transparent_28%)]
+
+          after:absolute
+          after:inset-0
+          after:bg-[radial-gradient(circle_at_bottom_right,rgba(59,130,246,0.06),transparent_30%)]
+
+          before:pointer-events-none
+          after:pointer-events-none
+        "
+    >
       {/* Sidebar */}
       <aside
           className="
@@ -82,6 +101,7 @@ export default function DatasetLayout() {
             flex
             flex-col
             flex-shrink-0
+            relative z-10
           "
       >
 
@@ -236,7 +256,7 @@ export default function DatasetLayout() {
       </aside>
 
       {/* Main content */}
-      <main className="flex-1 flex flex-col min-w-0">
+      <main className="relative z-10 flex-1 flex flex-col min-w-0">
         <header className="h-14 border-b bg-background flex items-center px-6 justify-between flex-shrink-0">
           <div className="flex items-center space-x-4">
             <h1 className="font-semibold text-lg capitalize">
