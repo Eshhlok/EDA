@@ -481,8 +481,20 @@ export default function BusinessAnalytics({
 
         {/* TOTAL */}
 
-        <Card className="border-border/50 bg-card/40 backdrop-blur-sm">
+        <Card
+          className="
+            border-border/50
+            bg-card/40
+            backdrop-blur-xl
 
+            transition-all
+            duration-300
+
+            hover:border-primary/20
+            hover:shadow-[0_0_30px_rgba(224,184,75,0.08)]
+            hover:-translate-y-1
+          "
+        >
           <CardHeader className="pb-2">
 
             <CardTitle className="text-sm text-muted-foreground">
@@ -505,7 +517,20 @@ export default function BusinessAnalytics({
 
         {/* AVERAGE */}
 
-        <Card className="border-border/50 bg-card/40 backdrop-blur-sm">
+        <Card
+          className="
+            border-border/50
+            bg-card/40
+            backdrop-blur-xl
+
+            transition-all
+            duration-300
+
+            hover:border-primary/20
+            hover:shadow-[0_0_30px_rgba(224,184,75,0.08)]
+            hover:-translate-y-1
+          "
+        >
 
           <CardHeader className="pb-2">
 
@@ -534,7 +559,20 @@ export default function BusinessAnalytics({
 
         {/* TOP CATEGORY */}
 
-        <Card className="border-border/50 bg-card/40 backdrop-blur-sm">
+        <Card
+          className="
+            border-border/50
+            bg-card/40
+            backdrop-blur-xl
+
+            transition-all
+            duration-300
+
+            hover:border-primary/20
+            hover:shadow-[0_0_30px_rgba(224,184,75,0.08)]
+            hover:-translate-y-1
+          "
+        >
 
           <CardHeader className="pb-2">
 
@@ -558,7 +596,20 @@ export default function BusinessAnalytics({
 
         {/* TOP VALUE */}
 
-        <Card className="border-border/50 bg-card/40 backdrop-blur-sm">
+        <Card
+          className="
+            border-border/50
+            bg-card/40
+            backdrop-blur-xl
+
+            transition-all
+            duration-300
+
+            hover:border-primary/20
+            hover:shadow-[0_0_30px_rgba(224,184,75,0.08)]
+            hover:-translate-y-1
+          "
+        >
 
           <CardHeader className="pb-2">
 
@@ -988,7 +1039,20 @@ export default function BusinessAnalytics({
       <Button onClick={exportCSV}>
         Export CSV
       </Button>
-      <Card className="border-border/50 bg-card/40 backdrop-blur-sm">
+      <Card
+        className="
+          border-border/50
+          bg-card/40
+          backdrop-blur-xl
+
+          transition-all
+          duration-300
+
+          hover:border-primary/20
+          hover:shadow-[0_0_30px_rgba(224,184,75,0.08)]
+          hover:-translate-y-1
+        "
+      >
 
         <CardHeader>
 
