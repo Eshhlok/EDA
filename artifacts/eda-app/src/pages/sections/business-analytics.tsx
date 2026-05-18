@@ -162,6 +162,63 @@ export default function BusinessAnalytics({
     ];
 
   })();
+  const insights = (() => {
+
+    if (!data?.data?.length) {
+      return [];
+    }
+
+    const total =
+      data.data.reduce(
+        (sum, row) => sum + row.value,
+        0
+      );
+
+    const sorted =
+      [...data.data].sort(
+        (a, b) => b.value - a.value
+      );
+
+    const top =
+      sorted[0];
+
+    const topPercent =
+      (
+        (top.value / total) *
+        100
+      ).toFixed(1);
+
+    const top3 =
+      sorted
+        .slice(0, 3)
+        .reduce(
+          (sum, row) =>
+            sum + row.value,
+          0
+        );
+
+    const top3Percent =
+      (
+        (top3 / total) *
+        100
+      ).toFixed(1);
+
+    const bottom =
+      sorted[sorted.length - 1];
+
+    return [
+
+      `${top.label} contributes ${topPercent}% of total value.`,
+
+      `Top 3 categories contribute ${top3Percent}% of total distribution.`,
+
+      `${bottom.label} has the lowest contribution.`,
+
+      `${data.group_by} analysis contains ${data.data.length} categories.`,
+
+    ];
+
+  })();
   const { data: univariateData } =
     useGetUnivariateAnalysis(datasetId);
 
@@ -511,6 +568,47 @@ export default function BusinessAnalytics({
         </SelectContent>
 
       </Select>
+
+      <Card className="border-border/50 bg-card/40 backdrop-blur-sm">
+
+        <CardHeader>
+
+          <CardTitle>
+            AI Insights
+          </CardTitle>
+
+        </CardHeader>
+
+        <CardContent>
+
+          <div className="space-y-3">
+
+            {insights.map(
+              (insight, index) => (
+
+                <div
+                  key={index}
+                  className="flex items-start gap-3 rounded-xl border border-border/40 bg-background/40 p-4"
+                >
+
+                  <div className="mt-1 h-2 w-2 rounded-full bg-primary" />
+
+                  <p className="text-sm leading-relaxed text-muted-foreground">
+
+                    {insight}
+
+                  </p>
+
+                </div>
+
+              )
+            )}
+
+          </div>
+
+        </CardContent>
+
+      </Card>
       {/* CHART */}
 
       <Card>
