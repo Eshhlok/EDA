@@ -21,6 +21,10 @@ import {
   XAxis,
   YAxis,
   Tooltip,
+  PieChart,
+  Pie,
+  Cell,
+  Legend,
 } from "recharts";
 
 const API_BASE =
@@ -66,7 +70,18 @@ const chartTooltipStyle = {
     stroke: "#9ca3af",
     strokeDasharray: "4 4",
   },
+  
 };
+const PIE_COLORS = [
+  "#3b82f6",
+  "#8b5cf6",
+  "#06b6d4",
+  "#10b981",
+  "#f59e0b",
+  "#ef4444",
+  "#ec4899",
+  "#6366f1",
+];
 export default function BusinessAnalytics({
   datasetId,
 }: Props) {
@@ -91,20 +106,26 @@ export default function BusinessAnalytics({
     0
   ) || 0;
 
-const averageValue =
-  data?.data.length
-    ? totalValue / data.data.length
-    : 0;
+  const averageValue =
+    data?.data.length
+      ? totalValue / data.data.length
+      : 0;
 
-const topEntry =
-  data?.data.length
-    ? data.data.reduce((max, row) =>
-        row.value > max.value
-          ? row
-          : max
-      )
-    : null;
-
+  const topEntry =
+    data?.data.length
+      ? data.data.reduce((max, row) =>
+          row.value > max.value
+            ? row
+            : max
+        )
+      : null;
+  const pieData =
+    data?.data
+      ?.slice(0, 8)
+      .map((row) => ({
+        name: row.label,
+        value: row.value,
+      })) || [];
   const { data: univariateData } =
     useGetUnivariateAnalysis(datasetId);
 
@@ -437,53 +458,123 @@ const topEntry =
           </CardTitle>
         </CardHeader>
 
-        <CardContent className="h-[500px]">
+        <CardContent>
 
-          <ResponsiveContainer
-            width="100%"
-            height="100%"
-          >
+          <div className="grid grid-cols-1 xl:grid-cols-2 gap-6">
 
-            <BarChart
-              data={data?.data || []}
-              margin={{
-                top: 20,
-                right: 20,
-                left: 20,
-                bottom: 120,
-              }}
-              barCategoryGap="20%"
-            >
+            {/* BAR CHART */}
 
-              <CartesianGrid
-                strokeDasharray="3 3"
-                vertical={false}
-              />
+            <div className="h-[500px] border border-border/50 rounded-2xl bg-card/40 backdrop-blur-sm p-4">
 
-              <XAxis
-                dataKey="label"
-                type="category"
-                angle={-45}
-                textAnchor="end"
-                interval={0}
-                height={120}
-                fontSize={11}
-              />
+              <ResponsiveContainer
+                width="100%"
+                height="100%"
+              >
 
-              <YAxis />
+                <BarChart
+                  data={data?.data || []}
+                  margin={{
+                    top: 20,
+                    right: 20,
+                    left: 20,
+                    bottom: 120,
+                  }}
+                  barCategoryGap="20%"
+                >
 
-              <Tooltip {...chartTooltipStyle} />
-              
+                  <CartesianGrid
+                    strokeDasharray="3 3"
+                    vertical={false}
+                  />
 
-              <Bar
-                dataKey="value"
-                fill="hsl(var(--primary))"
-                radius={[4, 4, 0, 0]}
-              />
+                  <XAxis
+                    dataKey="label"
+                    type="category"
+                    angle={-45}
+                    textAnchor="end"
+                    interval={0}
+                    height={120}
+                    fontSize={11}
+                  />
 
-            </BarChart>
+                  <YAxis />
 
-          </ResponsiveContainer>
+                  <Tooltip
+                    {...chartTooltipStyle}
+                  />
+
+                  <Bar
+                    dataKey="value"
+                    fill="hsl(var(--primary))"
+                    radius={[4, 4, 0, 0]}
+                  />
+
+                </BarChart>
+
+              </ResponsiveContainer>
+
+            </div>
+
+            {/* PIE CHART */}
+
+            <div className="h-[500px] border border-border/50 rounded-2xl bg-card/40 backdrop-blur-sm p-4">
+
+              <ResponsiveContainer
+                width="100%"
+                height="100%"
+              >
+
+                <PieChart>
+
+                  <Pie
+                    data={pieData}
+                    dataKey="value"
+                    nameKey="name"
+                    cx="50%"
+                    cy="50%"
+                    outerRadius={140}
+                    innerRadius={70}
+                    paddingAngle={3}
+                    label={({
+                      percent,
+                    }) =>
+                      `${(
+                        percent * 100
+                      ).toFixed(0)}%`
+                    }
+                  >
+
+                    {pieData.map(
+                      (_, index) => (
+
+                        <Cell
+                          key={index}
+                          fill={
+                            PIE_COLORS[
+                              index %
+                                PIE_COLORS.length
+                            ]
+                          }
+                        />
+
+                      )
+                    )}
+
+                  </Pie>
+
+                  <Tooltip
+                    {...chartTooltipStyle}
+                  />
+
+                  <Legend />
+
+                </PieChart>
+
+              </ResponsiveContainer>
+
+            </div>
+
+          </div>
 
         </CardContent>
 
