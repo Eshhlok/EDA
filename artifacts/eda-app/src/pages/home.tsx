@@ -57,13 +57,13 @@ export default function Home() {
   });
 
   return (
-    <div className="min-h-screen bg-background flex flex-col items-center pt-24 pb-12 px-4 sm:px-6 lg:px-8">
-      <div className="w-full max-w-4xl space-y-12">
+    <div className="min-h-screen bg-background flex flex-col items-center pt-2 pb-12 px-4 sm:px-6 lg:px-8">
+      <div className="w-full max-w-4xl space-y-0">
 
         {/* Branding */}
-        <div className="text-center space-y-4">
+        <div className="text-center space-y-2">
 
-          <div className="flex items-center justify-center mb-1">
+          <div className="flex items-center justify-center -mb-6">
 
             <img
               src={logoFull}
