@@ -569,46 +569,7 @@ export default function BusinessAnalytics({
 
       </Select>
 
-      <Card className="border-border/50 bg-card/40 backdrop-blur-sm">
-
-        <CardHeader>
-
-          <CardTitle>
-            AI Insights
-          </CardTitle>
-
-        </CardHeader>
-
-        <CardContent>
-
-          <div className="space-y-3">
-
-            {insights.map(
-              (insight, index) => (
-
-                <div
-                  key={index}
-                  className="flex items-start gap-3 rounded-xl border border-border/40 bg-background/40 p-4"
-                >
-
-                  <div className="mt-1 h-2 w-2 rounded-full bg-primary" />
-
-                  <p className="text-sm leading-relaxed text-muted-foreground">
-
-                    {insight}
-
-                  </p>
-
-                </div>
-
-              )
-            )}
-
-          </div>
-
-        </CardContent>
-
-      </Card>
+      
       {/* CHART */}
 
       <Card>
@@ -815,6 +776,46 @@ export default function BusinessAnalytics({
               })) || []
             }
           />
+
+        </CardContent>
+
+      </Card>
+      <Card className="border-border/50 bg-card/40 backdrop-blur-sm">
+
+        <CardHeader>
+
+          <CardTitle>
+            Business Insights
+          </CardTitle>
+
+        </CardHeader>
+
+        <CardContent>
+
+          <div className="space-y-3">
+
+            {insights.map(
+              (insight, index) => (
+
+                <div
+                  key={index}
+                  className="flex items-start gap-3 rounded-xl border border-border/40 bg-background/40 p-4"
+                >
+
+                  <div className="mt-1 h-2 w-2 rounded-full bg-primary" />
+
+                  <p className="text-sm leading-relaxed text-muted-foreground">
+
+                    {insight}
+
+                  </p>
+
+                </div>
+
+              )
+            )}
+
+          </div>
 
         </CardContent>
 
