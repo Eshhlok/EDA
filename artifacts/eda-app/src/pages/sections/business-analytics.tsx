@@ -81,6 +81,7 @@ const PIE_COLORS = [
   "#ef4444",
   "#ec4899",
   "#6366f1",
+  "#595957",
 ];
 export default function BusinessAnalytics({
   datasetId,
