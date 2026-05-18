@@ -69,7 +69,7 @@ export default function Home() {
               src={logoFull}
               alt="EDAFlow"
               className="
-                w-[220px]
+                w-[300px]
                 sm:w-[280px]
                 h-auto
                 object-contain
