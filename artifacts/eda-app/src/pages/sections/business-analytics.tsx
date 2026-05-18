@@ -86,6 +86,20 @@ const PIE_COLORS = [
   "#6366f1",
   "#595957",
 ];
+const formatCompactNumber = (
+  value: number
+) => {
+
+  return new Intl.NumberFormat(
+    "en",
+    {
+      notation: "compact",
+      maximumFractionDigits: 1,
+    }
+  ).format(value);
+
+};
+
 export default function BusinessAnalytics({
   datasetId,
 }: Props) {
@@ -746,10 +760,21 @@ export default function BusinessAnalytics({
                       fontSize={11}
                     />
 
-                    <YAxis />
+                    <YAxis
+                      tickFormatter={
+                        formatCompactNumber
+                      }
+                      width={80}
+                      tick={{
+                        fontSize: 12,
+                      }}
+                    />
 
                     <Tooltip
                       {...chartTooltipStyle}
+                      formatter={(value: number) =>
+                        formatCompactNumber(value)
+                      }
                     />
 
                     <Bar
@@ -790,10 +815,21 @@ export default function BusinessAnalytics({
                       fontSize={11}
                     />
 
-                    <YAxis />
+                    <YAxis
+                      tickFormatter={
+                        formatCompactNumber
+                      }
+                      width={80}
+                      tick={{
+                        fontSize: 12,
+                      }}
+                    />
 
                     <Tooltip
                       {...chartTooltipStyle}
+                      formatter={(value: number) =>
+                      formatCompactNumber(value)
+                    }
                     />
 
                     <Line
@@ -879,6 +915,9 @@ export default function BusinessAnalytics({
 
                   <Tooltip
                     {...chartTooltipStyle}
+                    formatter={(value: number) =>
+                      formatCompactNumber(value)
+                    }
                   />
 
                   <Legend />
