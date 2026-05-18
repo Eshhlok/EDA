@@ -63,14 +63,15 @@ export default function Home() {
         {/* Branding */}
         <div className="text-center space-y-4">
 
-          <div className="flex items-center justify-center mb-4">
+          <div className="flex items-center justify-center mb-1">
 
             <img
               src={logoFull}
               alt="EDAFlow"
               className="
-                w-[300px]
-                sm:w-[280px]
+                w-[340px]
+                sm:w-[460px]
+                md:w-[520px]
                 h-auto
                 object-contain
                 drop-shadow-[0_0_18px_rgba(224,184,75,0.18)]
