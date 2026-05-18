@@ -23,7 +23,7 @@ import Multivariate from "./sections/multivariate";
 import Outliers from "./sections/outliers";
 import BusinessAnalytics from "./sections/business-analytics";
 import logoFull from "@/assets/branding/logo-full.png";
-import logoIcon fron "@/assets/branding/logo-icon.png";
+import logoIcon from "@/assets/branding/logo-icon.png";
 
 type NavItem = {
   name: string;
