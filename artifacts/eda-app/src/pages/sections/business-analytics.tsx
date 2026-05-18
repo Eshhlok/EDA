@@ -2,6 +2,7 @@ import React, { useEffect, useState } from "react";
 import { useGetUnivariateAnalysis } from "@workspace/api-client-react";
 import DataTable from "@/components/analytics/data-table"; 
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Button } from "@/components/ui/button";
 
 import {
   Select,
@@ -279,6 +280,77 @@ export default function BusinessAnalytics({
     metric,
   ]);
 
+  function exportCSV() {
+
+    if (!data?.data?.length) return;
+
+    const generatedAt =
+      new Date().toLocaleString();
+
+    const metadata = [
+
+      ["Generated From", "EDAFlow Analytics Platform"],
+
+      ["Website", "https://edaflow.vercel.app"],
+
+      ["Generated At", generatedAt],
+
+      [],
+
+    ];
+
+    const headers = [
+      data.group_by,
+      data.metric,
+    ];
+
+    const rows = data.data.map(
+      (row) => [
+        row.label,
+        row.value,
+      ]
+    );
+
+    const csvContent = [
+
+      ...metadata.map((r) =>
+        r.join(",")
+      ),
+
+      headers.join(","),
+
+      ...rows.map((r) =>
+        r.join(",")
+      ),
+
+    ].join("\n");
+
+    const blob = new Blob(
+      [csvContent],
+      {
+        type: "text/csv;charset=utf-8;",
+      }
+    );
+
+    const url =
+      URL.createObjectURL(blob);
+
+    const link =
+      document.createElement("a");
+
+    link.href = url;
+
+    link.setAttribute(
+      "download",
+      `EDAFlow_${data.group_by}_${data.metric}.csv`
+    );
+
+    document.body.appendChild(link);
+
+    link.click();
+
+    document.body.removeChild(link);
+  }
   // -----------------------------
   // FETCH DATA
   // -----------------------------
@@ -568,7 +640,9 @@ export default function BusinessAnalytics({
         </SelectContent>
 
       </Select>
-
+      <Button onClick={exportCSV}>
+        Export CSV
+      </Button>
       
       {/* CHART */}
 
