@@ -1,6 +1,6 @@
-import { useEffect, useState } from "react";
+import React, { useEffect, useState } from "react";
 import { useGetUnivariateAnalysis } from "@workspace/api-client-react";
-
+import DataTable from "@/components/analytics/data-table"; 
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 
 import {
@@ -40,7 +40,33 @@ type GroupByResponse = {
     value: number;
   }[];
 };
+const chartTooltipStyle = {
+  contentStyle: {
+    backgroundColor: "#111827",
+    border: "1px solid #374151",
+    borderRadius: "12px",
+    padding: "12px",
+    color: "#f9fafb",
+    boxShadow:
+      "0 10px 25px rgba(0,0,0,0.35)",
+  },
 
+  labelStyle: {
+    color: "#ffffff",
+    fontWeight: 600,
+    marginBottom: "6px",
+  },
+
+  itemStyle: {
+    color: "#e5e7eb",
+    fontSize: "13px",
+  },
+
+  cursor: {
+    stroke: "#9ca3af",
+    strokeDasharray: "4 4",
+  },
+};
 export default function BusinessAnalytics({
   datasetId,
 }: Props) {
@@ -324,14 +350,8 @@ export default function BusinessAnalytics({
 
               <YAxis />
 
-              <Tooltip
-                contentStyle={{
-                  backgroundColor:
-                    "hsl(var(--card))",
-                  borderColor:
-                    "hsl(var(--border))",
-                }}
-              />
+              <Tooltip {...chartTooltipStyle} />
+              
 
               <Bar
                 dataKey="value"
@@ -346,7 +366,34 @@ export default function BusinessAnalytics({
         </CardContent>
 
       </Card>
+      <Card>
 
+        <CardHeader>
+
+          <CardTitle>
+            Underlying Data
+          </CardTitle>
+
+        </CardHeader>
+
+        <CardContent>
+
+          <DataTable
+            columns={[
+              data?.group_by || "Category",
+              data?.metric || "Value",
+            ]}
+            rows={
+              data?.data.map((row) => ({
+                [data.group_by]: row.label,
+                [data.metric]: row.value,
+              })) || []
+            }
+          />
+
+        </CardContent>
+
+      </Card>
     </div>
   );
 }
