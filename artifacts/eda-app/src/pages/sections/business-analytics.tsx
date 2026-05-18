@@ -725,7 +725,7 @@ export default function BusinessAnalytics({
 
             {/* BAR CHART */}
 
-            <div className="h-[500px] border border-border/50 rounded-2xl bg-card/40 backdrop-blur-sm p-4">
+            <div className="h-[560px] border border-border/50 rounded-2xl bg-card/40 backdrop-blur-sm p-4">
 
               <ResponsiveContainer
                 width="100%"
@@ -737,12 +737,12 @@ export default function BusinessAnalytics({
                   <BarChart
                     data={data?.data || []}
                     margin={{
-                      top: 20,
-                      right: 20,
-                      left: 20,
-                      bottom: 120,
+                      top: 0,
+                      right: 10,
+                      left: 0,
+                      bottom: 60,
                     }}
-                    barCategoryGap="20%"
+                    barCategoryGap="8%"
                   >
 
                     <CartesianGrid
@@ -764,9 +764,14 @@ export default function BusinessAnalytics({
                       tickFormatter={
                         formatCompactNumber
                       }
-                      width={80}
+                      width={70}
                       tick={{
                         fontSize: 12,
+                      }}
+                      domain={[0, "dataMax"]}
+                      padding={{
+                        top: 0,
+                        bottom: 0,
                       }}
                     />
 
@@ -781,6 +786,7 @@ export default function BusinessAnalytics({
                       dataKey="value"
                       fill="hsl(var(--primary))"
                       radius={[4, 4, 0, 0]}
+                      maxBarSize={60}
                     />
 
                   </BarChart>
@@ -794,10 +800,10 @@ export default function BusinessAnalytics({
                           : data?.data || []
                     }
                     margin={{
-                      top: 20,
-                      right: 20,
-                      left: 20,
-                      bottom: 120,
+                      top: 0,
+                      right: 10,
+                      left: 0,
+                      bottom: 60,
                     }}
                   >
 
@@ -836,9 +842,9 @@ export default function BusinessAnalytics({
                       type="monotone"
                       dataKey="value"
                       stroke="hsl(var(--primary))"
-                      strokeWidth={3}
+                      strokeWidth={4}
                       dot={{
-                        r: 4,
+                        r: 5,
                       }}
                       activeDot={{
                         r: 7,
@@ -868,7 +874,7 @@ export default function BusinessAnalytics({
 
             {/* PIE CHART */}
 
-            <div className="h-[500px] border border-border/50 rounded-2xl bg-card/40 backdrop-blur-sm p-4">
+            <div className="h-[560px] border border-border/50 rounded-2xl bg-card/40 backdrop-blur-sm p-4">
 
               <ResponsiveContainer
                 width="100%"
