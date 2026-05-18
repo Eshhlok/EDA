@@ -640,9 +640,7 @@ export default function BusinessAnalytics({
         </SelectContent>
 
       </Select>
-      <Button onClick={exportCSV}>
-        Export CSV
-      </Button>
+      
       
       {/* CHART */}
 
@@ -854,6 +852,9 @@ export default function BusinessAnalytics({
         </CardContent>
 
       </Card>
+      <Button onClick={exportCSV}>
+        Export CSV
+      </Button>
       <Card className="border-border/50 bg-card/40 backdrop-blur-sm">
 
         <CardHeader>
