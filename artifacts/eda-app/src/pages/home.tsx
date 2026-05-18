@@ -98,14 +98,77 @@ export default function Home() {
         <div 
           {...getRootProps()} 
           className={`
-            border-2 border-dashed rounded-xl p-16 text-center cursor-pointer transition-all duration-200
-            ${isDragActive ? 'border-primary bg-primary/5' : 'border-border hover:border-primary/50 hover:bg-muted/50'}
-            ${uploadDataset.isPending ? 'opacity-50 cursor-not-allowed pointer-events-none' : ''}
+            relative
+            overflow-hidden
+
+            border
+            border-border/50
+
+            rounded-3xl
+
+            p-16
+
+            text-center
+            cursor-pointer
+
+            bg-card/50
+            backdrop-blur-xl
+
+            transition-all
+            duration-500
+
+            hover:border-primary/30
+            hover:shadow-[0_0_50px_rgba(224,184,75,0.12)]
+            hover:-translate-y-1
+
+            before:absolute
+            before:inset-0
+            before:bg-[radial-gradient(circle_at_top,rgba(224,184,75,0.08),transparent_40%)]
+
+            before:pointer-events-none
+
+            ${
+              isDragActive
+                ? `
+                  border-primary
+                  shadow-[0_0_60px_rgba(224,184,75,0.18)]
+                  scale-[1.01]
+                `
+                : ""
+            }
+
+            ${
+              uploadDataset.isPending
+                ? `
+                  opacity-70
+                  cursor-not-allowed
+                  pointer-events-none
+                `
+                : ""
+            }
           `}
         >
           <input {...getInputProps()} />
-          <div className="flex flex-col items-center justify-center space-y-4">
-            <div className="p-4 bg-primary/10 rounded-full text-primary">
+          <div className="relative z-10 flex flex-col items-center justify-center space-y-5">
+            <div
+              className="
+                p-5
+                rounded-2xl
+
+                bg-primary/10
+                text-primary
+
+                border
+                border-primary/20
+
+                shadow-[0_0_25px_rgba(224,184,75,0.12)]
+
+                transition-all
+                duration-300
+
+                group-hover:scale-105
+              "
+            >
               {uploadDataset.isPending ? (
                 <Loader2 className="h-12 w-12 animate-spin" />
               ) : (
@@ -113,7 +176,7 @@ export default function Home() {
               )}
             </div>
             <div>
-              <p className="text-xl font-medium text-foreground">
+              <p className="text-2xl font-semibold tracking-tight text-foreground">
                 {isDragActive ? "Drop the file here" : "Drag & drop your dataset"}
               </p>
               <p className="text-sm text-muted-foreground mt-1">
