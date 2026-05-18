@@ -120,13 +120,45 @@ export default function BusinessAnalytics({
             : max
         )
       : null;
-  const pieData =
-    data?.data
-      ?.slice(0, 8)
-      .map((row) => ({
+  const pieData = (() => {
+
+    if (!data?.data) return [];
+
+    const sorted =
+      [...data.data];
+
+    if (sorted.length <= 8) {
+      return sorted.map((row) => ({
         name: row.label,
         value: row.value,
-      })) || [];
+      }));
+    }
+
+    const top =
+      sorted.slice(0, 8);
+
+    const othersValue =
+      sorted
+        .slice(8)
+        .reduce(
+          (sum, row) =>
+            sum + row.value,
+          0
+        );
+
+    return [
+      ...top.map((row) => ({
+        name: row.label,
+        value: row.value,
+      })),
+
+      {
+        name: "Others",
+        value: othersValue,
+      },
+    ];
+
+  })();
   const { data: univariateData } =
     useGetUnivariateAnalysis(datasetId);
 
