@@ -72,7 +72,17 @@ export default function DatasetLayout() {
   return (
     <div className="flex h-screen bg-background overflow-hidden">
       {/* Sidebar */}
-      <aside className="w-64 border-r bg-card flex flex-col flex-shrink-0">
+      <aside
+          className="
+            w-64
+            border-r
+            bg-card/80
+            backdrop-blur-xl
+            flex
+            flex-col
+            flex-shrink-0
+          "
+      >
 
         {/* EDAFlow logo */}
 
@@ -145,14 +155,78 @@ export default function DatasetLayout() {
                 key={item.path}
                 onClick={() => setLocation(`/datasets/${datasetId}/${item.path}`)}
                 className={`
-                  w-full flex items-center space-x-3 px-3 py-2 text-sm rounded-md transition-colors
-                  ${isActive 
-                    ? 'bg-primary/10 text-primary font-medium' 
-                    : 'text-muted-foreground hover:bg-muted hover:text-foreground'
+                  group
+                  relative
+                  w-full
+                  flex
+                  items-center
+                  space-x-3
+                  px-3
+                  py-2.5
+                  text-sm
+                  rounded-xl
+                  transition-all
+                  duration-300
+
+                  ${
+                    isActive
+                      ? `
+                        bg-primary/10
+                        text-primary
+                        font-medium
+                        border
+                        border-primary/20
+                        shadow-[0_0_18px_rgba(224,184,75,0.08)]
+                        backdrop-blur-sm
+                      `
+                      : `
+                        text-muted-foreground
+                        hover:bg-muted/60
+                        hover:text-foreground
+                        hover:border
+                        hover:border-border/50
+                      `
                   }
                 `}
               >
-                <Icon className={`h-4 w-4 ${isActive ? 'text-primary' : 'text-muted-foreground'}`} />
+                <Icon
+                  className={`
+                    h-4
+                    w-4
+                    transition-all
+                    duration-300
+
+                    ${
+                      isActive
+                        ? `
+                          text-primary
+                          scale-110
+                        `
+                        : `
+                          text-muted-foreground
+                          group-hover:text-primary
+                          group-hover:scale-105
+                        `
+                    }
+                  `}
+                />
+                {isActive && (
+
+                  <div
+                    className="
+                      absolute
+                      left-0
+                      top-1/2
+                      -translate-y-1/2
+                      h-6
+                      w-1
+                      rounded-r-full
+                      bg-primary
+                      shadow-[0_0_12px_rgba(224,184,75,0.8)]
+                    "
+                  />
+
+                )}
                 <span>{item.name}</span>
               </button>
             );
