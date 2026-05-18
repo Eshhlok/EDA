@@ -61,7 +61,9 @@ export default function Home() {
       <div className="w-full max-w-4xl space-y-12">
 
         {/* Branding */}
-        <div className="flex items-center justify-center mb-4">
+        <div className="text-center space-y-4">
+
+          <div className="flex items-center justify-center mb-4">
 
             <img
               src={logoFull}
@@ -76,13 +78,18 @@ export default function Home() {
               "
             />
 
-        </div>
+          </div>
+
           <h1 className="text-4xl font-extrabold tracking-tight text-foreground sm:text-5xl">
-            Explore your data,<br />instantly.
+            Explore your data,
+            <br />
+            instantly.
           </h1>
+
           <p className="text-lg text-muted-foreground max-w-2xl mx-auto">
             Drop any dataset to generate insights, visualisations, quality scores, and outlier reports — all in seconds.
           </p>
+
         </div>
 
         {/* Dropzone */}
