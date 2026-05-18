@@ -100,6 +100,8 @@ export default function BusinessAnalytics({
     useState("sum");
   const [chartType, setChartType] =
     useState<"bar" | "line">("bar");
+  const [showForecast, setShowForecast] =
+    useState(true);
   const [data, setData] =
     useState<GroupByResponse | null>(null);
 
@@ -160,6 +162,57 @@ export default function BusinessAnalytics({
         name: "Others",
         value: othersValue,
       },
+    ];
+
+  })();
+  const forecastData = (() => {
+
+    if (!data?.data?.length) {
+      return [];
+    }
+
+    const base =
+      data.data.map((d) => ({
+        label: d.label,
+        value: d.value,
+        forecast: null,
+      }));
+
+    if (base.length < 2) {
+      return base;
+    }
+
+    const last =
+      base[base.length - 1].value;
+
+    const prev =
+      base[base.length - 2].value;
+
+    const trend =
+      last - prev;
+
+    const future = [];
+
+    for (let i = 1; i <= 3; i++) {
+
+      future.push({
+
+        label: `Forecast ${i}`,
+
+        value: null,
+
+        forecast:
+          last + trend * i,
+
+      });
+    }
+
+    return [
+
+      ...base,
+
+      ...future,
+
     ];
 
   })();
@@ -710,7 +763,11 @@ export default function BusinessAnalytics({
                 ) : (
 
                   <LineChart
-                    data={data?.data || []}
+                    data={
+                        showForecast
+                          ? forecastData
+                          : data?.data || []
+                    }
                     margin={{
                       top: 20,
                       right: 20,
@@ -751,7 +808,20 @@ export default function BusinessAnalytics({
                         r: 7,
                       }}
                     />
+                    {showForecast && (
 
+                      <Line
+                        type="monotone"
+                        dataKey="forecast"
+                        stroke="#f59e0b"
+                        strokeWidth={3}
+                        strokeDasharray="8 6"
+                        dot={{
+                          r: 4,
+                        }}
+                      />
+
+                    )}
                   </LineChart>
 
                 )}
@@ -824,6 +894,24 @@ export default function BusinessAnalytics({
         </CardContent>
 
       </Card>
+      <Button
+        variant={
+          showForecast
+            ? "default"
+            : "outline"
+        }
+        onClick={() =>
+          setShowForecast(
+            !showForecast
+          )
+        }
+      >
+
+        {showForecast
+          ? "Hide Forecast"
+          : "Show Forecast"}
+
+      </Button>
       <Card>
 
         <CardHeader>
