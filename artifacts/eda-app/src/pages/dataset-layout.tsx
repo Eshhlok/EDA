@@ -22,6 +22,7 @@ import Bivariate from "./sections/bivariate";
 import Multivariate from "./sections/multivariate";
 import Outliers from "./sections/outliers";
 import BusinessAnalytics from "./sections/business-analytics";
+import logoFull from "@/assets/branding/logo-full.png";
 
 type NavItem = {
   name: string;
@@ -74,16 +75,38 @@ export default function DatasetLayout() {
       <aside className="w-64 border-r bg-card flex flex-col flex-shrink-0">
 
         {/* EDAFlow logo */}
-        <div className="h-14 border-b flex items-center px-4 gap-2">
-          <div className="p-1.5 rounded-lg bg-primary/10">
-            <Zap className="h-4 w-4 text-primary" />
-          </div>
-          <span className="font-black text-sm tracking-tight text-foreground">EDAFlow</span>
+
+        <div
+          className="
+            h-20
+            border-b
+            flex
+            items-center
+            justify-center
+            px-4
+            bg-background/80
+            backdrop-blur-sm
+          "
+        >
+
+          <img
+            src={logoFull}
+            alt="EDAFlow"
+            className="
+              w-[180px]
+              h-auto
+              object-contain
+              transition-transform duration-300
+              hover:scale-[1.02]
+              drop-shadow-[0_0_12px_rgba(224,184,75,0.15)]
+            "
+          />
+
         </div>
 
         {/* Back link */}
         <div
-          className="h-10 border-b flex items-center px-4 hover:bg-muted/50 cursor-pointer transition-colors"
+          className="h-12 border-b flex items-center px-4 hover:bg-muted/50 cursor-pointer transition-colors"
           onClick={() => setLocation("/")}
         >
           <ChevronLeft className="h-3.5 w-3.5 mr-1.5 text-muted-foreground" />
