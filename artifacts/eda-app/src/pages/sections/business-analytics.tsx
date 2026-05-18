@@ -17,6 +17,8 @@ import {
   ResponsiveContainer,
   BarChart,
   Bar,
+  LineChart,
+  Line,
   CartesianGrid,
   XAxis,
   YAxis,
@@ -95,7 +97,8 @@ export default function BusinessAnalytics({
 
   const [aggregation, setAggregation] =
     useState("sum");
-
+  const [chartType, setChartType] =
+    useState<"bar" | "line">("bar");
   const [data, setData] =
     useState<GroupByResponse | null>(null);
 
@@ -448,7 +451,7 @@ export default function BusinessAnalytics({
           value={aggregation}
           onValueChange={setAggregation}
         >
-
+        
           <SelectTrigger className="w-[180px]">
             <SelectValue placeholder="Aggregation" />
           </SelectTrigger>
@@ -480,7 +483,34 @@ export default function BusinessAnalytics({
         </Select>
 
       </div>
+      {/* CHART TYPE */}
 
+      <Select
+        value={chartType}
+        onValueChange={(v) =>
+          setChartType(
+            v as "bar" | "line"
+          )
+        }
+      >
+
+        <SelectTrigger className="w-[180px]">
+          <SelectValue placeholder="Chart Type" />
+        </SelectTrigger>
+
+        <SelectContent>
+
+          <SelectItem value="bar">
+            Bar Chart
+          </SelectItem>
+
+          <SelectItem value="line">
+            Line Chart
+          </SelectItem>
+
+        </SelectContent>
+
+      </Select>
       {/* CHART */}
 
       <Card>
@@ -504,45 +534,96 @@ export default function BusinessAnalytics({
                 height="100%"
               >
 
-                <BarChart
-                  data={data?.data || []}
-                  margin={{
-                    top: 20,
-                    right: 20,
-                    left: 20,
-                    bottom: 120,
-                  }}
-                  barCategoryGap="20%"
-                >
+                {chartType === "bar" ? (
 
-                  <CartesianGrid
-                    strokeDasharray="3 3"
-                    vertical={false}
-                  />
+                  <BarChart
+                    data={data?.data || []}
+                    margin={{
+                      top: 20,
+                      right: 20,
+                      left: 20,
+                      bottom: 120,
+                    }}
+                    barCategoryGap="20%"
+                  >
 
-                  <XAxis
-                    dataKey="label"
-                    type="category"
-                    angle={-45}
-                    textAnchor="end"
-                    interval={0}
-                    height={120}
-                    fontSize={11}
-                  />
+                    <CartesianGrid
+                      strokeDasharray="3 3"
+                      vertical={false}
+                    />
 
-                  <YAxis />
+                    <XAxis
+                      dataKey="label"
+                      type="category"
+                      angle={-45}
+                      textAnchor="end"
+                      interval={0}
+                      height={120}
+                      fontSize={11}
+                    />
 
-                  <Tooltip
-                    {...chartTooltipStyle}
-                  />
+                    <YAxis />
 
-                  <Bar
-                    dataKey="value"
-                    fill="hsl(var(--primary))"
-                    radius={[4, 4, 0, 0]}
-                  />
+                    <Tooltip
+                      {...chartTooltipStyle}
+                    />
 
-                </BarChart>
+                    <Bar
+                      dataKey="value"
+                      fill="hsl(var(--primary))"
+                      radius={[4, 4, 0, 0]}
+                    />
+
+                  </BarChart>
+
+                ) : (
+
+                  <LineChart
+                    data={data?.data || []}
+                    margin={{
+                      top: 20,
+                      right: 20,
+                      left: 20,
+                      bottom: 120,
+                    }}
+                  >
+
+                    <CartesianGrid
+                      strokeDasharray="3 3"
+                      vertical={false}
+                    />
+
+                    <XAxis
+                      dataKey="label"
+                      angle={-45}
+                      textAnchor="end"
+                      interval={0}
+                      height={120}
+                      fontSize={11}
+                    />
+
+                    <YAxis />
+
+                    <Tooltip
+                      {...chartTooltipStyle}
+                    />
+
+                    <Line
+                      type="monotone"
+                      dataKey="value"
+                      stroke="hsl(var(--primary))"
+                      strokeWidth={3}
+                      dot={{
+                        r: 4,
+                      }}
+                      activeDot={{
+                        r: 7,
+                      }}
+                    />
+
+                  </LineChart>
+
+                )}
 
               </ResponsiveContainer>
 
