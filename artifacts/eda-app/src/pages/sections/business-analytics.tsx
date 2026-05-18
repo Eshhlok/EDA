@@ -85,6 +85,25 @@ export default function BusinessAnalytics({
 
   const [loading, setLoading] =
     useState(false);
+  const totalValue =
+  data?.data.reduce(
+    (sum, row) => sum + row.value,
+    0
+  ) || 0;
+
+const averageValue =
+  data?.data.length
+    ? totalValue / data.data.length
+    : 0;
+
+const topEntry =
+  data?.data.length
+    ? data.data.reduce((max, row) =>
+        row.value > max.value
+          ? row
+          : max
+      )
+    : null;
 
   const { data: univariateData } =
     useGetUnivariateAnalysis(datasetId);
@@ -205,7 +224,110 @@ export default function BusinessAnalytics({
 
   return (
     <div className="p-6 space-y-6">
+      <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-4 gap-4">
 
+        {/* TOTAL */}
+
+        <Card className="border-border/50 bg-card/40 backdrop-blur-sm">
+
+          <CardHeader className="pb-2">
+
+            <CardTitle className="text-sm text-muted-foreground">
+              Total Value
+            </CardTitle>
+
+          </CardHeader>
+
+          <CardContent>
+
+            <div className="text-2xl font-bold">
+
+              {totalValue.toLocaleString()}
+
+            </div>
+
+          </CardContent>
+
+        </Card>
+
+        {/* AVERAGE */}
+
+        <Card className="border-border/50 bg-card/40 backdrop-blur-sm">
+
+          <CardHeader className="pb-2">
+
+            <CardTitle className="text-sm text-muted-foreground">
+              Average Value
+            </CardTitle>
+
+          </CardHeader>
+
+          <CardContent>
+
+            <div className="text-2xl font-bold">
+
+              {averageValue.toLocaleString(
+                undefined,
+                {
+                  maximumFractionDigits: 2,
+                }
+              )}
+
+            </div>
+
+          </CardContent>
+
+        </Card>
+
+        {/* TOP CATEGORY */}
+
+        <Card className="border-border/50 bg-card/40 backdrop-blur-sm">
+
+          <CardHeader className="pb-2">
+
+            <CardTitle className="text-sm text-muted-foreground">
+              Top Category
+            </CardTitle>
+
+          </CardHeader>
+
+          <CardContent>
+
+            <div className="text-lg font-bold truncate">
+
+              {topEntry?.label || "-"}
+
+            </div>
+
+          </CardContent>
+
+        </Card>
+
+        {/* TOP VALUE */}
+
+        <Card className="border-border/50 bg-card/40 backdrop-blur-sm">
+
+          <CardHeader className="pb-2">
+
+            <CardTitle className="text-sm text-muted-foreground">
+              Top Value
+            </CardTitle>
+
+          </CardHeader>
+
+          <CardContent>
+
+            <div className="text-2xl font-bold">
+
+              {topEntry?.value.toLocaleString() || "-"}
+
+            </div>
+
+          </CardContent>
+
+        </Card>
+
+      </div>
       {/* CONTROLS */}
 
       <div className="flex flex-wrap gap-4">
