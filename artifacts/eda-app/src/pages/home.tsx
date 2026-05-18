@@ -2,9 +2,10 @@ import { useCallback, useState } from "react";
 import { useDropzone } from "react-dropzone";
 import { useLocation } from "wouter";
 import { useUploadDataset, useListDatasets, getListDatasetsQueryKey } from "@workspace/api-client-react";
-import { UploadCloud, FileSpreadsheet, Trash2, ChevronRight, Loader2, Zap } from "lucide-react";
+import { UploadCloud, FileSpreadsheet, Trash2, ChevronRight, Loader2, } from "lucide-react";
 import { useQueryClient } from "@tanstack/react-query";
 import { format } from "date-fns";
+import logoFull from "@/assets/branding/logo-full.png";
 
 export default function Home() {
   const [, setLocation] = useLocation();
@@ -60,13 +61,22 @@ export default function Home() {
       <div className="w-full max-w-4xl space-y-12">
 
         {/* Branding */}
-        <div className="text-center space-y-4">
-          <div className="flex items-center justify-center gap-2 mb-2">
-            <div className="p-2 rounded-xl bg-primary/10">
-              <Zap className="h-6 w-6 text-primary" />
-            </div>
-            <span className="text-2xl font-black tracking-tight text-foreground">EDAFlow</span>
-          </div>
+        <div className="flex items-center justify-center mb-4">
+
+            <img
+              src={logoFull}
+              alt="EDAFlow"
+              className="
+                h-16
+                w-auto
+                object-contain
+                drop-shadow-[0_0_18px_rgba(224,184,75,0.18)]
+                transition-transform duration-300
+                hover:scale-[1.02]
+              "
+            />
+
+        </div>
           <h1 className="text-4xl font-extrabold tracking-tight text-foreground sm:text-5xl">
             Explore your data,<br />instantly.
           </h1>
