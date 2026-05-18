@@ -6,8 +6,11 @@ import { UploadCloud, FileSpreadsheet, Trash2, ChevronRight, Loader2, } from "lu
 import { useQueryClient } from "@tanstack/react-query";
 import { format } from "date-fns";
 import logoFull from "@/assets/branding/logo-full.png";
+import logoDark from "@/assets/branding/logo-dark.png";
+import { useTheme } from "@/components/theme-toggle";
 
 export default function Home() {
+  const { theme } = useTheme();
   const [, setLocation] = useLocation();
   const queryClient = useQueryClient();
   const { data: datasets, isLoading: datasetsLoading } = useListDatasets();
@@ -66,7 +69,7 @@ export default function Home() {
           <div className="flex items-center justify-center -mb-6">
 
             <img
-              src={logoFull}
+              src={theme === "dark" ? logoDark : logoFull}
               alt="EDAFlow"
               className="
                 w-[340px]
