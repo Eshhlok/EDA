@@ -69,8 +69,9 @@ export default function Home() {
               src={logoFull}
               alt="EDAFlow"
               className="
-                h-16
-                w-auto
+                w-[220px]
+                sm:w-[280px]
+                h-auto
                 object-contain
                 drop-shadow-[0_0_18px_rgba(224,184,75,0.18)]
                 transition-transform duration-300
