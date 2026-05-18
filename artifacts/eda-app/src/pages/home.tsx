@@ -7,7 +7,7 @@ import { useQueryClient } from "@tanstack/react-query";
 import { format } from "date-fns";
 import logoFull from "@/assets/branding/logo-full.png";
 import logoDark from "@/assets/branding/logo-dark.png";
-import { useTheme } from "@/components/theme-toggle";
+import { useTheme } from "@/components/theme-provider";
 
 export default function Home() {
   const { theme } = useTheme();
