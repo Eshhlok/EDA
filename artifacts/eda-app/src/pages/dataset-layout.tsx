@@ -22,8 +22,9 @@ import Bivariate from "./sections/bivariate";
 import Multivariate from "./sections/multivariate";
 import Outliers from "./sections/outliers";
 import BusinessAnalytics from "./sections/business-analytics";
-import logoFull from "@/assets/branding/logo-full.png";
+import logoIconDark from "@/assets/branding/logo-icon-dark.png";
 import logoIcon from "@/assets/branding/logo-icon.png";
+import { useTheme } from "@/components/theme-provider";
 
 type NavItem = {
   name: string;
@@ -44,6 +45,7 @@ const navItems: NavItem[] = [
 ];
 
 export default function DatasetLayout() {
+  const { theme } = useTheme();
   const [match, params] = useRoute("/datasets/:id/:section?");
   const [, setLocation] = useLocation();
   const datasetId = params?.id;
@@ -121,7 +123,7 @@ export default function DatasetLayout() {
         >
 
           <img
-            src={logoIcon}
+            src={theme === "dark" ? logoIconDark : logoIcon}
             alt="EDAFlow"
             className="
               w-[180px]
