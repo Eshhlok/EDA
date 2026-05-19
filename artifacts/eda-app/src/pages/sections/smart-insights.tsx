@@ -60,57 +60,6 @@ export default function SmartInsights({
     useGetUnivariateAnalysis(
         datasetId
     );
-
-    useEffect(() => {
-
-    async function fetchInsights() {
-
-        try {
-            if (
-                !selectedMetric ||
-                !selectedCategory ||
-                !selectedTime
-                ) {
-                return;
-                }
-
-        setLoading(true);
-
-        const deptRes =
-            await fetch(
-            `${API_BASE}/api/datasets/${datasetId}/groupby?group_by=${selectedCategory}&metric=${selectedMetric} Cost&aggregation=sum`
-            );
-
-        const deptJson =
-            await deptRes.json();
-
-        setDepartmentData(
-            deptJson
-        );
-
-        const monthRes =
-            await fetch(
-            `${API_BASE}/api/datasets/${datasetId}/groupby?group_by=${selectedTime}&metric=${selectedMetric} Cost&aggregation=sum`
-            );
-
-        const monthJson =
-            await monthRes.json();
-
-        setMonthlyData(
-            monthJson
-        );
-
-        } catch (err) {
-
-        console.error(err);
-
-        } finally {
-
-        setLoading(false);
-
-        }
-    }
-
     const numericColumns =
         univariateData?.numeric.map(
             (n) => n.column
@@ -163,14 +112,63 @@ export default function SmartInsights({
         const selectedTime =
         timeColumns[0];
 
-            fetchInsights();
+            
+
+    useEffect(() => {
+
+    async function fetchInsights() {
+
+        try {
+            if (
+                !selectedMetric ||
+                !selectedCategory ||
+                !selectedTime
+                ) {
+                return;
+                }
+
+        setLoading(true);
+
+        const deptRes =
+            await fetch(
+            `${API_BASE}/api/datasets/${datasetId}/groupby?group_by=${selectedCategory}&metric=${selectedMetric}&aggregation=sum`
+            );
+
+        const deptJson =
+            await deptRes.json();
+
+        setDepartmentData(
+            deptJson
+        );
+
+        const monthRes =
+            await fetch(
+            `${API_BASE}/api/datasets/${datasetId}/groupby?group_by=${selectedTime}&metric=${selectedMetric}&aggregation=sum`
+            );
+
+        const monthJson =
+            await monthRes.json();
+
+        setMonthlyData(
+            monthJson
+        );
+
+        } catch (err) {
+
+        console.error(err);
+
+        } finally {
+
+        setLoading(false);
+
+        }
+    }
+    fetchInsights();
 
             }, [
             datasetId,
-            selectedMetric,
-            selectedCategory,
-            selectedTime,
             ]);
+    
 
   // -----------------------------
   // AI INSIGHTS ENGINE
@@ -208,10 +206,10 @@ export default function SmartInsights({
     results.push({
 
       title:
-        "Total LNG Expenditure",
+        "Total Metric Distribution",
 
       description:
-        `Total LNG expenditure reached ${formatCurrency(totalSpend)} across ${departmentData.data.length} operational departments.`,
+        `Total observed metric value reached ${formatCurrency(totalSpend)} across ${departmentData.data.length} categories.`,
 
       severity:
         "info",
@@ -239,10 +237,10 @@ export default function SmartInsights({
     results.push({
 
       title:
-        "Top Consuming Department",
+        "Top Performing Category",
 
       description:
-        `${topDept.label} contributes ${topPct}% of total LNG expenditure with ${formatCurrency(topDept.value)} in consumption.`,
+        `${topDept.label} contributes ${topPct}% of total observed metric value with ${formatCurrency(topDept.value)} in consumption.`,
 
       severity:
         "warning",
@@ -278,10 +276,10 @@ export default function SmartInsights({
     results.push({
 
       title:
-        "Operational Concentration",
+        "Distribution Concentration",
 
       description:
-        `Top 3 departments account for ${top3Pct}% of total LNG expenditure, indicating significant operational concentration.`,
+        `Top 3 categories account for ${top3Pct}% of total observed metric value, indicating significant operational concentration.`,
 
       severity:
         "warning",
@@ -301,10 +299,10 @@ export default function SmartInsights({
     results.push({
 
       title:
-        "Peak Consumption Period",
+        "Peak Activity Period",
 
       description:
-        `${highestMonth.label} recorded the highest LNG expenditure at ${formatCurrency(highestMonth.value)}.`,
+        `${highestMonth.label} recorded the highest observed metric value at ${formatCurrency(highestMonth.value)}.`,
 
       severity:
         "info",
@@ -340,7 +338,7 @@ export default function SmartInsights({
           "Anomaly Detection",
 
         description:
-          `${anomalies[0].label} shows unusually high LNG expenditure compared to the monthly average.`,
+          `${anomalies[0].label} shows unusually high metric value compared to the monthly average.`,
 
         severity:
           "warning",
@@ -356,10 +354,10 @@ export default function SmartInsights({
     results.push({
 
       title:
-        "Operational Recommendation",
+        "Optimization Recommendation",
 
       description:
-        `Review LNG utilization efficiency in high-consumption departments to identify optimization opportunities and reduce operational cost concentration.`,
+        `Review high-impact categories and dominant trends to identify optimization opportunities and reduce concentration risk.`,
 
       severity:
         "success",
