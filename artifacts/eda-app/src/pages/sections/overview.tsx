@@ -53,6 +53,10 @@ export default function Overview({ datasetId }: { datasetId: string }) {
       ? "Moderate"
 
       : "High";
+  const totalRowsSafe =
+    overview?.row_count ||
+    preview?.rows?.length ||
+    0;
   return (
     <div className="p-6 space-y-6">
       <div className="space-y-6">
@@ -142,7 +146,7 @@ export default function Overview({ datasetId }: { datasetId: string }) {
 
                   <h2 className="text-3xl font-bold mt-2">
 
-                    {overview.rows.toLocaleString()}
+                    {totalRowsSafe.toLocaleString()}
 
                   </h2>
 
