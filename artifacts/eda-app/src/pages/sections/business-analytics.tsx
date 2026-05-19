@@ -1021,6 +1021,16 @@ export default function BusinessAnalytics({
 
                   <Pie
                     data={pieData}
+                    onClick={(entry: any) => {
+
+                      if (entry?.name) {
+
+                        handleDrillDown(
+                          entry.name
+                        );
+
+                      }
+                    }}
                     dataKey="value"
                     nameKey="name"
                     cx="50%"
