@@ -107,6 +107,11 @@ export default function BusinessAnalytics({
   const [groupBy, setGroupBy] =
     useState("");
 
+  const [
+    rootGroupBy,
+    setRootGroupBy,
+  ] = useState("");  
+
   const [metric, setMetric] =
     useState("");
 
@@ -118,11 +123,12 @@ export default function BusinessAnalytics({
     useState(true);
   const [data, setData] =
     useState<GroupByResponse | null>(null);
-  const [drillFilter, setDrillFilter] =
-    useState<{
+  const [drillHistory,setDrillHistory,] = useState<
+    {
       column: string;
       value: string;
-    } | null>(null);
+    }[]
+  >([]);
   const [loading, setLoading] =
     useState(false);
   const totalValue =
@@ -335,6 +341,7 @@ export default function BusinessAnalytics({
       !groupBy
     ) {
       setGroupBy(groupableColumns[0]);
+      setRootGroupBy(groupableColumns[0]);
     }
 
     if (
@@ -422,25 +429,43 @@ export default function BusinessAnalytics({
 
     document.body.removeChild(link);
   }
+  const DRILL_HIERARCHY: Record<
+    string,
+    string
+  > = {
 
-  function handleDrillDown(label: string) {
+    "Cost Center Name":
+      "Posting Date_month",
+
+    "Posting Date_year":
+      "Posting Date_month",
+
+    "Posting Date_month":
+      "Posting Date",
+
+  };
+  function handleDrillDown(
+    label: string
+  ) {
 
     if (!groupBy) return;
 
-    setDrillFilter({
+    const newEntry = {
       column: groupBy,
       value: label,
-    });
+    };
 
-    // Switch next level automatically
+    setDrillHistory((prev) => [
+      ...prev,
+      newEntry,
+    ]);
 
-    if (
-      groupBy === "Cost Center Name"
-    ) {
+    const nextLevel =
+      DRILL_HIERARCHY[groupBy];
 
-      setGroupBy(
-        "Posting Date_month"
-      );
+    if (nextLevel) {
+
+      setGroupBy(nextLevel);
 
     }
   }
@@ -462,16 +487,21 @@ export default function BusinessAnalytics({
         aggregation,
       });
 
-      if (drillFilter) {
+      if (drillHistory.length > 0) {
+
+        const latest =
+          drillHistory[
+            drillHistory.length - 1
+          ];
 
         params.append(
           "filter_column",
-          drillFilter.column
+          latest.column
         );
 
         params.append(
           "filter_value",
-          drillFilter.value
+          latest.value
         );
       }
 
@@ -678,7 +708,15 @@ export default function BusinessAnalytics({
 
         <Select
           value={groupBy}
-          onValueChange={setGroupBy}
+          onValueChange={(value) => {
+
+            setGroupBy(value);
+
+            setRootGroupBy(value);
+
+            setDrillHistory([]);
+
+          }}
         >
 
           <SelectTrigger className="w-[250px]">
@@ -797,37 +835,60 @@ export default function BusinessAnalytics({
 
       </Select>
       
-      {drillFilter && (
+      {drillHistory.length > 0 && (
 
-        <div className="flex items-center gap-3 flex-wrap">
-
-          <div className="text-sm text-muted-foreground">
-
-            Drill Down:
-
-          </div>
-
-          <div className="px-3 py-1 rounded-full bg-primary/10 border border-primary/20 text-sm">
-
-            {drillFilter.column}
-            {" → "}
-            <span className="font-medium">
-              {drillFilter.value}
-            </span>
-
-          </div>
+        <div className="flex items-center gap-2 flex-wrap">
 
           <Button
             variant="outline"
             size="sm"
             onClick={() => {
 
-              setDrillFilter(null);
-
+              setDrillHistory([]);
+              setGroupBy(rootGroupBy);
             }}
           >
-            Reset
+            All Data
           </Button>
+
+          {drillHistory.map(
+            (item, index) => (
+
+              <React.Fragment
+                key={index}
+              >
+
+                <span className="text-muted-foreground">
+                  →
+                </span>
+
+                <Button
+                  variant="secondary"
+                  size="sm"
+
+                  onClick={() => {
+
+                    const updated =
+                      drillHistory.slice(
+                        0,
+                        index + 1
+                      );
+
+                    setDrillHistory(
+                      updated
+                    );
+
+                  }}
+                >
+
+                  {item.value}
+
+                </Button>
+
+              </React.Fragment>
+
+            )
+          )}
 
         </div>
 
