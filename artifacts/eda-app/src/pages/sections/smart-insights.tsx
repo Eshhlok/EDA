@@ -112,7 +112,122 @@ export default function SmartInsights({
         const selectedTime =
         timeColumns[0];
 
-            
+        const metricLower =
+        selectedMetric
+            ?.toLowerCase() || "";
+
+        const categoryLower =
+        selectedCategory
+            ?.toLowerCase() || "";
+
+        // --------------------------------
+        // FINANCIAL CONTEXT
+        // --------------------------------
+
+        const isFinancial =
+        [
+            "cost",
+            "expense",
+            "revenue",
+            "sales",
+            "amount",
+            "spend",
+            "price",
+            "profit",
+            "income",
+        ].some((word) =>
+            metricLower.includes(word)
+        );
+
+        // --------------------------------
+        // OPERATIONAL CONTEXT
+        // --------------------------------
+
+        const isOperational =
+        [
+            "department",
+            "cost center",
+            "division",
+            "plant",
+            "unit",
+            "team",
+            "facility",
+        ].some((word) =>
+            categoryLower.includes(word)
+        );
+
+        // --------------------------------
+        // GEOGRAPHICAL CONTEXT
+        // --------------------------------
+
+        const isGeographical =
+        [
+            "region",
+            "city",
+            "country",
+            "state",
+            "zone",
+            "territory",
+        ].some((word) =>
+            categoryLower.includes(word)
+        );
+
+        // --------------------------------
+        // PRODUCT CONTEXT
+        // --------------------------------
+
+        const isProduct =
+        [
+            "product",
+            "item",
+            "sku",
+            "inventory",
+            "material",
+            "asset",
+        ].some((word) =>
+            categoryLower.includes(word)
+        );
+                    
+        const metricLabel =
+        isFinancial
+            ? "expenditure"
+            : "metric value";
+
+        const categoryLabel =
+        isOperational
+            ? "department"
+
+            : isGeographical
+            ? "region"
+
+            : isProduct
+            ? "product category"
+
+            : "category";
+
+        const concentrationLabel =
+        isOperational
+            ? "operational concentration"
+
+            : isGeographical
+            ? "regional concentration"
+
+            : isProduct
+            ? "product concentration"
+
+            : "distribution concentration";
+
+        const recommendationLabel =
+        isOperational
+            ? "Review operational efficiency in high-impact departments to identify optimization opportunities."
+
+            : isGeographical
+            ? "Review regional distribution patterns to identify concentration opportunities."
+
+            : isProduct
+            ? "Review high-impact product categories to optimize distribution and utilization."
+
+            : "Review dominant categories and trends to identify optimization opportunities.";
 
     useEffect(() => {
 
@@ -206,10 +321,10 @@ export default function SmartInsights({
     results.push({
 
       title:
-        "Total Metric Distribution",
+        `Total ${selectedMetric}`,
 
       description:
-        `Total observed metric value reached ${formatCurrency(totalSpend)} across ${departmentData.data.length} categories.`,
+        `Total ${metricLabel} reached ${formatCurrency(totalSpend)} across ${departmentData.data.length} ${categoryLabel}s.`,
 
       severity:
         "info",
@@ -237,10 +352,10 @@ export default function SmartInsights({
     results.push({
 
       title:
-        "Top Performing Category",
+        `Top ${categoryLabel.charAt(0).toUpperCase() +categoryLabel.slice(1)}`,
 
       description:
-        `${topDept.label} contributes ${topPct}% of total observed metric value with ${formatCurrency(topDept.value)} in consumption.`,
+        `${topDept.label} contributes ${topPct}% of total ${metricLabel} with ${formatCurrency(topDept.value)} in observed impact.`,
 
       severity:
         "warning",
@@ -276,10 +391,10 @@ export default function SmartInsights({
     results.push({
 
       title:
-        "Distribution Concentration",
+        concentrationLabel,
 
       description:
-        `Top 3 categories account for ${top3Pct}% of total observed metric value, indicating significant operational concentration.`,
+        `Top 3 ${categoryLabel}s account for ${top3Pct}% of total ${metricLabel}, indicating significant ${concentrationLabel}.`,
 
       severity:
         "warning",
@@ -302,7 +417,7 @@ export default function SmartInsights({
         "Peak Activity Period",
 
       description:
-        `${highestMonth.label} recorded the highest observed metric value at ${formatCurrency(highestMonth.value)}.`,
+        `${highestMonth.label} recorded the highest ${metricLabel} at ${formatCurrency(highestMonth.value)}.`,
 
       severity:
         "info",
@@ -338,7 +453,7 @@ export default function SmartInsights({
           "Anomaly Detection",
 
         description:
-          `${anomalies[0].label} shows unusually high metric value compared to the monthly average.`,
+          `${anomalies[0].label} shows unusually high ${metricLabel} compared to the historical average.`,
 
         severity:
           "warning",
@@ -357,7 +472,7 @@ export default function SmartInsights({
         "Optimization Recommendation",
 
       description:
-        `Review high-impact categories and dominant trends to identify optimization opportunities and reduce concentration risk.`,
+        recommendationLabel,
 
       severity:
         "success",
