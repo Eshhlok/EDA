@@ -297,11 +297,13 @@ export default function SmartInsights({
     });
 
     // --------------------------------
-    // MONTHLY TREND
+    // PEAK ACTIVITY PERIOD
     // --------------------------------
 
     const sortedMonths = [...monthlyData.data];
-    const highestMonth = sortedMonths[0];
+    const highestMonth = [...sortedMonths].sort(
+      (a, b) => b.value - a.value
+    )[0];
 
     results.push({
       title: "Peak Activity Period",
@@ -310,30 +312,38 @@ export default function SmartInsights({
     });
 
     // --------------------------------
-    // ANOMALY DETECTION
+    // ANOMALY DETECTION (Z-SCORE)
     // --------------------------------
 
-    const monthlyAverage =
-      sortedMonths.reduce((sum: number, row: any) => sum + row.value, 0) /
+    const mean =
+      sortedMonths.reduce((s: number, r: any) => s + r.value, 0) /
       sortedMonths.length;
 
-    const anomalies = sortedMonths.filter(
-      (row) => row.value > monthlyAverage * 1.2
+    const stdDev = Math.sqrt(
+      sortedMonths.reduce(
+        (s: number, r: any) => s + Math.pow(r.value - mean, 2),
+        0
+      ) / sortedMonths.length
     );
 
-    // Always push anomaly card — show highest month if no anomaly found
-    const anomalyTarget =
-      anomalies.length > 0
-        ? anomalies[0]
-        : [...sortedMonths].sort((a, b) => b.value - a.value)[0];
+    const scoredMonths = sortedMonths
+      .map((row: any) => ({
+        ...row,
+        zScore: stdDev === 0 ? 0 : Math.abs((row.value - mean) / stdDev),
+        direction: row.value > mean ? "high" : "low",
+      }))
+      .sort((a, b) => b.zScore - a.zScore);
+
+    const anomalies = scoredMonths.filter((row) => row.zScore > 1.5);
+    const topAnomaly = scoredMonths[0]; // highest z-score regardless
 
     const anomalyIsReal = anomalies.length > 0;
 
     results.push({
       title: "Anomaly Detection",
       description: anomalyIsReal
-        ? `${anomalyTarget.label} shows unusually high ${metricLabel} compared to the historical average (>${formatCurrency(monthlyAverage * 1.2)} threshold).`
-        : `No significant anomalies detected. ${metricLabel} remains within expected range across all periods.`,
+        ? `${topAnomaly.label} shows unusually ${topAnomaly.direction} ${metricLabel} (Z-score: ${topAnomaly.zScore.toFixed(2)}), deviating significantly from the ${formatCurrency(mean)} period average.`
+        : `No significant anomalies detected. ${metricLabel} remains within expected range (±1.5σ) across all periods.`,
       severity: anomalyIsReal ? "warning" : "success",
     });
 
