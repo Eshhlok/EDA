@@ -215,7 +215,7 @@ export default function SmartInsights({
             : isProduct
             ? "product concentration"
 
-            : "distribution concentration";
+            : "Distribution Concentration";
 
         const recommendationLabel =
         isOperational
