@@ -10,6 +10,10 @@ import {
   Activity,
   Sparkles,
   Columns3,
+  CheckCircle2,
+  ShieldAlert,
+  TrendingUp,
+  Fingerprint,
 } from "lucide-react";
 
 export default function Overview({ datasetId }: { datasetId: string }) {
@@ -409,7 +413,203 @@ export default function Overview({ datasetId }: { datasetId: string }) {
           </Card>
 
         </div>
+        <div className="grid grid-cols-1 xl:grid-cols-3 gap-5">
 
+          {/* Executive Summary */}
+
+          <Card className="xl:col-span-2">
+
+            <CardHeader>
+
+              <div className="flex items-center gap-2">
+
+                <Sparkles className="h-5 w-5 text-primary" />
+
+                <CardTitle>
+
+                  Executive Summary
+
+                </CardTitle>
+
+              </div>
+
+            </CardHeader>
+
+            <CardContent>
+
+              <div className="space-y-4">
+
+                <p className="text-muted-foreground leading-relaxed text-sm">
+
+                  Dataset quality remains
+                  <span className="font-semibold text-foreground">
+                    {" "}
+                    {qualityScore >= 85
+                      ? "strong"
+                      : qualityScore >= 65
+                      ? "stable"
+                      : "concerning"}
+                  </span>
+
+                  {" "}with{" "}
+
+                  <span className="font-semibold text-foreground">
+                    {missingPct}%
+                  </span>
+
+                  missing values and{" "}
+
+                  <span className="font-semibold text-foreground">
+                    {overview.duplicate_count}
+                  </span>
+
+                  duplicate records detected across{" "}
+
+                  <span className="font-semibold text-foreground">
+                    {totalColumns}
+                  </span>
+
+                  columns.
+
+                </p>
+
+                <div className="flex flex-wrap gap-2">
+
+                  <Badge variant="secondary">
+
+                    Quality Score: {qualityScore}
+
+                  </Badge>
+
+                  <Badge variant="outline">
+
+                    Risk: {riskLevel}
+
+                  </Badge>
+
+                  <Badge variant="outline">
+
+                    {totalRows.toLocaleString()} rows analyzed
+
+                  </Badge>
+
+                </div>
+
+              </div>
+
+            </CardContent>
+
+          </Card>
+
+          {/* Dataset Health */}
+
+          <Card>
+
+            <CardHeader>
+
+              <CardTitle>
+
+                Dataset Health
+
+              </CardTitle>
+
+            </CardHeader>
+
+            <CardContent className="space-y-4">
+
+              <div className="flex items-center justify-between">
+
+                <div className="flex items-center gap-2">
+
+                  <CheckCircle2 className="h-4 w-4 text-green-500" />
+
+                  <span className="text-sm">
+
+                    Completeness
+
+                  </span>
+
+                </div>
+
+                <span className="font-semibold">
+
+                  {qualityData?.completeness?.toFixed(0)}%
+
+                </span>
+
+              </div>
+
+              <div className="flex items-center justify-between">
+
+                <div className="flex items-center gap-2">
+
+                  <Fingerprint className="h-4 w-4 text-blue-500" />
+
+                  <span className="text-sm">
+
+                    Uniqueness
+
+                  </span>
+
+                </div>
+
+                <span className="font-semibold">
+
+                  {qualityData?.uniqueness?.toFixed(0)}%
+
+                </span>
+
+              </div>
+
+              <div className="flex items-center justify-between">
+
+                <div className="flex items-center gap-2">
+
+                  <TrendingUp className="h-4 w-4 text-amber-500" />
+
+                  <span className="text-sm">
+
+                    Consistency
+
+                  </span>
+
+                </div>
+
+                <span className="font-semibold">
+
+                  {qualityData?.consistency?.toFixed(0)}%
+
+                </span>
+
+              </div>
+
+              <div className="flex items-center justify-between">
+
+                <div className="flex items-center gap-2">
+
+                  <ShieldAlert className="h-4 w-4 text-red-500" />
+
+                  <span className="text-sm">
+
+                    Validity
+
+                  </span>
+
+                </div>
+
+                <span className="font-semibold">
+
+                  {qualityData?.validity?.toFixed(0)}%
+
+                </span>
+
+              </div>
+
+            </CardContent>
+
+          </Card>
+
+        </div>
       </div>
 
       <Card>
