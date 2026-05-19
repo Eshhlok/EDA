@@ -3,7 +3,7 @@ import React, {
   useMemo,
   useState,
 } from "react";
-
+import { useGetUnivariateAnalysis } from "@workspace/api-client-react";
 
 import {
   Card,
@@ -55,18 +55,30 @@ export default function SmartInsights({
 
     const [loading, setLoading] =
     useState(true);
+    
+    const { data: univariateData } =
+    useGetUnivariateAnalysis(
+        datasetId
+    );
 
     useEffect(() => {
 
     async function fetchInsights() {
 
         try {
+            if (
+                !selectedMetric ||
+                !selectedCategory ||
+                !selectedTime
+                ) {
+                return;
+                }
 
         setLoading(true);
 
         const deptRes =
             await fetch(
-            `${API_BASE}/api/datasets/${datasetId}/groupby?group_by=Cost Center Name&metric=LNG Cost&aggregation=sum`
+            `${API_BASE}/api/datasets/${datasetId}/groupby?group_by=${selectedCategory}&metric=${selectedMetric} Cost&aggregation=sum`
             );
 
         const deptJson =
@@ -78,7 +90,7 @@ export default function SmartInsights({
 
         const monthRes =
             await fetch(
-            `${API_BASE}/api/datasets/${datasetId}/groupby?group_by=Posting Date_month&metric=LNG Cost&aggregation=sum`
+            `${API_BASE}/api/datasets/${datasetId}/groupby?group_by=${selectedTime}&metric=${selectedMetric} Cost&aggregation=sum`
             );
 
         const monthJson =
@@ -99,9 +111,66 @@ export default function SmartInsights({
         }
     }
 
-    fetchInsights();
+    const numericColumns =
+        univariateData?.numeric.map(
+            (n) => n.column
+        ) || [];
 
-    }, [datasetId]);
+        const categoricalColumns =
+        univariateData?.categorical.map(
+            (c) => c.column
+        ) || [];
+
+        const timeColumns =
+        categoricalColumns.filter(
+            (col) =>
+            col.includes("_month") ||
+            col.includes("_year") ||
+            col.includes("_quarter")
+        );
+
+        // Best metric candidate
+
+        const selectedMetric =
+        numericColumns.find(
+            (col) =>
+            col.toLowerCase().includes(
+                "cost"
+            ) ||
+            col.toLowerCase().includes(
+                "sales"
+            ) ||
+            col.toLowerCase().includes(
+                "revenue"
+            ) ||
+            col.toLowerCase().includes(
+                "amount"
+            )
+        ) || numericColumns[0];
+
+        // Best categorical candidate
+
+        const selectedCategory =
+        categoricalColumns.find(
+            (col) =>
+            !col.includes("_month") &&
+            !col.includes("_year") &&
+            !col.includes("_quarter")
+        ) || categoricalColumns[0];
+
+        // Best time candidate
+
+        const selectedTime =
+        timeColumns[0];
+
+            fetchInsights();
+
+            }, [
+            datasetId,
+            selectedMetric,
+            selectedCategory,
+            selectedTime,
+            ]);
 
   // -----------------------------
   // AI INSIGHTS ENGINE
