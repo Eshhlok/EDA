@@ -8,6 +8,7 @@ import NotFound from "@/pages/not-found";
 import Home from "@/pages/home";
 import DatasetLayout from "@/pages/dataset-layout";
 import Footer from "@/components/ui/footer";
+import SmartInsights from "@/pages/sections/smart-insights";
 
 const queryClient = new QueryClient();
 

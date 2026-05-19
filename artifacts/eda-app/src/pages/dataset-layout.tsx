@@ -11,6 +11,7 @@ import {
   CheckCircle2,
   ChevronLeft,
   Zap,
+  Brain,
 } from "lucide-react";
 import { useGetDataset } from "@workspace/api-client-react";
 import Overview from "./sections/overview";
@@ -25,6 +26,7 @@ import BusinessAnalytics from "./sections/business-analytics";
 import logoIconDark from "@/assets/branding/logo-icon-dark.png";
 import logoIcon from "@/assets/branding/logo-icon.png";
 import { useTheme } from "@/components/theme-provider";
+import SmartInsights from "@/pages/sections/smart-insights";
 
 type NavItem = {
   name: string;
@@ -38,6 +40,7 @@ const navItems: NavItem[] = [
   { name: "Univariate", path: "univariate", icon: BarChart2 },
   { name: "Bivariate", path: "bivariate", icon: ScatterChart },
   { name: "Business Analytics", path: "business-analytics", icon: Activity },
+  {name: "Smart Insights",path: "smart-insights",icon: Brain},
   { name: "Multivariate", path: "multivariate", icon: Network },
   { name: "Outliers", path: "outliers", icon: ShieldAlert },
   { name: "Insights", path: "insights", icon: Lightbulb },
@@ -68,6 +71,7 @@ export default function DatasetLayout() {
       case "insights": return <Insights datasetId={datasetId} />;
       case "quality-score": return <QualityScore datasetId={datasetId} />;
       case "business-analytics":return <BusinessAnalytics datasetId={datasetId} />;
+      case "smart-insights":return <SmartInsights datasetId={datasetId} />;
       default: return <Overview datasetId={datasetId} />;
     }
   };
