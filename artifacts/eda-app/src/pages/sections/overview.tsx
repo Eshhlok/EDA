@@ -66,6 +66,139 @@ export default function Overview({ datasetId }: { datasetId: string }) {
 
       : "High";
 
+  const smartInsights: {
+    title: string;
+    description: string;
+    severity:
+      | "success"
+      | "warning"
+      | "critical";
+  }[] = [];
+
+  // --------------------------------
+  // COMPLETENESS
+  // --------------------------------
+
+  if (
+    (qualityData?.completeness || 0) < 70
+  ) {
+
+    smartInsights.push({
+
+      title:
+        "High Missingness Detected",
+
+      description:
+        "Significant missing values detected across the dataset which may impact downstream analytics reliability.",
+
+      severity:
+        "critical",
+
+    });
+
+  } else {
+
+    smartInsights.push({
+
+      title:
+        "Strong Dataset Completeness",
+
+      description:
+        "Most columns maintain healthy completeness levels with minimal missing value disruption.",
+
+      severity:
+        "success",
+
+    });
+  }
+
+  // --------------------------------
+  // UNIQUENESS
+  // --------------------------------
+
+  if (
+    overview.duplicate_count > 0
+  ) {
+
+    smartInsights.push({
+
+      title:
+        "Duplicate Records Found",
+
+      description:
+        `${overview.duplicate_count} duplicate rows detected which may affect aggregation accuracy and analytical consistency.`,
+
+      severity:
+        "warning",
+
+    });
+  }
+
+  // --------------------------------
+  // CONSISTENCY
+  // --------------------------------
+
+  if (
+    (qualityData?.consistency || 0) >= 85
+  ) {
+
+    smartInsights.push({
+
+      title:
+        "Consistent Structural Patterns",
+
+      description:
+        "Dataset formatting and structural consistency remain strong across key analytical dimensions.",
+
+      severity:
+        "success",
+
+    });
+  }
+
+  // --------------------------------
+  // VALIDITY
+  // --------------------------------
+
+  if (
+    (qualityData?.validity || 0) < 70
+  ) {
+
+    smartInsights.push({
+
+      title:
+        "Potential Validity Risks",
+
+      description:
+        "Certain values may fall outside expected ranges or contain inconsistent formatting patterns.",
+
+      severity:
+        "warning",
+
+    });
+  }
+
+  // --------------------------------
+  // OVERALL QUALITY
+  // --------------------------------
+
+  if (
+    qualityScore >= 90
+  ) {
+
+    smartInsights.push({
+
+      title:
+        "Executive Ready Dataset",
+
+      description:
+        "Dataset quality indicators suggest strong readiness for advanced analytics and executive reporting workflows.",
+
+      severity:
+        "success",
+
+    });
+  }
   return (
     <div className="p-6 space-y-6">
       <div className="space-y-6">
@@ -611,7 +744,120 @@ export default function Overview({ datasetId }: { datasetId: string }) {
 
         </div>
       </div>
+      <Card>
 
+        <CardHeader>
+
+          <div className="flex items-center gap-2">
+
+            <Sparkles className="h-5 w-5 text-primary" />
+
+            <CardTitle>
+
+              AI Recommendations & Warnings
+
+            </CardTitle>
+
+          </div>
+
+        </CardHeader>
+
+        <CardContent className="space-y-4">
+
+          {smartInsights.map(
+            (
+              insight,
+              index
+            ) => (
+
+              <div
+                key={index}
+                className={`
+                  rounded-2xl
+                  border
+                  p-4
+                  transition-all
+
+                  ${
+                    insight.severity ===
+                    "critical"
+
+                      ? "border-red-500/30 bg-red-500/5"
+
+                      : insight.severity ===
+                        "warning"
+
+                      ? "border-amber-500/30 bg-amber-500/5"
+
+                      : "border-green-500/30 bg-green-500/5"
+                  }
+                `}
+              >
+
+                <div className="flex items-start gap-3">
+
+                  <div
+                    className={`
+                      mt-0.5
+
+                      ${
+                        insight.severity ===
+                        "critical"
+
+                          ? "text-red-500"
+
+                          : insight.severity ===
+                            "warning"
+
+                          ? "text-amber-500"
+
+                          : "text-green-500"
+                      }
+                    `}
+                  >
+
+                    {
+                      insight.severity ===
+                      "critical"
+
+                        ? <ShieldAlert className="h-5 w-5" />
+
+                        : insight.severity ===
+                          "warning"
+
+                        ? <AlertTriangle className="h-5 w-5" />
+
+                        : <CheckCircle2 className="h-5 w-5" />
+                    }
+
+                  </div>
+
+                  <div className="space-y-1">
+
+                    <h4 className="font-semibold">
+
+                      {insight.title}
+
+                    </h4>
+
+                    <p className="text-sm text-muted-foreground leading-relaxed">
+
+                      {insight.description}
+
+                    </p>
+
+                  </div>
+
+                </div>
+
+              </div>
+
+            )
+          )}
+
+        </CardContent>
+
+      </Card>
       <Card>
         <CardHeader>
           <CardTitle>Schema Definition</CardTitle>
