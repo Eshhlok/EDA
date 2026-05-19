@@ -489,19 +489,24 @@ export default function BusinessAnalytics({
 
       if (drillHistory.length > 0) {
 
-        const latest =
-          drillHistory[
-            drillHistory.length - 1
-          ];
-
         params.append(
-          "filter_column",
-          latest.column
+
+          "filter_columns",
+
+          drillHistory
+            .map((d) => d.column)
+            .join(",")
+
         );
 
         params.append(
-          "filter_value",
-          latest.value
+
+          "filter_values",
+
+          drillHistory
+            .map((d) => d.value)
+            .join(",")
+
         );
       }
 

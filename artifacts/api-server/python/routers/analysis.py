@@ -730,8 +730,8 @@ def get_groupby_analysis(
     aggregation: str = "sum",
     top_n: int = 20,
 
-    filter_column: Optional[str] = None,
-    filter_value: Optional[str] = None,
+    filter_columns: Optional[str] = None,
+    filter_values: Optional[str] = None,
 ):
     df = _get_df_or_404(dataset_id)
 
@@ -754,21 +754,41 @@ def get_groupby_analysis(
             detail=f"metric column '{metric}' must be numeric"
         )
 
-    # Apply optional filtering
-    if filter_column and filter_value:
+   # Apply cumulative filters
 
-        if filter_column not in df.columns:
-            raise HTTPException(
-                status_code=400,
-                detail=f"filter column '{filter_column}' not found"
-            )
+    if filter_columns and filter_values:
 
-        df = df[
-            df[filter_column]
-            .astype(str)
-            == str(filter_value)
+        columns = [
+            c.strip()
+            for c in filter_columns.split(",")
         ]
 
+        values = [
+            v.strip()
+            for v in filter_values.split(",")
+        ]
+
+        if len(columns) != len(values):
+
+            raise HTTPException(
+                status_code=400,
+                detail="filter_columns and filter_values length mismatch"
+            )
+
+        for col, val in zip(columns, values):
+
+            if col not in df.columns:
+
+                raise HTTPException(
+                    status_code=400,
+                    detail=f"filter column '{col}' not found"
+                )
+
+            df = df[
+                df[col]
+                .astype(str)
+                == str(val)
+            ]
     valid_aggs = [
         "sum",
         "mean",
@@ -811,8 +831,8 @@ def get_groupby_analysis(
             "metric": metric,
             "aggregation": aggregation,
 
-            "filter_column": filter_column,
-            "filter_value": filter_value,
+            "filter_columns": filter_columns,
+            "filter_values": filter_values,
 
             "data": [
                 {
