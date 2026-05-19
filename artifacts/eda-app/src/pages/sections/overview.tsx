@@ -25,31 +25,54 @@ export default function Overview({ datasetId }: { datasetId: string }) {
     overview.columns.length;
 
   const totalRows =
-    preview.rows.length;
+    overview.columns[0]
+      ?.non_null_count || 0;
+
+  const totalCells =
+    totalRows *
+    overview.columns.length;
+
+  const missingCells =
+    overview.columns.reduce(
+      (sum, col) =>
+        sum + col.null_count,
+      0
+    );
 
   const missingPct =
     (
-      (overview.fully_missing_rows /
-        Math.max(totalRows, 1)) *
+      (missingCells /
+        Math.max(totalCells, 1)) *
       100
     ).toFixed(1);
+
+  const duplicatePenalty =
+    Math.min(
+      25,
+      overview.duplicate_count * 0.5
+    );
+
+  const missingPenalty =
+    Math.min(
+      40,
+      Number(missingPct) * 2
+    );
 
   const qualityScore =
     Math.max(
       0,
-      Math.min(
-        100,
+      Math.round(
         100 -
-          Number(missingPct) * 2 -
-          overview.duplicate_count * 0.5
+        duplicatePenalty -
+        missingPenalty
       )
-    ).toFixed(0);
-
+    );
   const riskLevel =
-    Number(qualityScore) > 85
+
+    qualityScore >= 85
       ? "Low"
 
-      : Number(qualityScore) > 65
+      : qualityScore >= 65
       ? "Moderate"
 
       : "High";
@@ -112,7 +135,7 @@ export default function Overview({ datasetId }: { datasetId: string }) {
 
                 <p className="text-muted-foreground mt-1">
 
-                  AI-powered dataset intelligence and operational health summary.
+                  EDAFlow-powered dataset intelligence and operational health summary.
 
                 </p>
 
