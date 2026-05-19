@@ -118,7 +118,11 @@ export default function BusinessAnalytics({
     useState(true);
   const [data, setData] =
     useState<GroupByResponse | null>(null);
-
+  const [drillFilter, setDrillFilter] =
+    useState<{
+      column: string;
+      value: string;
+    } | null>(null);
   const [loading, setLoading] =
     useState(false);
   const totalValue =
@@ -418,6 +422,28 @@ export default function BusinessAnalytics({
 
     document.body.removeChild(link);
   }
+
+  function handleDrillDown(label: string) {
+
+    if (!groupBy) return;
+
+    setDrillFilter({
+      column: groupBy,
+      value: label,
+    });
+
+    // Switch next level automatically
+
+    if (
+      groupBy === "Cost Center Name"
+    ) {
+
+      setGroupBy(
+        "Posting Date_month"
+      );
+
+    }
+  }
   // -----------------------------
   // FETCH DATA
   // -----------------------------
@@ -430,12 +456,24 @@ export default function BusinessAnalytics({
 
       setLoading(true);
 
-      const params =
-        new URLSearchParams({
-          group_by: groupBy,
-          metric,
-          aggregation,
-        });
+      const params = new URLSearchParams({
+        group_by: groupBy,
+        metric,
+        aggregation,
+      });
+
+      if (drillFilter) {
+
+        params.append(
+          "filter_column",
+          drillFilter.column
+        );
+
+        params.append(
+          "filter_value",
+          drillFilter.value
+        );
+      }
 
       const response = await fetch(
         `${API_BASE}/api/datasets/${datasetId}/groupby?${params}`
@@ -759,6 +797,41 @@ export default function BusinessAnalytics({
 
       </Select>
       
+      {drillFilter && (
+
+        <div className="flex items-center gap-3 flex-wrap">
+
+          <div className="text-sm text-muted-foreground">
+
+            Drill Down:
+
+          </div>
+
+          <div className="px-3 py-1 rounded-full bg-primary/10 border border-primary/20 text-sm">
+
+            {drillFilter.column}
+            {" → "}
+            <span className="font-medium">
+              {drillFilter.value}
+            </span>
+
+          </div>
+
+          <Button
+            variant="outline"
+            size="sm"
+            onClick={() => {
+
+              setDrillFilter(null);
+
+            }}
+          >
+            Reset
+          </Button>
+
+        </div>
+
+      )}
       
       {/* CHART */}
 
@@ -787,6 +860,18 @@ export default function BusinessAnalytics({
 
                   <BarChart
                     data={data?.data || []}
+                    onClick={(state: any) => {
+
+                        if (
+                          state?.activeLabel
+                        ) {
+
+                          handleDrillDown(
+                            state.activeLabel
+                          );
+
+                        }
+                    }}
                     margin={{
                       top: 0,
                       right: 10,

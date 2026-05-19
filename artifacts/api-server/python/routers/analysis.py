@@ -728,10 +728,14 @@ def get_groupby_analysis(
     group_by: str,
     metric: str,
     aggregation: str = "sum",
-    top_n: int = 20
+    top_n: int = 20,
+
+    filter_column: Optional[str] = None,
+    filter_value: Optional[str] = None,
 ):
     df = _get_df_or_404(dataset_id)
 
+    # Validate columns
     if group_by not in df.columns:
         raise HTTPException(
             status_code=400,
@@ -750,6 +754,21 @@ def get_groupby_analysis(
             detail=f"metric column '{metric}' must be numeric"
         )
 
+    # Apply optional filtering
+    if filter_column and filter_value:
+
+        if filter_column not in df.columns:
+            raise HTTPException(
+                status_code=400,
+                detail=f"filter column '{filter_column}' not found"
+            )
+
+        df = df[
+            df[filter_column]
+            .astype(str)
+            == str(filter_value)
+        ]
+
     valid_aggs = [
         "sum",
         "mean",
@@ -767,6 +786,7 @@ def get_groupby_analysis(
         )
 
     try:
+
         grouped = (
             df.groupby(group_by)[metric]
             .agg(aggregation)
@@ -775,10 +795,11 @@ def get_groupby_analysis(
 
         grouped.columns = [group_by, "value"]
 
-        grouped = grouped.replace(
-            [np.inf, -np.inf],
-            np.nan
-        ).dropna()
+        grouped = (
+            grouped
+            .replace([np.inf, -np.inf], np.nan)
+            .dropna()
+        )
 
         grouped = grouped.sort_values(
             "value",
@@ -789,6 +810,10 @@ def get_groupby_analysis(
             "group_by": group_by,
             "metric": metric,
             "aggregation": aggregation,
+
+            "filter_column": filter_column,
+            "filter_value": filter_value,
+
             "data": [
                 {
                     "label": str(row[group_by]),
