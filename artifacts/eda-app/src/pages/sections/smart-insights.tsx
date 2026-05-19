@@ -1,5 +1,9 @@
-import React, { useMemo } from "react";
-import { useGetGroupbyAnalysis } from "@workspace/api-client-react";
+import React, {
+  useEffect,
+  useMemo,
+  useState,
+} from "react";
+
 
 import {
   Card,
@@ -10,6 +14,9 @@ import {
 
 import { Skeleton } from "@/components/ui/skeleton";
 
+const API_BASE =
+  import.meta.env.VITE_API_URL ||
+  "https://eda-xqob.onrender.com";
 type Props = {
   datasetId: string;
 };
@@ -36,39 +43,65 @@ export default function SmartInsights({
   // DATA FETCHING
   // -----------------------------
 
-  const {
-    data: departmentData,
-    isLoading: deptLoading,
-  } = useGetGroupbyAnalysis(
-    datasetId,
-    {
-      groupBy:
-        "Cost Center Name",
+  const [
+    departmentData,
+    setDepartmentData,
+    ] = useState<any>(null);
 
-      metric:
-        "LNG Cost",
+    const [
+    monthlyData,
+    setMonthlyData,
+    ] = useState<any>(null);
 
-      aggregation:
-        "sum",
+    const [loading, setLoading] =
+    useState(true);
+
+    useEffect(() => {
+
+    async function fetchInsights() {
+
+        try {
+
+        setLoading(true);
+
+        const deptRes =
+            await fetch(
+            `${API_BASE}/api/datasets/${datasetId}/groupby?group_by=Cost Center Name&metric=LNG Cost&aggregation=sum`
+            );
+
+        const deptJson =
+            await deptRes.json();
+
+        setDepartmentData(
+            deptJson
+        );
+
+        const monthRes =
+            await fetch(
+            `${API_BASE}/api/datasets/${datasetId}/groupby?group_by=Posting Date_month&metric=LNG Cost&aggregation=sum`
+            );
+
+        const monthJson =
+            await monthRes.json();
+
+        setMonthlyData(
+            monthJson
+        );
+
+        } catch (err) {
+
+        console.error(err);
+
+        } finally {
+
+        setLoading(false);
+
+        }
     }
-  );
 
-  const {
-    data: monthlyData,
-    isLoading: monthLoading,
-  } = useGetGroupbyAnalysis(
-    datasetId,
-    {
-      groupBy:
-        "Posting Date_month",
+    fetchInsights();
 
-      metric:
-        "LNG Cost",
-
-      aggregation:
-        "sum",
-    }
-  );
+    }, [datasetId]);
 
   // -----------------------------
   // AI INSIGHTS ENGINE
@@ -275,10 +308,7 @@ export default function SmartInsights({
   // LOADING
   // -----------------------------
 
-  if (
-    deptLoading ||
-    monthLoading
-  ) {
+  if (loading){
 
     return (
       <div className="p-6">
