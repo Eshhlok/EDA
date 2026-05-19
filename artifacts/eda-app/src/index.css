@@ -188,3 +188,101 @@
     pointer-events: none;
   }
 }
+@layer utilities {
+
+  /* Premium Glass Cards */
+
+  .glass-card {
+    background: hsl(var(--card) / 0.72);
+    backdrop-filter: blur(20px);
+    border: 1px solid hsl(var(--border) / 0.5);
+    box-shadow:
+      0 8px 32px rgba(0,0,0,0.08);
+  }
+
+  .dark .glass-card {
+    box-shadow:
+      0 8px 40px rgba(0,0,0,0.35);
+  }
+
+  /* Intelligence Glow */
+
+  .ai-glow {
+    position: relative;
+    overflow: hidden;
+  }
+
+  .ai-glow::before {
+    content: "";
+    position: absolute;
+    inset: -30%;
+    background:
+      radial-gradient(
+        circle,
+        hsl(var(--primary) / 0.15),
+        transparent 60%
+      );
+    opacity: 0;
+    transition:
+      opacity 0.4s ease;
+    pointer-events: none;
+  }
+
+  .ai-glow:hover::before {
+    opacity: 1;
+  }
+
+  /* Premium Hover */
+
+  .premium-hover {
+    transition:
+      transform 0.3s ease,
+      box-shadow 0.3s ease;
+  }
+
+  .premium-hover:hover {
+    transform: translateY(-4px);
+    box-shadow:
+      0 18px 40px rgba(0,0,0,0.12);
+  }
+
+  .dark .premium-hover:hover {
+    box-shadow:
+      0 18px 50px rgba(0,0,0,0.45);
+  }
+
+  /* Executive Borders */
+
+  .executive-border {
+    border:
+      1px solid hsl(var(--border) / 0.6);
+  }
+
+  /* Animated Intelligence Pulse */
+
+  .ai-pulse {
+    animation:
+      aiPulse 2.2s infinite;
+  }
+
+  @keyframes aiPulse {
+
+    0% {
+      box-shadow:
+        0 0 0 0
+        hsl(var(--primary) / 0.25);
+    }
+
+    70% {
+      box-shadow:
+        0 0 0 14px
+        transparent;
+    }
+
+    100% {
+      box-shadow:
+        0 0 0 0
+        transparent;
+    }
+  }
+}

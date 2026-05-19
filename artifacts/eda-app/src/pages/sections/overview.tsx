@@ -210,9 +210,8 @@ export default function Overview({ datasetId }: { datasetId: string }) {
             relative
             overflow-hidden
             rounded-3xl
-            border
-            bg-card/70
-            backdrop-blur-xl
+            glass-card
+            executive-border
             p-8
           "
         >
@@ -251,7 +250,43 @@ export default function Overview({ datasetId }: { datasetId: string }) {
                   Executive Overview
 
                 </h1>
+                <div className="flex items-center gap-2 mt-2">
 
+                  <div className="relative flex h-3 w-3 ai-pulse">
+
+                    <span
+                      className="
+                        animate-ping
+                        absolute
+                        inline-flex
+                        h-full
+                        w-full
+                        rounded-full
+                        bg-green-400
+                        opacity-75
+                      "
+                    />
+
+                    <span
+                      className="
+                        relative
+                        inline-flex
+                        rounded-full
+                        h-3
+                        w-3
+                        bg-green-500
+                      "
+                    />
+
+                  </div>
+
+                  <span className="text-sm text-muted-foreground">
+
+                   EDAFlow Monitoring active
+
+                  </span>
+
+                </div>
                 <p className="text-muted-foreground mt-1">
 
                   EDAFlow-powered dataset intelligence and operational health summary.
@@ -272,7 +307,7 @@ export default function Overview({ datasetId }: { datasetId: string }) {
 
           {/* Rows */}
 
-          <Card>
+          <Card className="glass-card premium-hover ai-glow executive-border rounded-3xl">
 
             <CardContent className="p-6">
 
@@ -318,7 +353,7 @@ export default function Overview({ datasetId }: { datasetId: string }) {
 
           {/* Columns */}
 
-          <Card>
+          <Card className="glass-card premium-hover ai-glow executive-border rounded-3xl">
 
             <CardContent className="p-6">
 
@@ -364,7 +399,7 @@ export default function Overview({ datasetId }: { datasetId: string }) {
 
           {/* Quality */}
 
-          <Card>
+          <Card className="glass-card premium-hover ai-glow executive-border rounded-3xl">
 
             <CardContent className="p-6">
 
@@ -410,7 +445,7 @@ export default function Overview({ datasetId }: { datasetId: string }) {
 
           {/* Missing */}
 
-          <Card>
+          <Card className="glass-card premium-hover ai-glow executive-border rounded-3xl">
 
             <CardContent className="p-6">
 
@@ -456,7 +491,7 @@ export default function Overview({ datasetId }: { datasetId: string }) {
 
           {/* Duplicates */}
 
-          <Card>
+          <Card className="glass-card premium-hover ai-glow executive-border rounded-3xl">
 
             <CardContent className="p-6">
 
@@ -502,7 +537,7 @@ export default function Overview({ datasetId }: { datasetId: string }) {
 
           {/* Risk */}
 
-          <Card>
+          <Card className="glass-card premium-hover ai-glow executive-border rounded-3xl">
 
             <CardContent className="p-6">
 
@@ -550,7 +585,7 @@ export default function Overview({ datasetId }: { datasetId: string }) {
 
           {/* Executive Summary */}
 
-          <Card className="xl:col-span-2">
+          <Card className="xl:col-span-2 glass-card premium-hover ai-glow executive-border rounded-3xl">
 
             <CardHeader>
 
@@ -636,7 +671,7 @@ export default function Overview({ datasetId }: { datasetId: string }) {
 
           {/* Dataset Health */}
 
-          <Card>
+          <Card className="glass-card premium-hover ai-glow executive-border rounded-3xl">
 
             <CardHeader>
 
@@ -744,7 +779,7 @@ export default function Overview({ datasetId }: { datasetId: string }) {
 
         </div>
       </div>
-      <Card>
+      <Card className="glass-card premium-hover executive-border rounded-3xl">
 
         <CardHeader>
 
@@ -773,7 +808,7 @@ export default function Overview({ datasetId }: { datasetId: string }) {
               <div
                 key={index}
                 className={`
-                  rounded-2xl
+                  rounded-3xl
                   border
                   p-4
                   transition-all
@@ -799,7 +834,9 @@ export default function Overview({ datasetId }: { datasetId: string }) {
                   <div
                     className={`
                       mt-0.5
-
+                      transition-all
+                      duration-300
+                      hover:scale-[1.01]
                       ${
                         insight.severity ===
                         "critical"
