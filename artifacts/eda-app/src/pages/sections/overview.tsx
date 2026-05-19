@@ -3,6 +3,7 @@ import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Badge } from "@/components/ui/badge";
+import { motion } from "framer-motion";
 import {
   Database,
   ShieldCheck,
@@ -200,7 +201,25 @@ export default function Overview({ datasetId }: { datasetId: string }) {
     });
   }
   return (
-    <div className="p-6 space-y-6">
+    <motion.div
+
+        initial={{
+          opacity: 0,
+          y: 20,
+        }}
+
+        animate={{
+          opacity: 1,
+          y: 0,
+        }}
+
+        transition={{
+          duration: 0.5,
+          ease: "easeOut",
+        }}
+
+        className="p-6 space-y-6"
+      >
       <div className="space-y-6">
 
         {/* Executive Header */}
@@ -306,7 +325,24 @@ export default function Overview({ datasetId }: { datasetId: string }) {
         <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-5">
 
           {/* Rows */}
+          <motion.div
 
+            initial={{
+              opacity: 0,
+              y: 18,
+            }}
+
+            animate={{
+              opacity: 1,
+              y: 0,
+            }}
+
+            transition={{
+              delay: 0.05,
+              duration: 0.35,
+            }}
+
+          >
           <Card className="glass-card premium-hover ai-glow executive-border rounded-3xl">
 
             <CardContent className="p-6">
@@ -322,9 +358,26 @@ export default function Overview({ datasetId }: { datasetId: string }) {
                   </p>
 
                   <h2 className="text-3xl font-bold mt-2">
+                  <motion.span
+
+                    initial={{
+                      opacity: 0,
+                      scale: 0.8,
+                    }}
+
+                    animate={{
+                      opacity: 1,
+                      scale: 1,
+                    }}
+
+                    transition={{
+                      duration: 0.4,
+                    }}
+
+                  >
 
                     {dataset?.rows?.toLocaleString()}
-
+                  </motion.span>
                   </h2>
 
                 </div>
@@ -350,9 +403,26 @@ export default function Overview({ datasetId }: { datasetId: string }) {
             </CardContent>
 
           </Card>
-
+        </motion.div>
           {/* Columns */}
+        <motion.div
 
+            initial={{
+              opacity: 0,
+              y: 18,
+            }}
+
+            animate={{
+              opacity: 1,
+              y: 0,
+            }}
+
+            transition={{
+              delay: 0.05,
+              duration: 0.35,
+            }}
+
+        >
           <Card className="glass-card premium-hover ai-glow executive-border rounded-3xl">
 
             <CardContent className="p-6">
@@ -396,9 +466,27 @@ export default function Overview({ datasetId }: { datasetId: string }) {
             </CardContent>
 
           </Card>
+        </motion.div>
 
           {/* Quality */}
+        <motion.div
 
+            initial={{
+              opacity: 0,
+              y: 18,
+            }}
+
+            animate={{
+              opacity: 1,
+              y: 0,
+            }}
+
+            transition={{
+              delay: 0.05,
+              duration: 0.35,
+            }}
+
+          >
           <Card className="glass-card premium-hover ai-glow executive-border rounded-3xl">
 
             <CardContent className="p-6">
@@ -442,9 +530,26 @@ export default function Overview({ datasetId }: { datasetId: string }) {
             </CardContent>
 
           </Card>
-
+        </motion.div>
           {/* Missing */}
+        <motion.div
 
+            initial={{
+              opacity: 0,
+              y: 18,
+            }}
+
+            animate={{
+              opacity: 1,
+              y: 0,
+            }}
+
+            transition={{
+              delay: 0.05,
+              duration: 0.35,
+            }}
+
+          >
           <Card className="glass-card premium-hover ai-glow executive-border rounded-3xl">
 
             <CardContent className="p-6">
@@ -488,9 +593,26 @@ export default function Overview({ datasetId }: { datasetId: string }) {
             </CardContent>
 
           </Card>
-
+        </motion.div>
           {/* Duplicates */}
+        <motion.div
 
+            initial={{
+              opacity: 0,
+              y: 18,
+            }}
+
+            animate={{
+              opacity: 1,
+              y: 0,
+            }}
+
+            transition={{
+              delay: 0.05,
+              duration: 0.35,
+            }}
+
+          >    
           <Card className="glass-card premium-hover ai-glow executive-border rounded-3xl">
 
             <CardContent className="p-6">
@@ -534,9 +656,26 @@ export default function Overview({ datasetId }: { datasetId: string }) {
             </CardContent>
 
           </Card>
-
+        </motion.div>
           {/* Risk */}
+        <motion.div
 
+            initial={{
+              opacity: 0,
+              y: 18,
+            }}
+
+            animate={{
+              opacity: 1,
+              y: 0,
+            }}
+
+            transition={{
+              delay: 0.05,
+              duration: 0.35,
+            }}
+
+          >
           <Card className="glass-card premium-hover ai-glow executive-border rounded-3xl">
 
             <CardContent className="p-6">
@@ -579,7 +718,7 @@ export default function Overview({ datasetId }: { datasetId: string }) {
             </CardContent>
 
           </Card>
-
+        </motion.div>
         </div>
         <div className="grid grid-cols-1 xl:grid-cols-3 gap-5">
 
@@ -804,7 +943,26 @@ export default function Overview({ datasetId }: { datasetId: string }) {
               insight,
               index
             ) => (
+               <motion.div
 
+                  key={index}
+
+                  initial={{
+                    opacity: 0,
+                    x: -10,
+                  }}
+
+                  animate={{
+                    opacity: 1,
+                    x: 0,
+                  }}
+
+                  transition={{
+                    delay: index * 0.08,
+                    duration: 0.35,
+                  }}
+
+                >
               <div
                 key={index}
                 className={`
@@ -888,7 +1046,7 @@ export default function Overview({ datasetId }: { datasetId: string }) {
                 </div>
 
               </div>
-
+            </motion.div>
             )
           )}
 
@@ -966,6 +1124,6 @@ export default function Overview({ datasetId }: { datasetId: string }) {
           </div>
         </CardContent>
       </Card>
-    </div>
+    </motion.div>
   );
 }
