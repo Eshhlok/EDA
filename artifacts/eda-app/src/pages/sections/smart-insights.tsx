@@ -321,13 +321,21 @@ export default function SmartInsights({
       (row) => row.value > monthlyAverage * 1.2
     );
 
-    if (anomalies.length > 0) {
-      results.push({
-        title: "Anomaly Detection",
-        description: `${anomalies[0].label} shows unusually high ${metricLabel} compared to the historical average.`,
-        severity: "warning",
-      });
-    }
+    // Always push anomaly card — show highest month if no anomaly found
+    const anomalyTarget =
+      anomalies.length > 0
+        ? anomalies[0]
+        : [...sortedMonths].sort((a, b) => b.value - a.value)[0];
+
+    const anomalyIsReal = anomalies.length > 0;
+
+    results.push({
+      title: "Anomaly Detection",
+      description: anomalyIsReal
+        ? `${anomalyTarget.label} shows unusually high ${metricLabel} compared to the historical average (>${formatCurrency(monthlyAverage * 1.2)} threshold).`
+        : `No significant anomalies detected. ${metricLabel} remains within expected range across all periods.`,
+      severity: anomalyIsReal ? "warning" : "success",
+    });
 
     // --------------------------------
     // BUSINESS RECOMMENDATION
