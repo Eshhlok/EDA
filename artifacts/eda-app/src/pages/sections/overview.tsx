@@ -1,4 +1,4 @@
-import { useGetDatasetOverview, useGetDatasetPreview } from "@workspace/api-client-react";
+import { useGetDatasetOverview, useGetDatasetPreview, useGetDataset, useGetQualityScore} from "@workspace/api-client-react";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Skeleton } from "@/components/ui/skeleton";
@@ -15,6 +15,10 @@ import {
 export default function Overview({ datasetId }: { datasetId: string }) {
   const { data: overview, isLoading: overviewLoading } = useGetDatasetOverview(datasetId);
   const { data: preview, isLoading: previewLoading } = useGetDatasetPreview(datasetId, { rows: 10 });
+  const { data: dataset } =
+    useGetDataset(datasetId);
+  const { data: qualityData } =
+    useGetQualityScore(datasetId);
 
   if (overviewLoading || previewLoading) {
     return <div className="p-6 space-y-6"><Skeleton className="h-32 w-full" /><Skeleton className="h-64 w-full" /></div>;
@@ -25,8 +29,7 @@ export default function Overview({ datasetId }: { datasetId: string }) {
     overview.columns.length;
 
   const totalRows =
-    overview.columns[0]
-      ?.non_null_count || 0;
+  dataset?.rows || 0;
 
   const totalCells =
     totalRows *
@@ -46,27 +49,9 @@ export default function Overview({ datasetId }: { datasetId: string }) {
       100
     ).toFixed(1);
 
-  const duplicatePenalty =
-    Math.min(
-      25,
-      overview.duplicate_count * 0.5
-    );
-
-  const missingPenalty =
-    Math.min(
-      40,
-      Number(missingPct) * 2
-    );
-
   const qualityScore =
-    Math.max(
-      0,
-      Math.round(
-        100 -
-        duplicatePenalty -
-        missingPenalty
-      )
-    );
+    qualityData?.overall_score || 0;
+
   const riskLevel =
 
     qualityScore >= 85
@@ -76,10 +61,7 @@ export default function Overview({ datasetId }: { datasetId: string }) {
       ? "Moderate"
 
       : "High";
-  const totalRowsSafe =
-    overview?.row_count ||
-    preview?.rows?.length ||
-    0;
+
   return (
     <div className="p-6 space-y-6">
       <div className="space-y-6">
@@ -169,7 +151,7 @@ export default function Overview({ datasetId }: { datasetId: string }) {
 
                   <h2 className="text-3xl font-bold mt-2">
 
-                    {totalRowsSafe.toLocaleString()}
+                    {dataset?.rows?.toLocaleString()}
 
                   </h2>
 
