@@ -1,61 +1,36 @@
-import {
-  motion,
-  useMotionValue,
-  animate,
-} from "framer-motion";
-
-import {
-  useEffect,
-  useState,
-} from "react";
+import { motion, useSpring, useTransform } from "framer-motion";
+import { useEffect } from "react";
 
 interface AnimatedCounterProps {
   value: number;
+  duration?: number;
   decimals?: number;
 }
 
 export default function AnimatedCounter({
   value,
+  duration = 1,
   decimals = 0,
 }: AnimatedCounterProps) {
 
-  const motionValue =
-    useMotionValue(0);
+  const spring = useSpring(0, {
+    damping: 20,
+    stiffness: 100,
+  });
 
-  const [displayValue, setDisplayValue] =
-    useState(0);
+  const display = useTransform(
+    spring,
+    (current) =>
+      current.toFixed(decimals)
+  );
 
   useEffect(() => {
-
-    const controls = animate(
-      motionValue,
-      value,
-      {
-        duration: 1,
-        ease: "easeOut",
-        onUpdate(latest) {
-          setDisplayValue(latest);
-        },
-      }
-    );
-
-    return () => controls.stop();
-
-  }, [value, motionValue]);
+    spring.set(value);
+  }, [spring, value]);
 
   return (
     <motion.span>
-
-      {displayValue.toLocaleString(
-        undefined,
-        {
-          minimumFractionDigits:
-            decimals,
-          maximumFractionDigits:
-            decimals,
-        }
-      )}
-
+      {display}
     </motion.span>
   );
 }
