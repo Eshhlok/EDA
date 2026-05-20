@@ -237,7 +237,7 @@ export default function Bivariate({
 
         </CardHeader>
 
-        <CardContent>
+        <CardContent >
 
           <div className="overflow-x-auto">
 
@@ -356,9 +356,9 @@ export default function Bivariate({
 
         </CardHeader>
 
-        <CardContent>
+        <CardContent className="w-full overflow-hidden">
 
-          <div className="flex items-center space-x-4 mb-6">
+          <div className="flex flex-wrap items-center gap-4 mb-6 w-full">
 
             {/* X AXIS */}
 
@@ -573,7 +573,7 @@ function ScatterPlotData({
     );
 
   return (
-    <div className="space-y-4">
+    <div className="space-y-4 w-full">
 
       <motion.div
 
@@ -593,6 +593,7 @@ function ScatterPlotData({
 
         className="
           w-full
+          flex-1
           min-w-0
           h-[400px]
           border
