@@ -1,84 +1,84 @@
 import { motion } from "framer-motion";
 
+function ShimmerCard({
+  className = "",
+}: {
+  className?: string;
+}) {
+
+  return (
+
+    <div
+      className={`
+        relative
+        overflow-hidden
+        rounded-3xl
+        glass-card
+        executive-border
+        ${className}
+      `}
+    >
+
+      <motion.div
+
+        initial={{
+          x: "-100%",
+        }}
+
+        animate={{
+          x: "200%",
+        }}
+
+        transition={{
+          repeat: Infinity,
+          duration: 1.5,
+          ease: "linear",
+        }}
+
+        className="
+          absolute
+          inset-0
+          bg-gradient-to-r
+          from-transparent
+          via-white/10
+          to-transparent
+          dark:via-white/5
+        "
+      />
+
+    </div>
+  );
+}
+
 export default function DashboardSkeleton() {
 
   return (
 
     <div className="space-y-6 p-6">
 
-      {/* Header Skeleton */}
+      {/* Header */}
 
-      <motion.div
-        initial={{ opacity: 0.5 }}
-        animate={{ opacity: 1 }}
-        transition={{
-          repeat: Infinity,
-          repeatType: "reverse",
-          duration: 1.2,
-        }}
-        className="
-          h-40
-          rounded-3xl
-          glass-card
-          executive-border
-        "
-      />
+      <ShimmerCard className="h-40" />
 
-      {/* KPI Skeletons */}
+      {/* KPI Grid */}
 
       <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-5">
 
         {Array.from({ length: 6 }).map(
           (_, i) => (
 
-            <motion.div
-
+            <ShimmerCard
               key={i}
-
-              initial={{
-                opacity: 0.4,
-              }}
-
-              animate={{
-                opacity: 1,
-              }}
-
-              transition={{
-                repeat: Infinity,
-                repeatType: "reverse",
-                duration: 1,
-                delay: i * 0.08,
-              }}
-
-              className="
-                h-36
-                rounded-3xl
-                glass-card
-                executive-border
-              "
+              className="h-36"
             />
           )
         )}
 
       </div>
 
-      {/* Content Skeleton */}
+      {/* Content */}
 
-      <motion.div
-        initial={{ opacity: 0.4 }}
-        animate={{ opacity: 1 }}
-        transition={{
-          repeat: Infinity,
-          repeatType: "reverse",
-          duration: 1.2,
-        }}
-        className="
-          h-[300px]
-          rounded-3xl
-          glass-card
-          executive-border
-        "
-      />
+      <ShimmerCard className="h-[300px]" />
 
     </div>
   );

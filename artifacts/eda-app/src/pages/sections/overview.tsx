@@ -5,6 +5,7 @@ import { Skeleton } from "@/components/ui/skeleton";
 import { Badge } from "@/components/ui/badge";
 import { motion } from "framer-motion";
 import AnimatedCounter from "@/components/ui/AnimatedCounter";
+import DashboardSkeleton from "@/components/ui/dashboard-skeleton";
 import {
   Database,
   ShieldCheck,
@@ -27,7 +28,7 @@ export default function Overview({ datasetId }: { datasetId: string }) {
     useGetQualityScore(datasetId);
 
   if (overviewLoading || previewLoading) {
-    return <div className="p-6 space-y-6"><Skeleton className="h-32 w-full" /><Skeleton className="h-64 w-full" /></div>;
+    return <DashboardSkeleton />;
   }
 
   if (!overview || !preview) return null;
