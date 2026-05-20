@@ -592,6 +592,8 @@ function ScatterPlotData({
         }}
 
         className="
+          w-full
+          min-w-0
           h-[400px]
           border
           border-border/50
@@ -604,7 +606,7 @@ function ScatterPlotData({
       >
 
         <ResponsiveContainer
-          width="100%"
+          width="99%"
           height="100%"
         >
 
