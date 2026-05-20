@@ -4,6 +4,7 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Badge } from "@/components/ui/badge";
 import { motion } from "framer-motion";
+import AnimatedCounter from "@/components/ui/AnimatedCounter";
 import {
   Database,
   ShieldCheck,
@@ -503,7 +504,19 @@ export default function Overview({ datasetId }: { datasetId: string }) {
 
                   <h2 className="text-3xl font-bold mt-2">
 
-                    {qualityScore}/100
+                    <div className="flex items-end gap-1">
+
+                      <AnimatedCounter
+                        value={qualityScore}
+                      />
+
+                      <span className="text-base text-muted-foreground">
+
+                        /100
+
+                      </span>
+
+                    </div>
 
                   </h2>
 
@@ -796,7 +809,9 @@ export default function Overview({ datasetId }: { datasetId: string }) {
 
                   <Badge variant="outline">
 
-                    {totalRows.toLocaleString()} rows analyzed
+                    <AnimatedCounter
+                      value={totalRows}
+                    /> rows analyzed
 
                   </Badge>
 
