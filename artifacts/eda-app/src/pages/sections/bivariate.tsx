@@ -14,6 +14,7 @@ import {
 import { Skeleton } from "@/components/ui/skeleton";
 import DashboardSkeleton from "@/components/ui/dashboard-skeleton";
 import SmartLoading from "@/components/ui/smart-loading";
+import motion from "framer-motion";
 
 import {
   Select,
@@ -119,9 +120,10 @@ export default function Bivariate({
 
   if (bivLoading) {
     return (
-      <div className="p-6">
-        <Skeleton className="h-[500px] w-full" />
-      </div>
+      <>
+      <DashboardSkeleton />
+      <SmartLoading />
+      </>
     );
   }
 
@@ -179,11 +181,28 @@ export default function Bivariate({
   };
 
   return (
-    <div className="p-6 space-y-6">
+    <motion.div
+
+      initial={{
+        opacity: 0,
+        y: 20,
+      }}
+
+      animate={{
+        opacity: 1,
+        y: 0,
+      }}
+
+      transition={{
+        duration: 0.45,
+      }}
+
+      className="p-6 space-y-6"
+    >
 
       {/* HEATMAP */}
 
-      <Card>
+      <Card className="glass-card premium-hover executive-border rounded-3xl" >
 
         <CardHeader className="flex flex-row items-center justify-between">
 
@@ -267,9 +286,22 @@ export default function Bivariate({
 
                       return (
 
-                        <td
+                        <motion.td
                           key={c}
-                          className="w-10 h-10 border text-center text-xs font-mono font-medium transition-colors"
+                          className="w-10 h-10 border text-center text-xs font-mono font-medium transition-colors hover:scale-110 hover:z-10 hover:shadow-lg cursor-pointer duration-200"
+                          initial={{
+                            opacity: 0,
+                            scale: 0.95,
+                          }}
+
+                          animate={{
+                            opacity: 1,
+                            scale: 1,
+                          }}
+
+                          transition={{
+                            duration: 0.2,
+                          }}
                           style={{
                             backgroundColor:
                               getHeatmapColor(
@@ -294,7 +326,7 @@ export default function Bivariate({
                             ? val.toFixed(2)
                             : "-"}
 
-                        </td>
+                        </motion.td>
 
                       );
                     })}
@@ -413,7 +445,7 @@ export default function Bivariate({
 
       </Card>
 
-    </div>
+    </motion.div>
   );
 }
 
@@ -469,7 +501,33 @@ function ScatterPlotData({
   return (
     <div className="space-y-4">
 
-      <div className="h-[400px] border border-border/50 rounded-2xl bg-card/40 backdrop-blur-sm p-2 shadow-lg">
+      <motion.div
+
+        initial={{
+          opacity: 0,
+          scale: 0.98,
+        }}
+
+        animate={{
+          opacity: 1,
+          scale: 1,
+        }}
+
+        transition={{
+          duration: 0.4,
+        }}
+
+        className="
+          h-[400px]
+          border
+          border-border/50
+          rounded-2xl
+          bg-card/40
+          backdrop-blur-sm
+          p-2
+          shadow-lg
+        "
+      >
 
         <ResponsiveContainer
           width="100%"
@@ -526,7 +584,7 @@ function ScatterPlotData({
 
         </ResponsiveContainer>
 
-      </div>
+      </motion.div>
 
       <div className="flex gap-4 text-sm bg-muted/50 p-3 rounded-xl border border-border/40">
 
