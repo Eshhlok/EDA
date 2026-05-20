@@ -12,6 +12,8 @@ import {
 } from "@/components/ui/card";
 
 import { Skeleton } from "@/components/ui/skeleton";
+import DashboardSkeleton from "@/components/ui/dashboard-skeleton";
+import SmartLoading from "@/components/ui/smart-loading";
 
 import {
   Select,
@@ -443,7 +445,10 @@ function ScatterPlotData({
 
   if (isLoading) {
     return (
-      <Skeleton className="h-[400px] w-full" />
+      <>
+      <DashboardSkeleton />
+      <SmartLoading />
+      </>
     );
   }
 
