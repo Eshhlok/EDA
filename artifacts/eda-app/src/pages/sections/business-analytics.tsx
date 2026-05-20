@@ -137,11 +137,21 @@ export default function BusinessAnalytics({ datasetId }: Props) {
     ),
   ];
   const availableYears =
-    data?.data
-      ?.map((d) => d.label)
-      ?.filter((label) =>
-        /^\d{4}$/.test(label)
-      ) || [];
+
+    univariateData?.categorical
+      ?.find(
+        (c) =>
+          c.column ===
+          "Posting Date_year"
+      )
+      ?.top_values
+      ?.map((v) => String(v.value))
+      ?.filter((v) =>
+        /^\d{4}$/.test(v)
+      )
+      ?.sort()
+
+    || [];
 
   useEffect(() => {
     if (groupableColumns.length > 0 && !groupBy) {
