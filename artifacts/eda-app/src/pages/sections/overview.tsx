@@ -359,26 +359,9 @@ export default function Overview({ datasetId }: { datasetId: string }) {
                   </p>
 
                   <h2 className="text-3xl font-bold mt-2">
-                  <motion.span
-
-                    initial={{
-                      opacity: 0,
-                      scale: 0.8,
-                    }}
-
-                    animate={{
-                      opacity: 1,
-                      scale: 1,
-                    }}
-
-                    transition={{
-                      duration: 0.4,
-                    }}
-
-                  >
-
-                    {dataset?.rows?.toLocaleString()}
-                  </motion.span>
+                  <AnimatedCounter
+                    value={totalRows}
+                  />
                   </h2>
 
                 </div>
@@ -440,7 +423,9 @@ export default function Overview({ datasetId }: { datasetId: string }) {
 
                   <h2 className="text-3xl font-bold mt-2">
 
-                    {totalColumns}
+                    <AnimatedCounter
+                      value={totalColumns}
+                    />
 
                   </h2>
 
@@ -579,7 +564,18 @@ export default function Overview({ datasetId }: { datasetId: string }) {
 
                   <h2 className="text-3xl font-bold mt-2">
 
-                    {missingPct}%
+                    <div className="flex items-end gap-1">
+
+                      <AnimatedCounter
+                        value={Number(missingPct)}
+                        decimals={1}
+                      />
+
+                      <span className="text-base text-muted-foreground">
+                        %
+                      </span>
+
+                    </div>
 
                   </h2>
 
@@ -642,7 +638,9 @@ export default function Overview({ datasetId }: { datasetId: string }) {
 
                   <h2 className="text-3xl font-bold mt-2">
 
-                    {overview.duplicate_count}
+                    <AnimatedCounter
+                      value={overview.duplicate_count}
+                    />
 
                   </h2>
 
@@ -797,7 +795,15 @@ export default function Overview({ datasetId }: { datasetId: string }) {
 
                   <Badge variant="secondary">
 
-                    Quality Score: {qualityScore}
+                    <div className="flex items-center gap-1">
+
+                      Quality Score:
+
+                      <AnimatedCounter
+                        value={qualityScore}
+                      />
+
+                    </div>
 
                   </Badge>
 
@@ -855,7 +861,15 @@ export default function Overview({ datasetId }: { datasetId: string }) {
 
                 <span className="font-semibold">
 
-                  {qualityData?.completeness?.toFixed(0)}%
+                  <div className="flex items-center gap-1">
+
+                    <AnimatedCounter
+                      value={qualityData?.completeness || 0}
+                    />
+
+                    <span>%</span>
+
+                  </div>
 
                 </span>
 
@@ -877,7 +891,15 @@ export default function Overview({ datasetId }: { datasetId: string }) {
 
                 <span className="font-semibold">
 
-                  {qualityData?.uniqueness?.toFixed(0)}%
+                  <div className="flex items-center gap-1">
+
+                    <AnimatedCounter
+                      value={qualityData?.uniqueness || 0}
+                    />
+
+                    <span>%</span>
+
+                  </div>
 
                 </span>
 
@@ -899,7 +921,15 @@ export default function Overview({ datasetId }: { datasetId: string }) {
 
                 <span className="font-semibold">
 
-                  {qualityData?.consistency?.toFixed(0)}%
+                  <div className="flex items-center gap-1">
+
+                    <AnimatedCounter
+                      value={qualityData?.consistency || 0}
+                    />
+
+                    <span>%</span>
+
+                  </div>
 
                 </span>
 
@@ -921,7 +951,15 @@ export default function Overview({ datasetId }: { datasetId: string }) {
 
                 <span className="font-semibold">
 
-                  {qualityData?.validity?.toFixed(0)}%
+                  <div className="flex items-center gap-1">
+
+                    <AnimatedCounter
+                      value={qualityData?.validity || 0}
+                    />
+
+                    <span>%</span>
+
+                  </div>
 
                 </span>
 
