@@ -69,9 +69,11 @@ export default function BusinessAnalytics({ datasetId }: Props) {
   const [aggregation, setAggregation] = useState("sum");
   const [chartType, setChartType] = useState<"bar" | "line">("bar");
   const [showForecast, setShowForecast] = useState(true);
+  const [selectedYear, setSelectedYear] =useState("all");
   const [data, setData] = useState<GroupByResponse | null>(null);
   const [drillHistory, setDrillHistory] = useState<{ column: string; value: string }[]>([]);
   const [loading, setLoading] = useState(false);
+  const isYearMode =selectedYear !== "all";
 
   const totalValue = data?.data.reduce((sum, row) => sum + row.value, 0) || 0;
   const averageValue = data?.data.length ? totalValue / data.data.length : 0;
@@ -134,6 +136,12 @@ export default function BusinessAnalytics({ datasetId }: Props) {
       (col) => !col.includes("_month") && !col.includes("_year") && !col.includes("_quarter")
     ),
   ];
+  const availableYears =
+    data?.data
+      ?.map((d) => d.label)
+      ?.filter((label) =>
+        /^\d{4}$/.test(label)
+      ) || [];
 
   useEffect(() => {
     if (groupableColumns.length > 0 && !groupBy) {
@@ -144,6 +152,30 @@ export default function BusinessAnalytics({ datasetId }: Props) {
       setMetric(numericColumns[0]);
     }
   }, [groupableColumns, numericColumns, groupBy, metric]);
+
+  useEffect(() => {
+
+    if (
+      selectedYear !== "all" &&
+      groupableColumns.includes(
+        "Posting Date_month"
+      )
+    ) {
+
+      setGroupBy(
+        "Posting Date_month"
+      );
+
+      setDrillHistory([
+        {
+          column: "Posting Date_year",
+          value: selectedYear,
+        },
+      ]);
+
+    }
+
+  }, [selectedYear]);
 
   function exportCSV() {
     if (!data?.data?.length) return;
@@ -289,6 +321,41 @@ export default function BusinessAnalytics({ datasetId }: Props) {
             ))}
           </SelectContent>
         </Select>
+
+        <Select
+          value={selectedYear}
+          onValueChange={setSelectedYear}
+        >
+
+          <SelectTrigger className="w-[180px]">
+
+            <SelectValue placeholder="Select Year" />
+
+          </SelectTrigger>
+
+          <SelectContent>
+
+            <SelectItem value="all">
+              All Years
+            </SelectItem>
+
+            {availableYears.map((year) => (
+
+              <SelectItem
+                key={year}
+                value={year}
+              >
+
+                {year}
+
+              </SelectItem>
+
+            ))}
+
+          </SelectContent>
+
+        </Select>
+
       </div>
 
       {/* CHART TYPE */}
@@ -330,7 +397,9 @@ export default function BusinessAnalytics({ datasetId }: Props) {
       {/* CHARTS */}
       <Card>
         <CardHeader>
-          <CardTitle>Business Analytics</CardTitle>
+          <CardTitle>
+            {selectedYear === "all"? "Business Analytics": `${selectedYear} Monthly Trend Analysis`}
+          </CardTitle>
         </CardHeader>
         <CardContent>
           <div className="grid grid-cols-1 xl:grid-cols-2 gap-6">
