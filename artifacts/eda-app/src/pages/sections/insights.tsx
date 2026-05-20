@@ -1,8 +1,8 @@
 import { useState, useMemo } from "react";
 import { useGetInsights } from "@workspace/api-client-react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Skeleton } from "@/components/ui/skeleton";
 import { Badge } from "@/components/ui/badge";
+import SmartLoading from "@/components/ui/smart-loading";
 import {
   Info,
   AlertTriangle,
@@ -28,8 +28,8 @@ interface Insight {
   category: Category;
   column?: string;
   message: string;
-  detail?: string;       // optional richer explanation from API
-  action?: string;       // optional recommended fix from API
+  detail?: string;
+  action?: string;
   impact?: "low" | "medium" | "high";
 }
 
@@ -110,11 +110,7 @@ function SeverityPill({
       >
         <Filter className="h-3 w-3" />
         All
-        <span
-          className={`px-1.5 py-0.5 rounded-full text-[10px] font-bold ${
-            active ? "bg-white/20" : "bg-muted"
-          }`}
-        >
+        <span className={`px-1.5 py-0.5 rounded-full text-[10px] font-bold ${active ? "bg-white/20" : "bg-muted"}`}>
           {count}
         </span>
       </button>
@@ -133,11 +129,7 @@ function SeverityPill({
     >
       <span className={`h-1.5 w-1.5 rounded-full ${active ? cfg.dotClass : "bg-muted-foreground"}`} />
       {cfg.label}
-      <span
-        className={`px-1.5 py-0.5 rounded-full text-[10px] font-bold ${
-          active ? "bg-current/10" : "bg-muted"
-        }`}
-      >
+      <span className={`px-1.5 py-0.5 rounded-full text-[10px] font-bold ${active ? "bg-current/10" : "bg-muted"}`}>
         {count}
       </span>
     </button>
@@ -149,7 +141,6 @@ function InsightCard({ insight }: { insight: Insight }) {
   const cfg = SEVERITY_CONFIG[insight.severity] ?? SEVERITY_CONFIG.INFO;
   const Icon = cfg.icon;
   const CatIcon = getCategoryIcon(insight.category);
-
   const hasExtra = !!(insight.detail || insight.action);
 
   return (
@@ -162,18 +153,12 @@ function InsightCard({ insight }: { insight: Insight }) {
       aria-expanded={hasExtra ? expanded : undefined}
     >
       <div className="p-4 flex items-start gap-3">
-        {/* Icon */}
         <div className={`mt-0.5 shrink-0 ${cfg.iconClass}`}>
           <Icon className="h-4 w-4" />
         </div>
-
-        {/* Body */}
         <div className="flex-1 min-w-0 space-y-1.5">
-          {/* Tags row */}
           <div className="flex flex-wrap items-center gap-2">
-            <span
-              className={`inline-flex items-center gap-1 px-2 py-0.5 rounded text-[10px] font-semibold uppercase tracking-wider border ${cfg.badgeClass}`}
-            >
+            <span className={`inline-flex items-center gap-1 px-2 py-0.5 rounded text-[10px] font-semibold uppercase tracking-wider border ${cfg.badgeClass}`}>
               <CatIcon className="h-2.5 w-2.5" />
               {insight.category}
             </span>
@@ -183,32 +168,22 @@ function InsightCard({ insight }: { insight: Insight }) {
               </span>
             )}
             {insight.impact && (
-              <span
-                className={`text-[10px] font-medium px-2 py-0.5 rounded ${
-                  insight.impact === "high"
-                    ? "bg-red-500/10 text-red-500"
-                    : insight.impact === "medium"
-                    ? "bg-amber-500/10 text-amber-500"
-                    : "bg-muted text-muted-foreground"
-                }`}
-              >
+              <span className={`text-[10px] font-medium px-2 py-0.5 rounded ${
+                insight.impact === "high"
+                  ? "bg-red-500/10 text-red-500"
+                  : insight.impact === "medium"
+                  ? "bg-amber-500/10 text-amber-500"
+                  : "bg-muted text-muted-foreground"
+              }`}>
                 {insight.impact} impact
               </span>
             )}
           </div>
-
-          {/* Message */}
-          <p className="text-sm font-medium text-foreground leading-snug">
-            {insight.message}
-          </p>
-
-          {/* Expandable detail */}
+          <p className="text-sm font-medium text-foreground leading-snug">{insight.message}</p>
           {hasExtra && expanded && (
             <div className="mt-3 space-y-2 border-t border-current/10 pt-3">
               {insight.detail && (
-                <p className="text-xs text-muted-foreground leading-relaxed">
-                  {insight.detail}
-                </p>
+                <p className="text-xs text-muted-foreground leading-relaxed">{insight.detail}</p>
               )}
               {insight.action && (
                 <div className="flex items-start gap-2 text-xs">
@@ -218,8 +193,6 @@ function InsightCard({ insight }: { insight: Insight }) {
               )}
             </div>
           )}
-
-          {/* Expand hint */}
           {hasExtra && !expanded && (
             <p className="text-[10px] text-muted-foreground/60 mt-1">
               Click for details & recommended action
@@ -231,13 +204,7 @@ function InsightCard({ insight }: { insight: Insight }) {
   );
 }
 
-function CategoryGroup({
-  category,
-  insights,
-}: {
-  category: string;
-  insights: Insight[];
-}) {
+function CategoryGroup({ category, insights }: { category: string; insights: Insight[] }) {
   const CatIcon = getCategoryIcon(category);
   const criticalCount = insights.filter((i) => i.severity === "CRITICAL").length;
   const warningCount = insights.filter((i) => i.severity === "WARNING").length;
@@ -270,8 +237,6 @@ function CategoryGroup({
     </div>
   );
 }
-
-// ─── Summary bar ─────────────────────────────────────────────────────────────
 
 function InsightsSummary({ insights }: { insights: Insight[] }) {
   const critical = insights.filter((i) => i.severity === "CRITICAL").length;
@@ -331,7 +296,6 @@ export default function Insights({ datasetId }: { datasetId: string }) {
       if (!map[key]) map[key] = [];
       map[key].push(insight);
     }
-    // Sort groups: CRITICAL first, then by count
     return Object.entries(map).sort(([, a], [, b]) => {
       const aHasCrit = a.some((i) => i.severity === "CRITICAL") ? 1 : 0;
       const bHasCrit = b.some((i) => i.severity === "CRITICAL") ? 1 : 0;
@@ -341,12 +305,11 @@ export default function Insights({ datasetId }: { datasetId: string }) {
 
   if (isLoading) {
     return (
-      <div className="p-6 space-y-4">
-        <Skeleton className="h-16 w-full rounded-xl" />
-        <Skeleton className="h-8 w-64" />
-        {[1, 2, 3, 4].map((i) => (
-          <Skeleton key={i} className="h-20 w-full rounded-lg" />
-        ))}
+      <div className="p-6 flex flex-col items-center justify-center min-h-[400px] gap-4">
+        <div className="h-2 w-48 bg-secondary rounded-full overflow-hidden">
+          <div className="h-full bg-primary animate-pulse rounded-full w-2/3" />
+        </div>
+        <SmartLoading />
       </div>
     );
   }
@@ -374,10 +337,8 @@ export default function Insights({ datasetId }: { datasetId: string }) {
 
   return (
     <div className="p-6 space-y-6">
-      {/* Summary */}
       <InsightsSummary insights={insights as Insight[]} />
 
-      {/* Controls */}
       <div className="flex flex-wrap items-center gap-2 justify-between">
         <div className="flex flex-wrap gap-2">
           {(["ALL", "CRITICAL", "WARNING", "INFO"] as const).map((s) => (
@@ -403,14 +364,12 @@ export default function Insights({ datasetId }: { datasetId: string }) {
         </button>
       </div>
 
-      {/* Empty state for filtered view */}
       {filtered.length === 0 && (
         <div className="text-center py-10 text-muted-foreground text-sm">
           No {activeSeverity.toLowerCase()} insights found.
         </div>
       )}
 
-      {/* Insights list */}
       {groupByCategory ? (
         <div className="space-y-6">
           {grouped.map(([category, items]) => (
