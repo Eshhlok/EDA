@@ -23,7 +23,7 @@ interface SmartLoadingProps {
   interval?: number; // ms between message changes, default 2800
 }
 
-export function SmartLoading({ interval = 2800 }: SmartLoadingProps) {
+export default function SmartLoading({ interval = 2800 }: SmartLoadingProps) {
   const [index, setIndex] = useState(() =>
     Math.floor(Math.random() * MESSAGES.length)
   );
