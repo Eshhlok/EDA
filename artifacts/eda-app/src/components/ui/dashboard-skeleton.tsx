@@ -1,4 +1,5 @@
 import { motion } from "framer-motion";
+import SmartLoading from "@/components/ui/smart-loading";
 
 function ShimmerCard({
   className = "",
@@ -79,6 +80,11 @@ export default function DashboardSkeleton() {
       {/* Content */}
 
       <ShimmerCard className="h-[300px]" />
+      <div className="pt-4">
+
+        <SmartLoading />
+
+      </div>
 
     </div>
   );
