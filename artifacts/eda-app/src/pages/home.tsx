@@ -8,6 +8,7 @@ import { format } from "date-fns";
 import logoFull from "@/assets/branding/logo-full.png";
 import logoDark from "@/assets/branding/logo-dark.png";
 import { useTheme } from "@/components/theme-provider";
+import SmartLoading from "@/components/ui/smart-loading";
 
 export default function Home() {
   const { theme } = useTheme();
@@ -205,12 +206,66 @@ export default function Home() {
         <div className="space-y-6">
           <h2 className="text-2xl font-bold tracking-tight text-foreground border-b pb-4">Recent Datasets</h2>
           
-          {datasetsLoading ? (
-            <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3">
-              {[1, 2, 3].map(i => (
-                <div key={i} className="h-32 bg-muted rounded-xl animate-pulse" />
-              ))}
+          {{datasetsLoading ? (
+
+            <div className="space-y-6">
+
+              {/* Premium Skeleton Grid */}
+
+              <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3">
+
+                {[1, 2, 3].map((i) => (
+
+                  <div
+                    key={i}
+                    className="
+                      relative
+                      overflow-hidden
+                      h-40
+                      rounded-3xl
+                      glass-card
+                      executive-border
+                    "
+                  >
+
+                    <motion.div
+
+                      initial={{
+                        x: "-100%",
+                      }}
+
+                      animate={{
+                        x: "200%",
+                      }}
+
+                      transition={{
+                        repeat: Infinity,
+                        duration: 1.5,
+                        ease: "linear",
+                      }}
+
+                      className="
+                        absolute
+                        inset-0
+                        bg-gradient-to-r
+                        from-transparent
+                        via-white/10
+                        to-transparent
+                        dark:via-white/5
+                      "
+                    />
+
+                  </div>
+                ))}
+
+              </div>
+
+              {/* Smart Loader */}
+
+              <SmartLoading />
+
             </div>
+
           ) : datasets?.length === 0 ? (
             <div className="text-center py-12 border rounded-xl bg-card">
               <FileSpreadsheet className="h-12 w-12 mx-auto text-muted-foreground/50 mb-3" />
