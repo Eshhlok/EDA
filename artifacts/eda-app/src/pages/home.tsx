@@ -2,7 +2,7 @@ import { useCallback, useState } from "react";
 import { useDropzone } from "react-dropzone";
 import { useLocation } from "wouter";
 import { useUploadDataset, useListDatasets, getListDatasetsQueryKey } from "@workspace/api-client-react";
-import { UploadCloud, FileSpreadsheet, Trash2, ChevronRight, Loader2, } from "lucide-react";
+import { UploadCloud, FileSpreadsheet, ChevronRight, Loader2 } from "lucide-react";
 import { useQueryClient } from "@tanstack/react-query";
 import { format } from "date-fns";
 import logoFull from "@/assets/branding/logo-full.png";
@@ -22,9 +22,9 @@ export default function Home() {
   const onDrop = useCallback((acceptedFiles: File[]) => {
     if (acceptedFiles.length === 0) return;
     const file = acceptedFiles[0];
-    
+
     setUploadProgress(10);
-    
+
     const interval = setInterval(() => {
       setUploadProgress(prev => Math.min(prev + 10, 90));
     }, 200);
@@ -67,9 +67,7 @@ export default function Home() {
 
         {/* Branding */}
         <div className="text-center space-y-2">
-
           <div className="flex items-center justify-center -mb-6">
-
             <img
               src={theme === "dark" ? logoDark : logoFull}
               alt="EDAFlow"
@@ -84,7 +82,6 @@ export default function Home() {
                 hover:scale-[1.02]
               "
             />
-
           </div>
 
           <h1 className="text-4xl font-extrabold tracking-tight text-foreground sm:text-5xl">
@@ -96,12 +93,11 @@ export default function Home() {
           <p className="text-lg text-muted-foreground max-w-2xl mx-auto">
             Drop any dataset to generate insights, visualisations, quality scores, and outlier reports — all in seconds.
           </p>
-
         </div>
 
         {/* Dropzone */}
-        <div 
-          {...getRootProps()} 
+        <div
+          {...getRootProps()}
           className={`
             relative
             overflow-hidden
@@ -129,28 +125,19 @@ export default function Home() {
             before:absolute
             before:inset-0
             before:bg-[radial-gradient(circle_at_top,rgba(224,184,75,0.08),transparent_40%)]
-
             before:pointer-events-none
 
-            ${
-              isDragActive
-                ? `
-                  border-primary
-                  shadow-[0_0_60px_rgba(224,184,75,0.18)]
-                  scale-[1.01]
-                `
-                : ""
-            }
+            ${isDragActive ? `
+              border-primary
+              shadow-[0_0_60px_rgba(224,184,75,0.18)]
+              scale-[1.01]
+            ` : ""}
 
-            ${
-              uploadDataset.isPending
-                ? `
-                  opacity-70
-                  cursor-not-allowed
-                  pointer-events-none
-                `
-                : ""
-            }
+            ${uploadDataset.isPending ? `
+              opacity-70
+              cursor-not-allowed
+              pointer-events-none
+            ` : ""}
           `}
         >
           <input {...getInputProps()} />
@@ -159,18 +146,13 @@ export default function Home() {
               className="
                 p-5
                 rounded-2xl
-
                 bg-primary/10
                 text-primary
-
                 border
                 border-primary/20
-
                 shadow-[0_0_25px_rgba(224,184,75,0.12)]
-
                 transition-all
                 duration-300
-
                 group-hover:scale-105
               "
             >
@@ -180,6 +162,7 @@ export default function Home() {
                 <UploadCloud className="h-12 w-12" />
               )}
             </div>
+
             <div>
               <p className="text-2xl font-semibold tracking-tight text-foreground">
                 {isDragActive ? "Drop the file here" : "Drag & drop your dataset"}
@@ -188,53 +171,16 @@ export default function Home() {
                 Supports CSV, Excel, JSON, Parquet, and TSV files
               </p>
             </div>
-            
+
             {uploadDataset.isPending && (
               <div className="w-full max-w-md mt-6">
                 <div className="h-2 w-full bg-secondary rounded-full overflow-hidden">
-                  <div 
+                  <div
                     className="h-full bg-primary transition-all duration-200 ease-out"
                     style={{ width: `${uploadProgress}%` }}
                   />
                 </div>
-                  <motion.div
-
-                    initial={{
-                      opacity: 0,
-                      y: 5,
-                    }}
-
-                    animate={{
-                      opacity: 1,
-                      y: 0,
-                    }}
-
-                    transition={{
-                      duration: 0.4,
-                    }}
-
-                    className="
-                      text-xs
-                      text-muted-foreground
-                      mt-3
-                      text-center
-                      space-y-1
-                    "
-                  >
-
-                    <p>
-
-                      Initializing AI analytics pipeline...
-
-                    </p>
-
-                    <p className="text-[11px] text-muted-foreground/70">
-
-                      Cloud compute services may take a few moments after inactivity.
-
-                    </p>
-
-                  </motion.div>
+                <SmartLoading />
               </div>
             )}
           </div>
@@ -243,17 +189,11 @@ export default function Home() {
         {/* Recent datasets */}
         <div className="space-y-6">
           <h2 className="text-2xl font-bold tracking-tight text-foreground border-b pb-4">Recent Datasets</h2>
-          
+
           {datasetsLoading ? (
-
             <div className="space-y-6">
-
-              {/* Premium Skeleton Grid */}
-
               <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3">
-
                 {[1, 2, 3].map((i) => (
-
                   <div
                     key={i}
                     className="
@@ -265,23 +205,14 @@ export default function Home() {
                       executive-border
                     "
                   >
-
                     <motion.div
-
-                      initial={{
-                        x: "-100%",
-                      }}
-
-                      animate={{
-                        x: "200%",
-                      }}
-
+                      initial={{ x: "-100%" }}
+                      animate={{ x: "200%" }}
                       transition={{
                         repeat: Infinity,
                         duration: 1.5,
                         ease: "linear",
                       }}
-
                       className="
                         absolute
                         inset-0
@@ -292,16 +223,11 @@ export default function Home() {
                         dark:via-white/5
                       "
                     />
-
                   </div>
                 ))}
-
               </div>
 
-              {/* Smart Loader */}
-
               <SmartLoading />
-
             </div>
 
           ) : datasets?.length === 0 ? (
@@ -312,7 +238,7 @@ export default function Home() {
           ) : (
             <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3">
               {datasets?.map((dataset) => (
-                <div 
+                <div
                   key={dataset.id}
                   onClick={() => setLocation(`/datasets/${dataset.id}/overview`)}
                   className="group flex flex-col justify-between p-6 bg-card border rounded-xl hover:border-primary/50 hover:shadow-md transition-all cursor-pointer"
@@ -343,6 +269,7 @@ export default function Home() {
             </div>
           )}
         </div>
+
       </div>
     </div>
   );

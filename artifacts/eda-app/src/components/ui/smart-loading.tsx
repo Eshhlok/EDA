@@ -1,178 +1,68 @@
-import {
-  motion,
-  AnimatePresence,
-} from "framer-motion";
+import { useEffect, useState } from "react";
+import { motion, AnimatePresence } from "framer-motion";
 
-import {
-  useEffect,
-  useState,
-} from "react";
-
-const loadingMessages = [
-
-  "Initializing AI analytics engine...",
-
-  "Waking up cloud compute services...",
-
-  "Processing dataset intelligence...",
-
-  "Generating executive insights...",
-
-  "Analyzing operational patterns...",
-
-  "Building interactive analytics...",
-
-  "Preparing visualization layers...",
-
-  "Synchronizing data pipelines...",
-
+const MESSAGES = [
+  { main: "Warming up the servers...", sub: "Cold starts happen — we'll be ready in a moment." },
+  { main: "Fetching your data...", sub: "Pulling everything together." },
+  { main: "Crunching the numbers...", sub: "Good things take a few seconds." },
+  { main: "Spinning up the engines...", sub: "First request after inactivity takes a moment." },
+  { main: "Building your pipeline...", sub: "Hang tight, almost there." },
+  { main: "Running the analysis...", sub: "AI is doing the heavy lifting." },
+  { main: "Scanning for outliers...", sub: "Every anomaly will be found." },
+  { main: "Scoring data quality...", sub: "Checking completeness, consistency, and more." },
+  { main: "Generating visualisations...", sub: "Your charts are taking shape." },
+  { main: "Loading your dataset...", sub: "Parsing rows and columns." },
+  { main: "Preparing your report...", sub: "Worth the wait, we promise." },
+  { main: "Waking up the data engines...", sub: "Cloud compute sleeps between requests." },
+  { main: "Computing correlations...", sub: "Finding patterns in the noise." },
+  { main: "Profiling your columns...", sub: "Types, distributions, and gaps — all covered." },
+  { main: "Almost there...", sub: "Just a few more seconds." },
 ];
 
-export default function SmartLoading() {
+interface SmartLoadingProps {
+  interval?: number; // ms between message changes, default 2800
+}
 
-  const [messageIndex, setMessageIndex] =
-    useState(0);
+export function SmartLoading({ interval = 2800 }: SmartLoadingProps) {
+  const [index, setIndex] = useState(() =>
+    Math.floor(Math.random() * MESSAGES.length)
+  );
 
   useEffect(() => {
+    const id = setInterval(() => {
+      setIndex((i) => (i + 1) % MESSAGES.length);
+    }, interval);
+    return () => clearInterval(id);
+  }, [interval]);
 
-    const interval = setInterval(() => {
-
-      setMessageIndex(
-        (prev) =>
-          (prev + 1) %
-          loadingMessages.length
-      );
-
-    }, 2500);
-
-    return () =>
-      clearInterval(interval);
-
-  }, []);
+  const { main, sub } = MESSAGES[index];
 
   return (
-
-    <div
-      className="
-        min-h-[300px]
-        flex
-        flex-col
-        items-center
-        justify-center
-        gap-6
-        text-center
-        px-6
-      "
-    >
-
-      {/* Animated Orb */}
-
-      <div className="relative">
-
-        <motion.div
-
-          animate={{
-            scale: [1, 1.1, 1],
-            opacity: [0.7, 1, 0.7],
-          }}
-
-          transition={{
-            repeat: Infinity,
-            duration: 2,
-          }}
-
-          className="
-            h-20
-            w-20
-            rounded-full
-            bg-primary/20
-            blur-2xl
-            absolute
-            inset-0
-          "
-        />
-
-        <motion.div
-
-          animate={{
-            rotate: 360,
-          }}
-
-          transition={{
-            repeat: Infinity,
-            duration: 10,
-            ease: "linear",
-          }}
-
-          className="
-            relative
-            h-20
-            w-20
-            rounded-full
-            border
-            border-primary/20
-            border-t-primary
-          "
-        />
-
-      </div>
-
-      {/* Rotating Messages */}
-
+    <div className="flex flex-col items-center gap-1 mt-3 select-none">
       <AnimatePresence mode="wait">
-
         <motion.p
-
-          key={messageIndex}
-
-          initial={{
-            opacity: 0,
-            y: 8,
-          }}
-
-          animate={{
-            opacity: 1,
-            y: 0,
-          }}
-
-          exit={{
-            opacity: 0,
-            y: -8,
-          }}
-
-          transition={{
-            duration: 0.35,
-          }}
-
-          className="
-            text-sm
-            text-muted-foreground
-            max-w-md
-            leading-relaxed
-          "
+          key={index + "-main"}
+          initial={{ opacity: 0, y: 5 }}
+          animate={{ opacity: 1, y: 0 }}
+          exit={{ opacity: 0, y: -5 }}
+          transition={{ duration: 0.3 }}
+          className="text-xs text-muted-foreground text-center"
         >
-
-          {
-            loadingMessages[
-              messageIndex
-            ]
-          }
-
+          {main}
         </motion.p>
-
       </AnimatePresence>
-
-      <p
-        className="
-          text-xs
-          text-muted-foreground/70
-        "
-      >
-
-        Cloud analytics services may take a few moments to initialize after inactivity.
-
-      </p>
-
+      <AnimatePresence mode="wait">
+        <motion.p
+          key={index + "-sub"}
+          initial={{ opacity: 0 }}
+          animate={{ opacity: 1 }}
+          exit={{ opacity: 0 }}
+          transition={{ duration: 0.3, delay: 0.08 }}
+          className="text-[11px] text-muted-foreground/60 text-center"
+        >
+          {sub}
+        </motion.p>
+      </AnimatePresence>
     </div>
   );
 }
