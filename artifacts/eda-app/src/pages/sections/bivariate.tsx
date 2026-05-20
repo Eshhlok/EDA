@@ -11,9 +11,8 @@ import {
   CardTitle,
 } from "@/components/ui/card";
 
-import { Skeleton } from "@/components/ui/skeleton";
 import DashboardSkeleton from "@/components/ui/dashboard-skeleton";
-import SmartLoading from "@/components/ui/smart-loading";
+
 import { motion } from "framer-motion";
 
 import {
@@ -122,7 +121,7 @@ export default function Bivariate({
     return (
       <>
       <DashboardSkeleton />
-      <SmartLoading />
+      
       </>
     );
   }
@@ -476,11 +475,86 @@ function ScatterPlotData({
   );
 
   if (isLoading) {
+
     return (
-      <>
-      <DashboardSkeleton />
-      <SmartLoading />
-      </>
+
+      <div
+        className="
+          h-[400px]
+          rounded-3xl
+          glass-card
+          executive-border
+          relative
+          overflow-hidden
+          flex
+          items-center
+          justify-center
+        "
+      >
+
+        {/* Shimmer */}
+
+        <motion.div
+
+          initial={{
+            x: "-100%",
+          }}
+
+          animate={{
+            x: "200%",
+          }}
+
+          transition={{
+            repeat: Infinity,
+            duration: 1.4,
+            ease: "linear",
+          }}
+
+          className="
+            absolute
+            inset-0
+            bg-gradient-to-r
+            from-transparent
+            via-white/10
+            to-transparent
+          "
+        />
+
+        {/* Small Inline Loader */}
+
+        <div className="relative z-10 flex flex-col items-center gap-3">
+
+          <motion.div
+
+            animate={{
+              rotate: 360,
+            }}
+
+            transition={{
+              repeat: Infinity,
+              duration: 1.4,
+              ease: "linear",
+            }}
+
+            className="
+              h-8
+              w-8
+              rounded-full
+              border-2
+              border-primary/20
+              border-t-primary
+            "
+          />
+
+          <p className="text-xs text-muted-foreground">
+
+            Updating visualization...
+
+          </p>
+
+        </div>
+
+      </div>
     );
   }
 
