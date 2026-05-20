@@ -136,27 +136,38 @@ export default function BusinessAnalytics({ datasetId }: Props) {
       (col) => !col.includes("_month") && !col.includes("_year") && !col.includes("_quarter")
     ),
   ];
+  const yearColumn =
+
+    categoricalColumns.find(
+      (col) =>
+        col.toLowerCase().includes("year")
+    );
+
   const availableYears =
 
-    univariateData?.categorical
-      ?.find(
-        (c) =>
-          c.column ===
-          "Posting Date_year"
-      )
-      ?.top_values
-      ?.map((v) => String(v.value))
-      ?.filter((v) =>
-        /^\d{4}$/.test(v)
-      )
-      ?.sort()
+    yearColumn && data?.group_by === yearColumn
 
-    || [];
+      ? data.data
+          .map((d) => String(d.label))
+          .filter((v) => /^\d{4}$/.test(v))
+
+      : [];
 
   useEffect(() => {
     if (groupableColumns.length > 0 && !groupBy) {
       setGroupBy(groupableColumns[0]);
       setRootGroupBy(groupableColumns[0]);
+      const detectedYearColumn =
+
+        groupableColumns.find(
+          (col) =>
+            col.toLowerCase().includes("year")
+        );
+
+      if (detectedYearColumn) {
+        setGroupBy(detectedYearColumn);
+        setRootGroupBy(detectedYearColumn);
+      }
     }
     if (numericColumns.length > 0 && !metric) {
       setMetric(numericColumns[0]);
