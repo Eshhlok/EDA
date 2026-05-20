@@ -573,7 +573,7 @@ function ScatterPlotData({
     );
 
   return (
-    <div className="space-y-4 w-full">
+    <div className="w-full flex flex-col gap-4">
 
       <motion.div
 
@@ -593,7 +593,6 @@ function ScatterPlotData({
 
         className="
           w-full
-          flex-1
           min-w-0
           h-[400px]
           border
