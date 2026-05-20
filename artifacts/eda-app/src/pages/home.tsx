@@ -9,6 +9,7 @@ import logoFull from "@/assets/branding/logo-full.png";
 import logoDark from "@/assets/branding/logo-dark.png";
 import { useTheme } from "@/components/theme-provider";
 import SmartLoading from "@/components/ui/smart-loading";
+import { motion } from "framer-motion";
 
 export default function Home() {
   const { theme } = useTheme();
@@ -196,7 +197,44 @@ export default function Home() {
                     style={{ width: `${uploadProgress}%` }}
                   />
                 </div>
-                <p className="text-xs text-muted-foreground mt-2 text-center">Processing dataset…</p>
+                  <motion.div
+
+                    initial={{
+                      opacity: 0,
+                      y: 5,
+                    }}
+
+                    animate={{
+                      opacity: 1,
+                      y: 0,
+                    }}
+
+                    transition={{
+                      duration: 0.4,
+                    }}
+
+                    className="
+                      text-xs
+                      text-muted-foreground
+                      mt-3
+                      text-center
+                      space-y-1
+                    "
+                  >
+
+                    <p>
+
+                      Initializing AI analytics pipeline...
+
+                    </p>
+
+                    <p className="text-[11px] text-muted-foreground/70">
+
+                      Cloud compute services may take a few moments after inactivity.
+
+                    </p>
+
+                  </motion.div>
               </div>
             )}
           </div>
@@ -206,7 +244,7 @@ export default function Home() {
         <div className="space-y-6">
           <h2 className="text-2xl font-bold tracking-tight text-foreground border-b pb-4">Recent Datasets</h2>
           
-          {{datasetsLoading ? (
+          {datasetsLoading ? (
 
             <div className="space-y-6">
 
