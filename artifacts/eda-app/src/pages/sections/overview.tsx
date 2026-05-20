@@ -6,6 +6,7 @@ import { Badge } from "@/components/ui/badge";
 import { motion } from "framer-motion";
 import AnimatedCounter from "@/components/ui/AnimatedCounter";
 import DashboardSkeleton from "@/components/ui/dashboard-skeleton";
+import SmartLoading from "@/components/ui/smart-loading";
 import {
   Database,
   ShieldCheck,
@@ -28,7 +29,12 @@ export default function Overview({ datasetId }: { datasetId: string }) {
     useGetQualityScore(datasetId);
 
   if (overviewLoading || previewLoading) {
-    return <DashboardSkeleton />;
+    return (
+      <>
+      <SmartLoading />
+      <DashboardSkeleton />
+      </>
+    );
   }
 
   if (!overview || !preview) return null;
