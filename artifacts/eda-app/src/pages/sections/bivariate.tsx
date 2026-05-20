@@ -14,7 +14,7 @@ import {
 import { Skeleton } from "@/components/ui/skeleton";
 import DashboardSkeleton from "@/components/ui/dashboard-skeleton";
 import SmartLoading from "@/components/ui/smart-loading";
-import motion from "framer-motion";
+import { motion } from "framer-motion";
 
 import {
   Select,
