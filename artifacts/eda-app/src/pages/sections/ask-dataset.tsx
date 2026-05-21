@@ -21,11 +21,18 @@ type Message = {
   role: "user" | "assistant";
   content: string;
 };
+type Props = {
+  datasetId: string;
+};
 
 const [isThinking, setIsThinking] =
   useState(false);
 
-export default function AskDataset() {
+const API_BASE =
+  import.meta.env.VITE_API_URL ||
+  "https://eda-xqob.onrender.com";
+
+export default function AskDataset({ datasetId }: Props) {
 
   const [input, setInput] =
     useState("");
@@ -50,6 +57,40 @@ export default function AskDataset() {
     "What are the top cost drivers?",
 
   ];
+
+    async function fetchTopCategory() {
+
+        try {
+
+            const response =
+            await fetch(
+
+                `${API_BASE}/api/datasets/${datasetId}/groupby?group_by=Cost%20Center%20Name&metric=Amount&aggregation=sum`
+
+            );
+
+            const json =
+            await response.json();
+
+            if (!json?.data?.length)
+            return null;
+
+            const sorted =
+            [...json.data].sort(
+                (a, b) =>
+                b.value - a.value
+            );
+
+            return sorted[0];
+
+        } catch (err) {
+
+            console.error(err);
+
+            return null;
+
+        }
+    }
 
   async function handleAsk(
     question: string
@@ -89,8 +130,16 @@ export default function AskDataset() {
         lower.includes("most")
     ) {
 
-        response =
-        "Operations appears to contribute the highest overall operational value concentration across the dataset.";
+        const topCategory =
+            await fetchTopCategory();
+
+            if (topCategory) {
+
+            response =
+
+                `${topCategory.label} contributes the highest operational value concentration with approximately ${topCategory.value.toLocaleString()} total aggregated activity.`;
+
+            }
 
     }
 
