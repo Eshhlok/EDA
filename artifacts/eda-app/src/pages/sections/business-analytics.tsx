@@ -40,6 +40,21 @@ type GroupByResponse = {
   data: { label: string; value: number }[];
 };
 
+const MONTHS = [
+  { value: "1", label: "January" },
+  { value: "2", label: "February" },
+  { value: "3", label: "March" },
+  { value: "4", label: "April" },
+  { value: "5", label: "May" },
+  { value: "6", label: "June" },
+  { value: "7", label: "July" },
+  { value: "8", label: "August" },
+  { value: "9", label: "September" },
+  { value: "10", label: "October" },
+  { value: "11", label: "November" },
+  { value: "12", label: "December" },
+];
+
 const chartTooltipStyle = {
   contentStyle: {
     backgroundColor: "#111827",
@@ -69,11 +84,16 @@ export default function BusinessAnalytics({ datasetId }: Props) {
   const [aggregation, setAggregation] = useState("sum");
   const [chartType, setChartType] = useState<"bar" | "line">("bar");
   const [showForecast, setShowForecast] = useState(true);
-  const [selectedYear, setSelectedYear] =useState("all");
+
+  // ── NEW: Year / Month filter state ─────────────────────────────────────────
+  const [selectedYear, setSelectedYear] = useState("all");
+  const [selectedMonth, setSelectedMonth] = useState("all");
+  const [availableYears, setAvailableYears] = useState<string[]>([]);
+  // ──────────────────────────────────────────────────────────────────────────
+
   const [data, setData] = useState<GroupByResponse | null>(null);
   const [drillHistory, setDrillHistory] = useState<{ column: string; value: string }[]>([]);
   const [loading, setLoading] = useState(false);
-  const isYearMode =selectedYear !== "all";
 
   const totalValue = data?.data.reduce((sum, row) => sum + row.value, 0) || 0;
   const averageValue = data?.data.length ? totalValue / data.data.length : 0;
@@ -136,67 +156,68 @@ export default function BusinessAnalytics({ datasetId }: Props) {
       (col) => !col.includes("_month") && !col.includes("_year") && !col.includes("_quarter")
     ),
   ];
-  const yearColumn =
 
-    categoricalColumns.find(
-      (col) =>
-        col.toLowerCase().includes("year")
-    );
+  const yearColumn = categoricalColumns.find((col) => col.toLowerCase().includes("year"));
+  const monthColumn = categoricalColumns.find((col) => col.toLowerCase().includes("month"));
 
-  const availableYears =
-
-    yearColumn && data?.group_by === yearColumn
-
-      ? data.data
-          .map((d) => String(d.label))
-          .filter((v) => /^\d{4}$/.test(v))
-
-      : [];
-
+  // ── Initialise defaults once columns are resolved ──────────────────────────
   useEffect(() => {
     if (groupableColumns.length > 0 && !groupBy) {
-      setGroupBy(groupableColumns[0]);
-      setRootGroupBy(groupableColumns[0]);
-      const detectedYearColumn =
-
-        groupableColumns.find(
-          (col) =>
-            col.toLowerCase().includes("year")
-        );
-
-      if (detectedYearColumn) {
-        setGroupBy(detectedYearColumn);
-        setRootGroupBy(detectedYearColumn);
-      }
+      const detectedYearColumn = groupableColumns.find((col) =>
+        col.toLowerCase().includes("year")
+      );
+      const initial = detectedYearColumn ?? groupableColumns[0];
+      setGroupBy(initial);
+      setRootGroupBy(initial);
     }
     if (numericColumns.length > 0 && !metric) {
       setMetric(numericColumns[0]);
     }
-  }, [groupableColumns, numericColumns, groupBy, metric]);
+  }, [groupableColumns.join(","), numericColumns.join(",")]);
 
+  // ── Fetch available years from the year column ─────────────────────────────
   useEffect(() => {
+    if (!yearColumn || !metric) return;
+    const fetchYears = async () => {
+      try {
+        const params = new URLSearchParams({
+          group_by: yearColumn,
+          metric,
+          aggregation,
+        });
+        const res = await fetch(`${API_BASE}/api/datasets/${datasetId}/groupby?${params}`);
+        const json: GroupByResponse = await res.json();
+        const years = json.data
+          .map((d) => String(d.label))
+          .filter((v) => /^\d{4}$/.test(v))
+          .sort((a, b) => Number(a) - Number(b));
+        setAvailableYears(years);
+      } catch (err) {
+        console.error("Failed to fetch available years", err);
+      }
+    };
+    fetchYears();
+  }, [yearColumn, metric, aggregation, datasetId]);
 
-    if (
-      selectedYear !== "all" &&
-      groupableColumns.includes(
-        "Posting Date_month"
-      )
-    ) {
-
-      setGroupBy(
-        "Posting Date_month"
-      );
-
-      setDrillHistory([
-        {
-          column: "Posting Date_year",
-          value: selectedYear,
-        },
-      ]);
-
+  // ── Derive filter columns/values from year + month selectors ──────────────
+  function buildDateFilters(): { columns: string[]; values: string[] } {
+    const columns: string[] = [];
+    const values: string[] = [];
+    if (selectedYear !== "all" && yearColumn) {
+      columns.push(yearColumn);
+      values.push(selectedYear);
     }
+    if (selectedMonth !== "all" && monthColumn) {
+      columns.push(monthColumn);
+      values.push(selectedMonth);
+    }
+    return { columns, values };
+  }
 
-  }, [selectedYear]);
+  // ── When year/month changes reset manual drill history ────────────────────
+  useEffect(() => {
+    setDrillHistory([]);
+  }, [selectedYear, selectedMonth]);
 
   function exportCSV() {
     if (!data?.data?.length) return;
@@ -242,10 +263,17 @@ export default function BusinessAnalytics({ datasetId }: Props) {
     try {
       setLoading(true);
       const params = new URLSearchParams({ group_by: groupBy, metric, aggregation });
-      if (drillHistory.length > 0) {
-        params.append("filter_columns", drillHistory.map((d) => d.column).join(","));
-        params.append("filter_values", drillHistory.map((d) => d.value).join(","));
+
+      // Merge date filters + manual drill history
+      const dateFilters = buildDateFilters();
+      const allFilterColumns = [...dateFilters.columns, ...drillHistory.map((d) => d.column)];
+      const allFilterValues = [...dateFilters.values, ...drillHistory.map((d) => d.value)];
+
+      if (allFilterColumns.length > 0) {
+        params.append("filter_columns", allFilterColumns.join(","));
+        params.append("filter_values", allFilterValues.join(","));
       }
+
       const response = await fetch(`${API_BASE}/api/datasets/${datasetId}/groupby?${params}`);
       const json = await response.json();
       setData(json);
@@ -258,7 +286,7 @@ export default function BusinessAnalytics({ datasetId }: Props) {
 
   useEffect(() => {
     fetchData();
-  }, [groupBy, metric, aggregation]);
+  }, [groupBy, metric, aggregation, selectedYear, selectedMonth, drillHistory]);
 
   if (loading || !univariateData) {
     return (
@@ -270,6 +298,17 @@ export default function BusinessAnalytics({ datasetId }: Props) {
       </div>
     );
   }
+
+  // ── Derived label for chart title ─────────────────────────────────────────
+  const activePeriodLabel = (() => {
+    const parts: string[] = [];
+    if (selectedYear !== "all") parts.push(selectedYear);
+    if (selectedMonth !== "all") {
+      const m = MONTHS.find((m) => m.value === selectedMonth);
+      if (m) parts.push(m.label);
+    }
+    return parts.length > 0 ? parts.join(" – ") : null;
+  })();
 
   return (
     <div className="p-6 space-y-6">
@@ -303,6 +342,7 @@ export default function BusinessAnalytics({ datasetId }: Props) {
 
       {/* CONTROLS */}
       <div className="flex flex-wrap gap-4">
+        {/* Group By */}
         <Select
           value={groupBy}
           onValueChange={(value) => {
@@ -321,6 +361,7 @@ export default function BusinessAnalytics({ datasetId }: Props) {
           </SelectContent>
         </Select>
 
+        {/* Metric */}
         <Select value={metric} onValueChange={setMetric}>
           <SelectTrigger className="w-[250px]">
             <SelectValue placeholder="Metric" />
@@ -332,6 +373,7 @@ export default function BusinessAnalytics({ datasetId }: Props) {
           </SelectContent>
         </Select>
 
+        {/* Aggregation */}
         <Select value={aggregation} onValueChange={setAggregation}>
           <SelectTrigger className="w-[180px]">
             <SelectValue placeholder="Aggregation" />
@@ -343,41 +385,61 @@ export default function BusinessAnalytics({ datasetId }: Props) {
           </SelectContent>
         </Select>
 
+        {/* ── Year filter ── */}
         <Select
           value={selectedYear}
-          onValueChange={setSelectedYear}
+          onValueChange={(val) => {
+            setSelectedYear(val);
+            // Reset month when year changes to "all" for a clean state
+            if (val === "all") setSelectedMonth("all");
+          }}
         >
-
-          <SelectTrigger className="w-[180px]">
-
-            <SelectValue placeholder="Select Year" />
-
+          <SelectTrigger className="w-[160px]">
+            <SelectValue placeholder="Year" />
           </SelectTrigger>
-
           <SelectContent>
-
-            <SelectItem value="all">
-              All Years
-            </SelectItem>
-
+            <SelectItem value="all">All Years</SelectItem>
             {availableYears.map((year) => (
-
-              <SelectItem
-                key={year}
-                value={year}
-              >
-
-                {year}
-
-              </SelectItem>
-
+              <SelectItem key={year} value={year}>{year}</SelectItem>
             ))}
-
           </SelectContent>
-
         </Select>
 
+        {/* ── Month filter (only enabled when a year is selected) ── */}
+        <Select
+          value={selectedMonth}
+          onValueChange={setSelectedMonth}
+          disabled={selectedYear === "all"}
+        >
+          <SelectTrigger
+            className={`w-[160px] ${selectedYear === "all" ? "opacity-50 cursor-not-allowed" : ""}`}
+          >
+            <SelectValue placeholder="Month" />
+          </SelectTrigger>
+          <SelectContent>
+            <SelectItem value="all">All Months</SelectItem>
+            {MONTHS.map((m) => (
+              <SelectItem key={m.value} value={m.value}>{m.label}</SelectItem>
+            ))}
+          </SelectContent>
+        </Select>
       </div>
+
+      {/* Active filter badge */}
+      {activePeriodLabel && (
+        <div className="flex items-center gap-2">
+          <span className="inline-flex items-center gap-2 rounded-full border border-primary/30 bg-primary/10 px-3 py-1 text-xs font-medium text-primary">
+            Filtered: {activePeriodLabel}
+            <button
+              className="ml-1 rounded-full hover:text-destructive transition-colors"
+              onClick={() => { setSelectedYear("all"); setSelectedMonth("all"); }}
+              aria-label="Clear date filters"
+            >
+              ✕
+            </button>
+          </span>
+        </div>
+      )}
 
       {/* CHART TYPE */}
       <Select value={chartType} onValueChange={(v) => setChartType(v as "bar" | "line")}>
@@ -419,7 +481,9 @@ export default function BusinessAnalytics({ datasetId }: Props) {
       <Card>
         <CardHeader>
           <CardTitle>
-            {selectedYear === "all"? "Business Analytics": `${selectedYear} Monthly Trend Analysis`}
+            {activePeriodLabel
+              ? `${activePeriodLabel} — Analytics`
+              : "Business Analytics"}
           </CardTitle>
         </CardHeader>
         <CardContent>
