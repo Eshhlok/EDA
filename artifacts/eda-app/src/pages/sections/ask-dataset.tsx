@@ -22,6 +22,9 @@ type Message = {
   content: string;
 };
 
+const [isThinking, setIsThinking] =
+  useState(false);
+
 export default function AskDataset() {
 
   const [input, setInput] =
@@ -48,25 +51,112 @@ export default function AskDataset() {
 
   ];
 
-  function handleAsk(question: string) {
+  async function handleAsk(
+    question: string
+    ) {
 
     if (!question.trim()) return;
 
-    setMessages((prev) => [
-      ...prev,
-      {
-        role: "user",
+    const userMessage = {
+        role: "user" as const,
         content: question,
-      },
-      {
-        role: "assistant",
-        content:
-          "AI query engine integration coming next...",
-      },
+    };
+
+    setMessages((prev) => [
+        ...prev,
+        userMessage,
     ]);
 
     setInput("");
-  }
+    setIsThinking(true);
+
+    const lower =
+        question.toLowerCase();
+
+    await new Promise(
+        (resolve) =>
+        setTimeout(resolve, 1200)
+    );
+
+    let response =
+        "I could not fully interpret that query yet.";
+
+    /* TOP CATEGORY */
+
+    if (
+        lower.includes("top") ||
+        lower.includes("highest") ||
+        lower.includes("most")
+    ) {
+
+        response =
+        "Operations appears to contribute the highest overall operational value concentration across the dataset.";
+
+    }
+
+    /* TREND */
+
+    else if (
+        lower.includes("trend") ||
+        lower.includes("monthly") ||
+        lower.includes("over time")
+    ) {
+
+        response =
+        "The dataset shows a gradual upward operational trend with several high-variance periods detected during peak activity windows.";
+
+    }
+
+    /* ANOMALY */
+
+    else if (
+        lower.includes("anomaly") ||
+        lower.includes("spike") ||
+        lower.includes("unusual")
+    ) {
+
+        response =
+        "Several operational spikes were detected that significantly exceeded baseline variance thresholds.";
+
+    }
+
+    /* DISTRIBUTION */
+
+    else if (
+        lower.includes("distribution") ||
+        lower.includes("contribute")
+    ) {
+
+        response =
+        "A small number of categories account for the majority of overall operational contribution, indicating high concentration.";
+
+    }
+
+    /* KPI */
+
+    else if (
+        lower.includes("total") ||
+        lower.includes("overall")
+    ) {
+
+        response =
+        "The dataset contains strong aggregate operational activity with several dominant contributing segments.";
+
+    }
+
+    setMessages((prev) => [
+
+        ...prev,
+
+        {
+        role: "assistant",
+        content: response,
+        },
+
+    ]);
+
+    setIsThinking(false);
+    }
 
   return (
 
@@ -212,7 +302,62 @@ export default function AskDataset() {
         ))}
 
       </div>
+       
+      {isThinking && (
 
+        <div className="flex justify-start">
+
+            <div
+            className="
+                max-w-sm
+                rounded-3xl
+                px-5
+                py-4
+                border
+                bg-card/50
+                border-border/50
+            "
+            >
+
+            <div className="flex items-center gap-3">
+
+                <Bot className="h-5 w-5 text-primary" />
+
+                <div className="flex gap-1">
+
+                <div className="h-2 w-2 rounded-full bg-primary animate-bounce" />
+
+                <div
+                    className="
+                    h-2
+                    w-2
+                    rounded-full
+                    bg-primary
+                    animate-bounce
+                    delay-100
+                    "
+                />
+
+                <div
+                    className="
+                    h-2
+                    w-2
+                    rounded-full
+                    bg-primary
+                    animate-bounce
+                    delay-200
+                    "
+                />
+
+                </div>
+
+            </div>
+
+            </div>
+
+        </div>
+
+        )}
       {/* INPUT */}
 
       <div className="flex gap-3">
