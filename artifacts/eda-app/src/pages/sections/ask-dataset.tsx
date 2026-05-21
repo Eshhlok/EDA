@@ -1,7 +1,5 @@
 import { useEffect, useRef, useState } from "react";
 
-import { useGetUnivariateAnalysis } from "@workspace/api-client-react";
-
 import {
   Card,
   CardContent,
@@ -24,10 +22,25 @@ import {
   BarChart3,
 } from "lucide-react";
 
+type Insight = {
+  label: string;
+  value: string | number;
+};
+
 type Message = {
   role: "user" | "assistant";
   content: string;
   timestamp?: string;
+
+  severity?: "low" | "medium" | "high";
+
+  insights?: Insight[];
+
+  recommendations?: string[];
+
+  charts?: string[];
+
+  metrics?: Record<string, any>;
 };
 
 type Props = {
@@ -37,63 +50,6 @@ type Props = {
 const API_BASE =
   import.meta.env.VITE_API_URL ||
   "https://eda-xqob.onrender.com";
-
-/* -------------------------------- */
-/* INTENT DETECTION */
-/* -------------------------------- */
-
-function detectIntent(query: string) {
-  const q = query.toLowerCase();
-
-  if (
-    q.includes("highest") ||
-    q.includes("top") ||
-    q.includes("most") ||
-    q.includes("largest") ||
-    q.includes("dominant")
-  ) {
-    return "TOP_CATEGORY";
-  }
-
-  if (
-    q.includes("trend") ||
-    q.includes("monthly") ||
-    q.includes("over time") ||
-    q.includes("growth")
-  ) {
-    return "TREND";
-  }
-
-  if (
-    q.includes("anomaly") ||
-    q.includes("spike") ||
-    q.includes("unusual") ||
-    q.includes("outlier")
-  ) {
-    return "ANOMALY";
-  }
-
-  if (
-    q.includes("distribution") ||
-    q.includes("contribution")
-  ) {
-    return "DISTRIBUTION";
-  }
-
-  if (
-    q.includes("total") ||
-    q.includes("overall") ||
-    q.includes("summary")
-  ) {
-    return "SUMMARY";
-  }
-
-  return "UNKNOWN";
-}
-
-/* -------------------------------- */
-/* COMPONENT */
-/* -------------------------------- */
 
 export default function AskDataset({
   datasetId,
@@ -112,14 +68,16 @@ export default function AskDataset({
     useState<Message[]>([
       {
         role: "assistant",
+
         content:
-          "Hello — I’m your EDAFlow Copilot. I can analyze trends, operational KPIs, anomalies, category contributions, and business patterns across your dataset.",
-        timestamp: new Date().toLocaleTimeString(),
+          "Hello — I’m your EDAFlow Copilot. I can analyze dataset quality, anomalies, trends, correlations, forecasting readiness, and business intelligence patterns across your data.",
+
+        timestamp:
+          new Date().toLocaleTimeString(),
+
+        severity: "low",
       },
     ]);
-
-  const [conversationContext, setConversationContext] =
-    useState<any>(null);
 
   const chatEndRef =
     useRef<HTMLDivElement | null>(null);
@@ -137,183 +95,23 @@ export default function AskDataset({
   }, [messages, isThinking]);
 
   /* -------------------------------- */
-  /* DATASET METADATA */
-  /* -------------------------------- */
-
-  const { data: univariateData } =
-    useGetUnivariateAnalysis(datasetId);
-
-  const numericColumns =
-    univariateData?.numeric || [];
-
-  const categoricalColumns =
-    univariateData?.categorical || [];
-
-  /* -------------------------------- */
-  /* SMART COLUMN DETECTION */
-  /* -------------------------------- */
-
-  const detectedMetric =
-
-    numericColumns.find((c) =>
-
-      c.column.toLowerCase().includes("amount") ||
-
-      c.column.toLowerCase().includes("cost") ||
-
-      c.column.toLowerCase().includes("sales") ||
-
-      c.column.toLowerCase().includes("revenue") ||
-
-      c.column.toLowerCase().includes("usage")
-
-    )?.column
-
-    ||
-
-    numericColumns[0]?.column;
-
-  const detectedCategory =
-
-    categoricalColumns.find((c) =>
-
-      c.column.toLowerCase().includes("department") ||
-
-      c.column.toLowerCase().includes("category") ||
-
-      c.column.toLowerCase().includes("center") ||
-
-      c.column.toLowerCase().includes("region")
-
-    )?.column
-
-    ||
-
-    categoricalColumns[0]?.column;
-
-  /* -------------------------------- */
   /* SUGGESTIONS */
   /* -------------------------------- */
 
   const suggestions = [
 
-    "Which category contributes the most?",
+    "Is this dataset clean?",
 
-    "Show monthly operational trends",
+    "Are there anomalies in the dataset?",
 
-    "Which periods contain anomalies?",
+    "Can this dataset be used for forecasting?",
 
-    "What are the top cost drivers?",
+    "What columns are correlated?",
 
   ];
 
   /* -------------------------------- */
-  /* ANALYTICS FUNCTIONS */
-  /* -------------------------------- */
-
-  async function fetchTopCategory() {
-
-    try {
-
-      if (
-        !detectedCategory ||
-        !detectedMetric
-      ) {
-        return null;
-      }
-
-      const response =
-        await fetch(
-
-          `${API_BASE}/api/datasets/${datasetId}/groupby?group_by=${encodeURIComponent(detectedCategory)}&metric=${encodeURIComponent(detectedMetric)}&aggregation=sum`
-
-        );
-
-      const json =
-        await response.json();
-
-      if (!json?.data?.length)
-        return null;
-
-      const sorted =
-        [...json.data].sort(
-          (a, b) =>
-            b.value - a.value
-        );
-
-      return sorted[0];
-
-    } catch (err) {
-
-      console.error(err);
-
-      return null;
-
-    }
-  }
-
-  async function fetchDistribution() {
-
-    try {
-
-      if (
-        !detectedCategory ||
-        !detectedMetric
-      ) {
-        return null;
-      }
-
-      const response =
-        await fetch(
-
-          `${API_BASE}/api/datasets/${datasetId}/groupby?group_by=${encodeURIComponent(detectedCategory)}&metric=${encodeURIComponent(detectedMetric)}&aggregation=sum`
-
-        );
-
-      const json =
-        await response.json();
-
-      if (!json?.data?.length)
-        return null;
-
-      const total =
-        json.data.reduce(
-          (acc: number, item: any) =>
-            acc + item.value,
-          0
-        );
-
-      const sorted =
-        [...json.data].sort(
-          (a, b) =>
-            b.value - a.value
-        );
-
-      const dominant =
-        sorted[0];
-
-      const percentage =
-        (
-          (dominant.value / total) *
-          100
-        ).toFixed(1);
-
-      return {
-        dominant,
-        percentage,
-      };
-
-    } catch (err) {
-
-      console.error(err);
-
-      return null;
-
-    }
-  }
-
-  /* -------------------------------- */
-  /* CHAT ENGINE */
+  /* COPILOT ENGINE */
   /* -------------------------------- */
 
   async function handleAsk(
@@ -322,9 +120,11 @@ export default function AskDataset({
 
     if (!question.trim()) return;
 
-    const userMessage = {
-      role: "user" as const,
+    const userMessage: Message = {
+      role: "user",
+
       content: question,
+
       timestamp:
         new Date().toLocaleTimeString(),
     };
@@ -335,148 +135,94 @@ export default function AskDataset({
     ]);
 
     setInput("");
+
     setIsThinking(true);
 
-    const intent =
-      detectIntent(question);
+    try {
 
-    await new Promise(
-      (resolve) =>
-        setTimeout(resolve, 1200)
-    );
+      const response =
+        await fetch(
 
-    let response =
-      "I could not fully interpret that analytical query yet.";
+          `${API_BASE}/api/copilot/query`,
 
-    /* -------------------------------- */
-    /* TOP CATEGORY */
-    /* -------------------------------- */
+          {
+            method: "POST",
 
-    if (intent === "TOP_CATEGORY") {
+            headers: {
+              "Content-Type":
+                "application/json",
+            },
 
-      const topCategory =
-        await fetchTopCategory();
+            body: JSON.stringify({
+              dataset_id: datasetId,
+              message: question,
+            }),
+          }
+        );
 
-      if (topCategory) {
+      const data =
+        await response.json();
 
-        setConversationContext({
-          lastCategory:
-            topCategory.label,
-        });
+      const aiMessage: Message = {
 
-        response =
-
-          `${topCategory.label} currently represents the highest operational concentration across the dataset with approximately ${topCategory.value.toLocaleString()} aggregated units of activity. This segment appears to be the dominant business contributor based on the detected metrics.`;
-
-      } else {
-
-        response =
-          "I could not identify a dominant category from the available operational data.";
-
-      }
-
-    }
-
-    /* -------------------------------- */
-    /* TREND */
-    /* -------------------------------- */
-
-    else if (
-      intent === "TREND"
-    ) {
-
-      response =
-
-        `The dataset indicates a generally upward operational trend with several high-variance activity windows detected over time. ${
-          conversationContext?.lastCategory
-
-            ? `${conversationContext.lastCategory} appears to maintain particularly strong contribution consistency across observed periods.`
-
-            : ""
-        }`;
-
-    }
-
-    /* -------------------------------- */
-    /* ANOMALY */
-    /* -------------------------------- */
-
-    else if (
-      intent === "ANOMALY"
-    ) {
-
-      response =
-
-        "Several statistical anomalies and operational spikes were detected that significantly exceeded expected baseline variance thresholds. These periods may indicate irregular consumption behavior, peak demand cycles, or reporting inconsistencies.";
-
-    }
-
-    /* -------------------------------- */
-    /* DISTRIBUTION */
-    /* -------------------------------- */
-
-    else if (
-      intent === "DISTRIBUTION"
-    ) {
-
-      const distribution =
-        await fetchDistribution();
-
-      if (distribution) {
-
-        response =
-
-          `${distribution.dominant.label} contributes approximately ${distribution.percentage}% of the total measured operational activity, indicating a relatively concentrated distribution pattern across the dataset.`;
-
-      } else {
-
-        response =
-          "I could not calculate contribution distribution from the current dataset.";
-
-      }
-
-    }
-
-    /* -------------------------------- */
-    /* SUMMARY */
-    /* -------------------------------- */
-
-    else if (
-      intent === "SUMMARY"
-    ) {
-
-      response =
-
-        `The dataset contains ${numericColumns.length} numeric metrics and ${categoricalColumns.length} categorical dimensions. Initial analysis suggests the presence of dominant operational segments, measurable variance patterns, and several high-impact contributors across the dataset.`;
-
-    }
-
-    /* -------------------------------- */
-    /* UNKNOWN */
-    /* -------------------------------- */
-
-    else {
-
-      response =
-
-        "I understand parts of your request, but I still need expanded analytical reasoning capabilities for that query type. Try asking about trends, anomalies, operational contributors, distributions, or KPI summaries.";
-
-    }
-
-    setMessages((prev) => [
-
-      ...prev,
-
-      {
         role: "assistant",
-        content: response,
+
+        content:
+          data.message ||
+
+          "Analysis completed successfully.",
+
         timestamp:
           new Date().toLocaleTimeString(),
-      },
 
-    ]);
+        severity:
+          data.severity || "low",
 
-    setIsThinking(false);
+        insights:
+          data.insights || [],
+
+        recommendations:
+          data.recommendations || [],
+
+        charts:
+          data.charts || [],
+
+        metrics:
+          data.metrics || {},
+      };
+
+      setMessages((prev) => [
+        ...prev,
+        aiMessage,
+      ]);
+
+    } catch (error) {
+
+      console.error(error);
+
+      setMessages((prev) => [
+
+        ...prev,
+
+        {
+          role: "assistant",
+
+          content:
+            "EDAFlow Copilot could not complete the analysis request. Please try again.",
+
+          timestamp:
+            new Date().toLocaleTimeString(),
+
+          severity: "high",
+        },
+
+      ]);
+
+    } finally {
+
+      setIsThinking(false);
+
+    }
   }
 
   return (
@@ -571,7 +317,7 @@ export default function AskDataset({
 
                 <p className="text-xs text-muted-foreground">
 
-                  Conversational Business Intelligence
+                  Conversational Intelligence Engine
 
                 </p>
 
@@ -694,13 +440,138 @@ export default function AskDataset({
 
                     )}
 
-                    <div className="space-y-2">
+                    <div className="space-y-3 w-full">
+
+                      {/* SEVERITY */}
+
+                      {message.role ===
+                        "assistant" &&
+
+                        message.severity && (
+
+                        <div
+                          className={`
+                            inline-flex
+                            rounded-full
+                            px-2
+                            py-1
+                            text-[10px]
+                            font-medium
+
+                            ${
+                              message.severity === "high"
+
+                                ? `
+                                  bg-red-500/10
+                                  text-red-400
+                                `
+
+                                : message.severity === "medium"
+
+                                ? `
+                                  bg-yellow-500/10
+                                  text-yellow-400
+                                `
+
+                                : `
+                                  bg-emerald-500/10
+                                  text-emerald-400
+                                `
+                            }
+                          `}
+                        >
+
+                          {message.severity.toUpperCase()}
+
+                        </div>
+
+                      )}
+
+                      {/* MAIN MESSAGE */}
 
                       <p className="text-sm leading-relaxed">
 
                         {message.content}
 
                       </p>
+
+                      {/* INSIGHTS */}
+
+                      {message.insights &&
+                        message.insights.length > 0 && (
+
+                        <div className="grid grid-cols-2 gap-2">
+
+                          {message.insights.map(
+                            (insight, idx) => (
+
+                              <div
+                                key={idx}
+                                className="
+                                  rounded-2xl
+                                  border
+                                  border-border/50
+                                  bg-muted/30
+                                  p-3
+                                "
+                              >
+
+                                <div className="text-[10px] text-muted-foreground">
+
+                                  {insight.label}
+
+                                </div>
+
+                                <div className="text-lg font-bold mt-1">
+
+                                  {insight.value}
+
+                                </div>
+
+                              </div>
+
+                            )
+                          )}
+
+                        </div>
+
+                      )}
+
+                      {/* RECOMMENDATIONS */}
+
+                      {message.recommendations &&
+                        message.recommendations.length > 0 && (
+
+                        <div className="space-y-2">
+
+                          {message.recommendations.map(
+                            (rec, idx) => (
+
+                              <div
+                                key={idx}
+                                className="
+                                  rounded-xl
+                                  border
+                                  border-amber-500/20
+                                  bg-amber-500/5
+                                  px-3
+                                  py-2
+                                  text-xs
+                                "
+                              >
+
+                                • {rec}
+
+                              </div>
+
+                            )
+                          )}
+
+                        </div>
+
+                      )}
+
+                      {/* TIMESTAMP */}
 
                       <p className="text-[10px] opacity-60">
 
@@ -772,7 +643,7 @@ export default function AskDataset({
 
                       <p className="text-xs text-muted-foreground">
 
-                        Analyzing dataset intelligence...
+                        EDAFlow Copilot is orchestrating analytics intelligence...
 
                       </p>
 
@@ -868,14 +739,18 @@ export default function AskDataset({
 
             <Input
               value={input}
+
               onChange={(e) =>
                 setInput(e.target.value)
               }
+
               placeholder="Ask anything about your dataset..."
+
               className="
                 h-12
                 rounded-2xl
               "
+
               onKeyDown={(e) => {
 
                 if (e.key === "Enter") {
