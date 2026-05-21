@@ -27,6 +27,7 @@ import logoIconDark from "@/assets/branding/logo-icon-dark.png";
 import logoIcon from "@/assets/branding/logo-icon.png";
 import { useTheme } from "@/components/theme-provider";
 import SmartInsights from "@/pages/sections/smart-insights";
+import AskDataset from "@/pages/sections/ask-dataset";
 
 type NavItem = {
   name: string;
@@ -280,6 +281,7 @@ export default function DatasetLayout() {
           {renderSection()}
         </div>
       </main>
+      <AskDataset datasetId={datasetId} />
     </div>
   );
 }
