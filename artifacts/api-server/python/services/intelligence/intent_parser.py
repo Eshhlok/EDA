@@ -1,7 +1,14 @@
 def detect_intent(query: str) -> str:
     q = query.lower()
 
-    if any(word in q for word in ["outlier", "anomaly", "spike"]):
+    if any(word in q for word in [
+        "outlier",
+        "outliers",
+        "anomaly",
+        "anomalies",
+        "spike",
+        "unusual",
+    ]):
         return "outlier_analysis"
 
     if any(word in q for word in ["missing", "null", "empty"]):
