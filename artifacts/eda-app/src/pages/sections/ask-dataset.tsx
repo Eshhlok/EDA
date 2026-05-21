@@ -230,12 +230,12 @@ export default function AskDataset({
 
   return (
 
-    <div className="fixed bottom-6 right-6 z-50">
+    <div className="z-50">
 
       {/* COLLAPSED BUTTON */}
 
       {!isOpen && (
-
+        <div className="fixed bottom-6 right-6 z-50">
         <Button
           onClick={() =>
             setIsOpen(true)
@@ -256,7 +256,7 @@ export default function AskDataset({
           EDAFlow Copilot
 
         </Button>
-
+        </div>
       )}
 
       {/* CHAT WINDOW */}
@@ -265,8 +265,8 @@ export default function AskDataset({
 
         <Rnd
           default={{
-            x: Math.max(window.innerWidth - 460, 20),
-            y: Math.max(window.innerHeight - 760, 20),
+            x: window.innerWidth - 460,
+            y: 80,
             width: 420,
             height: 700,
           }}
