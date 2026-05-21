@@ -220,7 +220,11 @@ export default function BusinessAnalytics({ datasetId }: Props) {
         const res = await fetch(`${API_BASE}/api/datasets/${datasetId}/groupby?${params}`);
         const json: GroupByResponse = await res.json();
         const years = json.data
-          .map((d) => String(d.label).trim())
+          .map((d) => {
+            // API returns "2025.0" for integer years stored as float – normalize to "2025"
+            const raw = String(d.label).trim();
+            return raw.replace(/\.0+$/, "");
+          })
           .filter((v) => /^\d{4}$/.test(v))
           .sort((a, b) => Number(a) - Number(b));
         setAvailableYears(years);
@@ -281,7 +285,8 @@ export default function BusinessAnalytics({ datasetId }: Props) {
 
     if (selectedYear !== "all" && yearColumn) {
       columns.push(yearColumn);
-      values.push(selectedYear);
+      // Backend stores Year as float ("2025.0"), send in that format for filter matching
+      values.push(selectedYear.includes(".") ? selectedYear : `${selectedYear}.0`);
     }
     if (selectedMonth !== "all" && monthColumn) {
       columns.push(monthColumn);
