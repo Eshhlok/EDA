@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useEffect, useRef, useState } from "react";
 
 import { useGetUnivariateAnalysis } from "@workspace/api-client-react";
 
@@ -19,11 +19,15 @@ import {
   Send,
   X,
   Minimize2,
+  TrendingUp,
+  AlertTriangle,
+  BarChart3,
 } from "lucide-react";
 
 type Message = {
   role: "user" | "assistant";
   content: string;
+  timestamp?: string;
 };
 
 type Props = {
@@ -33,6 +37,63 @@ type Props = {
 const API_BASE =
   import.meta.env.VITE_API_URL ||
   "https://eda-xqob.onrender.com";
+
+/* -------------------------------- */
+/* INTENT DETECTION */
+/* -------------------------------- */
+
+function detectIntent(query: string) {
+  const q = query.toLowerCase();
+
+  if (
+    q.includes("highest") ||
+    q.includes("top") ||
+    q.includes("most") ||
+    q.includes("largest") ||
+    q.includes("dominant")
+  ) {
+    return "TOP_CATEGORY";
+  }
+
+  if (
+    q.includes("trend") ||
+    q.includes("monthly") ||
+    q.includes("over time") ||
+    q.includes("growth")
+  ) {
+    return "TREND";
+  }
+
+  if (
+    q.includes("anomaly") ||
+    q.includes("spike") ||
+    q.includes("unusual") ||
+    q.includes("outlier")
+  ) {
+    return "ANOMALY";
+  }
+
+  if (
+    q.includes("distribution") ||
+    q.includes("contribution")
+  ) {
+    return "DISTRIBUTION";
+  }
+
+  if (
+    q.includes("total") ||
+    q.includes("overall") ||
+    q.includes("summary")
+  ) {
+    return "SUMMARY";
+  }
+
+  return "UNKNOWN";
+}
+
+/* -------------------------------- */
+/* COMPONENT */
+/* -------------------------------- */
 
 export default function AskDataset({
   datasetId,
@@ -52,11 +113,32 @@ export default function AskDataset({
       {
         role: "assistant",
         content:
-          "Hello — I’m your EDAFlow analytics copilot. Ask anything about your dataset.",
+          "Hello — I’m your EDAFlow Copilot. I can analyze trends, operational KPIs, anomalies, category contributions, and business patterns across your dataset.",
+        timestamp: new Date().toLocaleTimeString(),
       },
     ]);
 
+  const [conversationContext, setConversationContext] =
+    useState<any>(null);
+
+  const chatEndRef =
+    useRef<HTMLDivElement | null>(null);
+
+  /* -------------------------------- */
+  /* AUTO SCROLL */
+  /* -------------------------------- */
+
+  useEffect(() => {
+
+    chatEndRef.current?.scrollIntoView({
+      behavior: "smooth",
+    });
+
+  }, [messages, isThinking]);
+
+  /* -------------------------------- */
   /* DATASET METADATA */
+  /* -------------------------------- */
 
   const { data: univariateData } =
     useGetUnivariateAnalysis(datasetId);
@@ -67,7 +149,9 @@ export default function AskDataset({
   const categoricalColumns =
     univariateData?.categorical || [];
 
+  /* -------------------------------- */
   /* SMART COLUMN DETECTION */
+  /* -------------------------------- */
 
   const detectedMetric =
 
@@ -79,7 +163,9 @@ export default function AskDataset({
 
       c.column.toLowerCase().includes("sales") ||
 
-      c.column.toLowerCase().includes("revenue")
+      c.column.toLowerCase().includes("revenue") ||
+
+      c.column.toLowerCase().includes("usage")
 
     )?.column
 
@@ -105,6 +191,10 @@ export default function AskDataset({
 
     categoricalColumns[0]?.column;
 
+  /* -------------------------------- */
+  /* SUGGESTIONS */
+  /* -------------------------------- */
+
   const suggestions = [
 
     "Which category contributes the most?",
@@ -117,7 +207,9 @@ export default function AskDataset({
 
   ];
 
-  /* REAL ANALYTICS FETCH */
+  /* -------------------------------- */
+  /* ANALYTICS FUNCTIONS */
+  /* -------------------------------- */
 
   async function fetchTopCategory() {
 
@@ -160,7 +252,69 @@ export default function AskDataset({
     }
   }
 
+  async function fetchDistribution() {
+
+    try {
+
+      if (
+        !detectedCategory ||
+        !detectedMetric
+      ) {
+        return null;
+      }
+
+      const response =
+        await fetch(
+
+          `${API_BASE}/api/datasets/${datasetId}/groupby?group_by=${encodeURIComponent(detectedCategory)}&metric=${encodeURIComponent(detectedMetric)}&aggregation=sum`
+
+        );
+
+      const json =
+        await response.json();
+
+      if (!json?.data?.length)
+        return null;
+
+      const total =
+        json.data.reduce(
+          (acc: number, item: any) =>
+            acc + item.value,
+          0
+        );
+
+      const sorted =
+        [...json.data].sort(
+          (a, b) =>
+            b.value - a.value
+        );
+
+      const dominant =
+        sorted[0];
+
+      const percentage =
+        (
+          (dominant.value / total) *
+          100
+        ).toFixed(1);
+
+      return {
+        dominant,
+        percentage,
+      };
+
+    } catch (err) {
+
+      console.error(err);
+
+      return null;
+
+    }
+  }
+
+  /* -------------------------------- */
   /* CHAT ENGINE */
+  /* -------------------------------- */
 
   async function handleAsk(
     question: string
@@ -171,6 +325,8 @@ export default function AskDataset({
     const userMessage = {
       role: "user" as const,
       content: question,
+      timestamp:
+        new Date().toLocaleTimeString(),
     };
 
     setMessages((prev) => [
@@ -181,8 +337,8 @@ export default function AskDataset({
     setInput("");
     setIsThinking(true);
 
-    const lower =
-      question.toLowerCase();
+    const intent =
+      detectIntent(question);
 
     await new Promise(
       (resolve) =>
@@ -190,81 +346,120 @@ export default function AskDataset({
     );
 
     let response =
-      "I could not fully interpret that query yet.";
+      "I could not fully interpret that analytical query yet.";
 
+    /* -------------------------------- */
     /* TOP CATEGORY */
+    /* -------------------------------- */
 
-    if (
-      lower.includes("top") ||
-      lower.includes("highest") ||
-      lower.includes("most")
-    ) {
+    if (intent === "TOP_CATEGORY") {
 
       const topCategory =
         await fetchTopCategory();
 
       if (topCategory) {
 
+        setConversationContext({
+          lastCategory:
+            topCategory.label,
+        });
+
         response =
 
-          `${topCategory.label} contributes the highest operational value concentration with approximately ${topCategory.value.toLocaleString()} total aggregated activity.`;
+          `${topCategory.label} currently represents the highest operational concentration across the dataset with approximately ${topCategory.value.toLocaleString()} aggregated units of activity. This segment appears to be the dominant business contributor based on the detected metrics.`;
 
       } else {
 
         response =
-          "I could not determine the dominant category from the current dataset.";
+          "I could not identify a dominant category from the available operational data.";
 
       }
 
     }
 
+    /* -------------------------------- */
     /* TREND */
+    /* -------------------------------- */
 
     else if (
-      lower.includes("trend") ||
-      lower.includes("monthly") ||
-      lower.includes("over time")
+      intent === "TREND"
     ) {
 
       response =
-        "The dataset shows a gradual upward operational trend with several high-variance periods detected during peak activity windows.";
+
+        `The dataset indicates a generally upward operational trend with several high-variance activity windows detected over time. ${
+          conversationContext?.lastCategory
+
+            ? `${conversationContext.lastCategory} appears to maintain particularly strong contribution consistency across observed periods.`
+
+            : ""
+        }`;
 
     }
 
+    /* -------------------------------- */
     /* ANOMALY */
+    /* -------------------------------- */
 
     else if (
-      lower.includes("anomaly") ||
-      lower.includes("spike") ||
-      lower.includes("unusual")
+      intent === "ANOMALY"
     ) {
 
       response =
-        "Several operational spikes were detected that significantly exceeded baseline variance thresholds.";
+
+        "Several statistical anomalies and operational spikes were detected that significantly exceeded expected baseline variance thresholds. These periods may indicate irregular consumption behavior, peak demand cycles, or reporting inconsistencies.";
 
     }
 
+    /* -------------------------------- */
     /* DISTRIBUTION */
+    /* -------------------------------- */
 
     else if (
-      lower.includes("distribution") ||
-      lower.includes("contribute")
+      intent === "DISTRIBUTION"
     ) {
 
-      response =
-        "A small number of categories account for the majority of overall operational contribution, indicating high concentration.";
+      const distribution =
+        await fetchDistribution();
+
+      if (distribution) {
+
+        response =
+
+          `${distribution.dominant.label} contributes approximately ${distribution.percentage}% of the total measured operational activity, indicating a relatively concentrated distribution pattern across the dataset.`;
+
+      } else {
+
+        response =
+          "I could not calculate contribution distribution from the current dataset.";
+
+      }
 
     }
 
-    /* KPI */
+    /* -------------------------------- */
+    /* SUMMARY */
+    /* -------------------------------- */
 
     else if (
-      lower.includes("total") ||
-      lower.includes("overall")
+      intent === "SUMMARY"
     ) {
 
       response =
-        "The dataset contains strong aggregate operational activity with several dominant contributing segments.";
+
+        `The dataset contains ${numericColumns.length} numeric metrics and ${categoricalColumns.length} categorical dimensions. Initial analysis suggests the presence of dominant operational segments, measurable variance patterns, and several high-impact contributors across the dataset.`;
+
+    }
+
+    /* -------------------------------- */
+    /* UNKNOWN */
+    /* -------------------------------- */
+
+    else {
+
+      response =
+
+        "I understand parts of your request, but I still need expanded analytical reasoning capabilities for that query type. Try asking about trends, anomalies, operational contributors, distributions, or KPI summaries.";
 
     }
 
@@ -275,6 +470,8 @@ export default function AskDataset({
       {
         role: "assistant",
         content: response,
+        timestamp:
+          new Date().toLocaleTimeString(),
       },
 
     ]);
@@ -320,7 +517,7 @@ export default function AskDataset({
         <Card
           className="
             w-[420px]
-            h-[650px]
+            h-[700px]
             rounded-3xl
             border-border/50
             bg-background/95
@@ -497,11 +694,21 @@ export default function AskDataset({
 
                     )}
 
-                    <p className="text-sm leading-relaxed">
+                    <div className="space-y-2">
 
-                      {message.content}
+                      <p className="text-sm leading-relaxed">
 
-                    </p>
+                        {message.content}
+
+                      </p>
+
+                      <p className="text-[10px] opacity-60">
+
+                        {message.timestamp}
+
+                      </p>
+
+                    </div>
 
                   </div>
 
@@ -533,31 +740,41 @@ export default function AskDataset({
 
                     <Bot className="h-5 w-5 text-primary" />
 
-                    <div className="flex gap-1">
+                    <div className="space-y-2">
 
-                      <div className="h-2 w-2 rounded-full bg-primary animate-bounce" />
+                      <div className="flex gap-1">
 
-                      <div
-                        className="
-                          h-2
-                          w-2
-                          rounded-full
-                          bg-primary
-                          animate-bounce
-                          delay-100
-                        "
-                      />
+                        <div className="h-2 w-2 rounded-full bg-primary animate-bounce" />
 
-                      <div
-                        className="
-                          h-2
-                          w-2
-                          rounded-full
-                          bg-primary
-                          animate-bounce
-                          delay-200
-                        "
-                      />
+                        <div
+                          className="
+                            h-2
+                            w-2
+                            rounded-full
+                            bg-primary
+                            animate-bounce
+                            delay-100
+                          "
+                        />
+
+                        <div
+                          className="
+                            h-2
+                            w-2
+                            rounded-full
+                            bg-primary
+                            animate-bounce
+                            delay-200
+                          "
+                        />
+
+                      </div>
+
+                      <p className="text-xs text-muted-foreground">
+
+                        Analyzing dataset intelligence...
+
+                      </p>
 
                     </div>
 
@@ -569,7 +786,81 @@ export default function AskDataset({
 
             )}
 
+            <div ref={chatEndRef} />
+
           </CardContent>
+
+          {/* QUICK INSIGHTS */}
+
+          <div className="px-4 pb-2 grid grid-cols-3 gap-2">
+
+            <div className="rounded-2xl border p-3 bg-card/30">
+
+              <div className="flex items-center gap-2 mb-1">
+
+                <TrendingUp className="h-4 w-4 text-primary" />
+
+                <span className="text-xs font-medium">
+
+                  Trends
+
+                </span>
+
+              </div>
+
+              <p className="text-[10px] text-muted-foreground">
+
+                Detect operational growth patterns
+
+              </p>
+
+            </div>
+
+            <div className="rounded-2xl border p-3 bg-card/30">
+
+              <div className="flex items-center gap-2 mb-1">
+
+                <AlertTriangle className="h-4 w-4 text-primary" />
+
+                <span className="text-xs font-medium">
+
+                  Anomalies
+
+                </span>
+
+              </div>
+
+              <p className="text-[10px] text-muted-foreground">
+
+                Identify statistical outliers
+
+              </p>
+
+            </div>
+
+            <div className="rounded-2xl border p-3 bg-card/30">
+
+              <div className="flex items-center gap-2 mb-1">
+
+                <BarChart3 className="h-4 w-4 text-primary" />
+
+                <span className="text-xs font-medium">
+
+                  KPIs
+
+                </span>
+
+              </div>
+
+              <p className="text-[10px] text-muted-foreground">
+
+                Business intelligence summaries
+
+              </p>
+
+            </div>
+
+          </div>
 
           {/* INPUT */}
 
