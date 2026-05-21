@@ -1,5 +1,5 @@
 import { useState } from "react";
-
+import { useGetUnivariateAnalysis } from "@workspace/api-client-react";
 import {
   Card,
   CardContent,
@@ -32,6 +32,51 @@ const API_BASE =
   import.meta.env.VITE_API_URL ||
   "https://eda-xqob.onrender.com";
 
+const { data: univariateData } =
+  useGetUnivariateAnalysis(datasetId);
+
+const numericColumns =
+  univariateData?.numeric || [];
+
+const categoricalColumns =
+  univariateData?.categorical || [];
+
+const detectedMetric =
+
+  numericColumns.find((c) =>
+
+    c.column.toLowerCase().includes("amount") ||
+
+    c.column.toLowerCase().includes("cost") ||
+
+    c.column.toLowerCase().includes("sales") ||
+
+    c.column.toLowerCase().includes("revenue")
+
+  )?.column
+
+  ||
+
+  numericColumns[0]?.column;
+
+const detectedCategory =
+
+  categoricalColumns.find((c) =>
+
+    c.column.toLowerCase().includes("department") ||
+
+    c.column.toLowerCase().includes("category") ||
+
+    c.column.toLowerCase().includes("center") ||
+
+    c.column.toLowerCase().includes("region")
+
+  )?.column
+
+  ||
+
+  categoricalColumns[0]?.column; 
+  
 export default function AskDataset({
   datasetId,
 }: Props) {
@@ -73,7 +118,7 @@ export default function AskDataset({
       const response =
         await fetch(
 
-          `${API_BASE}/api/datasets/${datasetId}/groupby?group_by=Cost%20Center%20Name&metric=Amount&aggregation=sum`
+          `${API_BASE}/api/datasets/${datasetId}/group_by=${encodeURIComponent(detectedCategory || "")}&metric=${encodeURIComponent(detectedMetric || "")}&aggregation=sum`
 
         );
 
