@@ -285,8 +285,8 @@ export default function BusinessAnalytics({ datasetId }: Props) {
 
     if (selectedYear !== "all" && yearColumn) {
       columns.push(yearColumn);
-      // Backend stores Year as float ("2025.0"), send in that format for filter matching
-      values.push(selectedYear.includes(".") ? selectedYear : `${selectedYear}.0`);
+      // Backend filters on plain integer string e.g. "2025"
+      values.push(selectedYear);
     }
     if (selectedMonth !== "all" && monthColumn) {
       columns.push(monthColumn);
