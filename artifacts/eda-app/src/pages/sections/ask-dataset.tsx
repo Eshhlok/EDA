@@ -230,7 +230,7 @@ export default function AskDataset({
 
   return (
 
-    <div className="z-50">
+    <>
 
       {/* COLLAPSED BUTTON */}
 
@@ -264,9 +264,13 @@ export default function AskDataset({
       {isOpen && (
 
         <Rnd
+          style={{
+            position: "fixed",
+            zIndex: 9999,
+          }}
           default={{
-            x: window.innerWidth - 460,
-            y: 80,
+            x: window.innerWidth - 450,
+            y: window.innerHeight - 760,
             width: 420,
             height: 700,
           }}
@@ -839,6 +843,6 @@ export default function AskDataset({
 
       )}
 
-    </div>
+    </>
   );
 }
