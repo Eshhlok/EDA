@@ -116,12 +116,17 @@ export default function BusinessAnalytics({ datasetId }: Props) {
   const pieData = (() => {
     if (!data?.data) return [];
     const sorted = [...data.data];
-    if (sorted.length <= 8) return sorted.map((row) => ({ name: row.label, value: row.value }));
+    if (sorted.length <= 8) return sorted.map((row) => ({ name: row.label, value: row.value, breakdown: null as { name: string; value: number }[] | null }));
     const top = sorted.slice(0, 8);
-    const othersValue = sorted.slice(8).reduce((sum, row) => sum + row.value, 0);
+    const othersItems = sorted.slice(8);
+    const othersValue = othersItems.reduce((sum, row) => sum + row.value, 0);
     return [
-      ...top.map((row) => ({ name: row.label, value: row.value })),
-      { name: "Others", value: othersValue },
+      ...top.map((row) => ({ name: row.label, value: row.value, breakdown: null as { name: string; value: number }[] | null })),
+      {
+        name: "Others",
+        value: othersValue,
+        breakdown: othersItems.map((row) => ({ name: row.label, value: row.value })),
+      },
     ];
   })();
 
@@ -636,7 +641,44 @@ export default function BusinessAnalytics({ datasetId }: Props) {
                       <Cell key={index} fill={PIE_COLORS[index % PIE_COLORS.length]} />
                     ))}
                   </Pie>
-                  <Tooltip {...chartTooltipStyle} formatter={(value: number) => formatCompactNumber(value)} />
+                  <Tooltip
+                    content={({ active, payload }: any) => {
+                      if (!active || !payload?.length) return null;
+                      const entry = payload[0].payload;
+                      const isOthers = entry.name === "Others" && entry.breakdown?.length;
+                      return (
+                        <div style={{
+                          backgroundColor: "#111827",
+                          border: "1px solid #374151",
+                          borderRadius: "12px",
+                          padding: "12px 16px",
+                          color: "#f9fafb",
+                          boxShadow: "0 10px 25px rgba(0,0,0,0.35)",
+                          maxWidth: "260px",
+                        }}>
+                          <p style={{ fontWeight: 600, marginBottom: isOthers ? "8px" : "2px", color: "#ffffff" }}>
+                            {entry.name}
+                          </p>
+                          <p style={{ color: "#e5e7eb", fontSize: "13px", marginBottom: isOthers ? "10px" : 0 }}>
+                            Total: {formatCompactNumber(entry.value)}
+                          </p>
+                          {isOthers && (
+                            <div style={{ borderTop: "1px solid #374151", paddingTop: "8px", display: "flex", flexDirection: "column", gap: "5px" }}>
+                              <p style={{ color: "#9ca3af", fontSize: "11px", marginBottom: "4px", textTransform: "uppercase", letterSpacing: "0.05em" }}>
+                                Includes
+                              </p>
+                              {entry.breakdown.map((item: { name: string; value: number }, i: number) => (
+                                <div key={i} style={{ display: "flex", justifyContent: "space-between", gap: "16px", fontSize: "12px" }}>
+                                  <span style={{ color: "#d1d5db", whiteSpace: "nowrap", overflow: "hidden", textOverflow: "ellipsis", maxWidth: "160px" }}>{item.name}</span>
+                                  <span style={{ color: "#e5e7eb", fontWeight: 500, flexShrink: 0 }}>{formatCompactNumber(item.value)}</span>
+                                </div>
+                              ))}
+                            </div>
+                          )}
+                        </div>
+                      );
+                    }}
+                  />
                   <Legend />
                 </PieChart>
               </ResponsiveContainer>
