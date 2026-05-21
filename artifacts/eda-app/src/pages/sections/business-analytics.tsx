@@ -483,7 +483,7 @@ export default function BusinessAnalytics({ datasetId }: Props) {
             <SelectTrigger className="w-[140px]">
               <SelectValue placeholder="All Years" />
             </SelectTrigger>
-            <SelectContent>
+            <SelectContent position="popper" className="max-h-60 overflow-y-auto">
               <SelectItem value="all">All Years</SelectItem>
               {availableYears.map((year) => (
                 <SelectItem key={year} value={year}>{year}</SelectItem>
@@ -507,7 +507,7 @@ export default function BusinessAnalytics({ datasetId }: Props) {
             >
               <SelectValue placeholder="All Months" />
             </SelectTrigger>
-            <SelectContent>
+            <SelectContent position="popper" className="max-h-60 overflow-y-auto">
               <SelectItem value="all">All Months</SelectItem>
               {availableMonths.map((m) => (
                 <SelectItem key={m} value={m}>{labelForMonth(m)}</SelectItem>
