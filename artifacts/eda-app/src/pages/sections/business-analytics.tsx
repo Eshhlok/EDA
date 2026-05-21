@@ -40,20 +40,30 @@ type GroupByResponse = {
   data: { label: string; value: number }[];
 };
 
-const MONTHS = [
-  { value: "1", label: "January" },
-  { value: "2", label: "February" },
-  { value: "3", label: "March" },
-  { value: "4", label: "April" },
-  { value: "5", label: "May" },
-  { value: "6", label: "June" },
-  { value: "7", label: "July" },
-  { value: "8", label: "August" },
-  { value: "9", label: "September" },
-  { value: "10", label: "October" },
-  { value: "11", label: "November" },
-  { value: "12", label: "December" },
-];
+// Full month label map – covers both plain numbers AND "YYYY-MM" format
+const MONTH_NAMES: Record<string, string> = {
+  "1": "January",  "01": "January",
+  "2": "February", "02": "February",
+  "3": "March",    "03": "March",
+  "4": "April",    "04": "April",
+  "5": "May",      "05": "May",
+  "6": "June",     "06": "June",
+  "7": "July",     "07": "July",
+  "8": "August",   "08": "August",
+  "9": "September","09": "September",
+  "10": "October",
+  "11": "November",
+  "12": "December",
+};
+
+function labelForMonth(raw: string): string {
+  // "2025-04" → "April 2025"
+  const yyyyMM = raw.match(/^(\d{4})-(\d{2})$/);
+  if (yyyyMM) {
+    return `${MONTH_NAMES[yyyyMM[2]] ?? yyyyMM[2]} ${yyyyMM[1]}`;
+  }
+  return MONTH_NAMES[raw] ?? raw;
+}
 
 const chartTooltipStyle = {
   contentStyle: {
@@ -85,10 +95,12 @@ export default function BusinessAnalytics({ datasetId }: Props) {
   const [chartType, setChartType] = useState<"bar" | "line">("bar");
   const [showForecast, setShowForecast] = useState(true);
 
-  // ── NEW: Year / Month filter state ─────────────────────────────────────────
+  // ── Year / Month filter ────────────────────────────────────────────────────
   const [selectedYear, setSelectedYear] = useState("all");
   const [selectedMonth, setSelectedMonth] = useState("all");
+  // These come from a dedicated fetch so they work regardless of group_by
   const [availableYears, setAvailableYears] = useState<string[]>([]);
+  const [availableMonths, setAvailableMonths] = useState<string[]>([]);
   // ──────────────────────────────────────────────────────────────────────────
 
   const [data, setData] = useState<GroupByResponse | null>(null);
@@ -115,14 +127,14 @@ export default function BusinessAnalytics({ datasetId }: Props) {
 
   const forecastData = (() => {
     if (!data?.data?.length) return [];
-    const base = data.data.map((d) => ({ label: d.label, value: d.value, forecast: null }));
+    const base = data.data.map((d) => ({ label: d.label, value: d.value, forecast: null as number | null }));
     if (base.length < 2) return base;
     const last = base[base.length - 1].value;
     const prev = base[base.length - 2].value;
     const trend = last - prev;
     const future = [];
     for (let i = 1; i <= 3; i++) {
-      future.push({ label: `Forecast ${i}`, value: null, forecast: last + trend * i });
+      future.push({ label: `Forecast ${i}`, value: null as number | null, forecast: last + trend * i });
     }
     return [...base, ...future];
   })();
@@ -148,6 +160,23 @@ export default function BusinessAnalytics({ datasetId }: Props) {
 
   const numericColumns = univariateData?.numeric.map((n) => n.column) || [];
   const categoricalColumns = univariateData?.categorical.map((c) => c.column) || [];
+
+  // ── Detect year/month columns across BOTH numeric and categorical ──────────
+  // Year is often numeric (int64) so check numericColumns too
+  const yearColumn =
+    [...categoricalColumns, ...numericColumns].find((col) =>
+      col.toLowerCase() === "year" || col.toLowerCase().endsWith("_year")
+    );
+
+  // Month column – look for "month" in name; prefers categorical
+  const monthColumn =
+    categoricalColumns.find((col) =>
+      col.toLowerCase() === "month" || col.toLowerCase().endsWith("_month")
+    ) ??
+    numericColumns.find((col) =>
+      col.toLowerCase() === "month" || col.toLowerCase().endsWith("_month")
+    );
+
   const groupableColumns = [
     ...categoricalColumns.filter(
       (col) => col.includes("_month") || col.includes("_year") || col.includes("_quarter")
@@ -157,16 +186,13 @@ export default function BusinessAnalytics({ datasetId }: Props) {
     ),
   ];
 
-  const yearColumn = categoricalColumns.find((col) => col.toLowerCase().includes("year"));
-  const monthColumn = categoricalColumns.find((col) => col.toLowerCase().includes("month"));
-
-  // ── Initialise defaults once columns are resolved ──────────────────────────
+  // ── Initialise defaults once columns resolve ───────────────────────────────
   useEffect(() => {
     if (groupableColumns.length > 0 && !groupBy) {
-      const detectedYearColumn = groupableColumns.find((col) =>
-        col.toLowerCase().includes("year")
-      );
-      const initial = detectedYearColumn ?? groupableColumns[0];
+      // Prefer month column for initial view (richer breakdown)
+      const initial =
+        groupableColumns.find((col) => col.toLowerCase().includes("month")) ??
+        groupableColumns[0];
       setGroupBy(initial);
       setRootGroupBy(initial);
     }
@@ -175,34 +201,74 @@ export default function BusinessAnalytics({ datasetId }: Props) {
     }
   }, [groupableColumns.join(","), numericColumns.join(",")]);
 
-  // ── Fetch available years from the year column ─────────────────────────────
+  // ── Fetch distinct year values (works even when Year is numeric) ───────────
   useEffect(() => {
     if (!yearColumn || !metric) return;
     const fetchYears = async () => {
       try {
-        const params = new URLSearchParams({
-          group_by: yearColumn,
-          metric,
-          aggregation,
-        });
+        const params = new URLSearchParams({ group_by: yearColumn, metric, aggregation });
         const res = await fetch(`${API_BASE}/api/datasets/${datasetId}/groupby?${params}`);
         const json: GroupByResponse = await res.json();
         const years = json.data
-          .map((d) => String(d.label))
+          .map((d) => String(d.label).trim())
           .filter((v) => /^\d{4}$/.test(v))
           .sort((a, b) => Number(a) - Number(b));
         setAvailableYears(years);
       } catch (err) {
-        console.error("Failed to fetch available years", err);
+        console.error("Failed to fetch years", err);
       }
     };
     fetchYears();
   }, [yearColumn, metric, aggregation, datasetId]);
 
-  // ── Derive filter columns/values from year + month selectors ──────────────
-  function buildDateFilters(): { columns: string[]; values: string[] } {
+  // ── Fetch distinct month values filtered by the chosen year ───────────────
+  useEffect(() => {
+    if (!monthColumn || !metric) return;
+
+    const fetchMonths = async () => {
+      try {
+        const params = new URLSearchParams({ group_by: monthColumn, metric, aggregation });
+        // Filter by selected year so only months belonging to that year show
+        if (selectedYear !== "all" && yearColumn) {
+          params.append("filter_columns", yearColumn);
+          params.append("filter_values", selectedYear);
+        }
+        const res = await fetch(`${API_BASE}/api/datasets/${datasetId}/groupby?${params}`);
+        const json: GroupByResponse = await res.json();
+        // Sort chronologically
+        const months = json.data
+          .map((d) => String(d.label).trim())
+          .sort((a, b) => {
+            // Handle "YYYY-MM" format
+            const toNum = (s: string) => {
+              const m = s.match(/^(\d{4})-(\d{2})$/);
+              return m ? Number(m[1]) * 100 + Number(m[2]) : Number(s);
+            };
+            return toNum(a) - toNum(b);
+          });
+        setAvailableMonths(months);
+      } catch (err) {
+        console.error("Failed to fetch months", err);
+      }
+    };
+    fetchMonths();
+  }, [monthColumn, yearColumn, selectedYear, metric, aggregation, datasetId]);
+
+  // ── Reset month when year changes ─────────────────────────────────────────
+  useEffect(() => {
+    setSelectedMonth("all");
+  }, [selectedYear]);
+
+  // ── Reset drill history when date filters change ───────────────────────────
+  useEffect(() => {
+    setDrillHistory([]);
+  }, [selectedYear, selectedMonth]);
+
+  // ── Build filter params merging date filters + drill history ──────────────
+  function buildFilterParams(): { columns: string[]; values: string[] } {
     const columns: string[] = [];
     const values: string[] = [];
+
     if (selectedYear !== "all" && yearColumn) {
       columns.push(yearColumn);
       values.push(selectedYear);
@@ -211,13 +277,38 @@ export default function BusinessAnalytics({ datasetId }: Props) {
       columns.push(monthColumn);
       values.push(selectedMonth);
     }
+    // Manual drill-down on top of date filters
+    drillHistory.forEach((d) => {
+      columns.push(d.column);
+      values.push(d.value);
+    });
+
     return { columns, values };
   }
 
-  // ── When year/month changes reset manual drill history ────────────────────
+  async function fetchData() {
+    if (!groupBy || !metric) return;
+    try {
+      setLoading(true);
+      const params = new URLSearchParams({ group_by: groupBy, metric, aggregation });
+      const { columns, values } = buildFilterParams();
+      if (columns.length > 0) {
+        params.append("filter_columns", columns.join(","));
+        params.append("filter_values", values.join(","));
+      }
+      const response = await fetch(`${API_BASE}/api/datasets/${datasetId}/groupby?${params}`);
+      const json = await response.json();
+      setData(json);
+    } catch (err) {
+      console.error(err);
+    } finally {
+      setLoading(false);
+    }
+  }
+
   useEffect(() => {
-    setDrillHistory([]);
-  }, [selectedYear, selectedMonth]);
+    fetchData();
+  }, [groupBy, metric, aggregation, selectedYear, selectedMonth, drillHistory.length]);
 
   function exportCSV() {
     if (!data?.data?.length) return;
@@ -246,9 +337,9 @@ export default function BusinessAnalytics({ datasetId }: Props) {
   }
 
   const DRILL_HIERARCHY: Record<string, string> = {
-    "Cost Center Name": "Posting Date_month",
-    "Posting Date_year": "Posting Date_month",
-    "Posting Date_month": "Posting Date",
+    "Cost Center Name": "Month",
+    "Year": "Month",
+    "Month": "Posting Date",
   };
 
   function handleDrillDown(label: string) {
@@ -257,36 +348,6 @@ export default function BusinessAnalytics({ datasetId }: Props) {
     const nextLevel = DRILL_HIERARCHY[groupBy];
     if (nextLevel) setGroupBy(nextLevel);
   }
-
-  async function fetchData() {
-    if (!groupBy || !metric) return;
-    try {
-      setLoading(true);
-      const params = new URLSearchParams({ group_by: groupBy, metric, aggregation });
-
-      // Merge date filters + manual drill history
-      const dateFilters = buildDateFilters();
-      const allFilterColumns = [...dateFilters.columns, ...drillHistory.map((d) => d.column)];
-      const allFilterValues = [...dateFilters.values, ...drillHistory.map((d) => d.value)];
-
-      if (allFilterColumns.length > 0) {
-        params.append("filter_columns", allFilterColumns.join(","));
-        params.append("filter_values", allFilterValues.join(","));
-      }
-
-      const response = await fetch(`${API_BASE}/api/datasets/${datasetId}/groupby?${params}`);
-      const json = await response.json();
-      setData(json);
-    } catch (err) {
-      console.error(err);
-    } finally {
-      setLoading(false);
-    }
-  }
-
-  useEffect(() => {
-    fetchData();
-  }, [groupBy, metric, aggregation, selectedYear, selectedMonth, drillHistory]);
 
   if (loading || !univariateData) {
     return (
@@ -299,14 +360,11 @@ export default function BusinessAnalytics({ datasetId }: Props) {
     );
   }
 
-  // ── Derived label for chart title ─────────────────────────────────────────
+  // ── Active filter label for badge + chart title ────────────────────────────
   const activePeriodLabel = (() => {
     const parts: string[] = [];
     if (selectedYear !== "all") parts.push(selectedYear);
-    if (selectedMonth !== "all") {
-      const m = MONTHS.find((m) => m.value === selectedMonth);
-      if (m) parts.push(m.label);
-    }
+    if (selectedMonth !== "all") parts.push(labelForMonth(selectedMonth));
     return parts.length > 0 ? parts.join(" – ") : null;
   })();
 
@@ -341,102 +399,124 @@ export default function BusinessAnalytics({ datasetId }: Props) {
       </div>
 
       {/* CONTROLS */}
-      <div className="flex flex-wrap gap-4">
+      <div className="flex flex-wrap gap-4 items-end">
+
         {/* Group By */}
-        <Select
-          value={groupBy}
-          onValueChange={(value) => {
-            setGroupBy(value);
-            setRootGroupBy(value);
-            setDrillHistory([]);
-          }}
-        >
-          <SelectTrigger className="w-[250px]">
-            <SelectValue placeholder="Group By" />
-          </SelectTrigger>
-          <SelectContent>
-            {groupableColumns.map((col) => (
-              <SelectItem key={col} value={col}>{col}</SelectItem>
-            ))}
-          </SelectContent>
-        </Select>
+        <div className="flex flex-col gap-1">
+          <span className="text-xs text-muted-foreground font-medium pl-1">Group By</span>
+          <Select
+            value={groupBy}
+            onValueChange={(value) => {
+              setGroupBy(value);
+              setRootGroupBy(value);
+              setDrillHistory([]);
+            }}
+          >
+            <SelectTrigger className="w-[220px]">
+              <SelectValue placeholder="Group By" />
+            </SelectTrigger>
+            <SelectContent>
+              {groupableColumns.map((col) => (
+                <SelectItem key={col} value={col}>{col}</SelectItem>
+              ))}
+            </SelectContent>
+          </Select>
+        </div>
 
         {/* Metric */}
-        <Select value={metric} onValueChange={setMetric}>
-          <SelectTrigger className="w-[250px]">
-            <SelectValue placeholder="Metric" />
-          </SelectTrigger>
-          <SelectContent>
-            {numericColumns.map((col) => (
-              <SelectItem key={col} value={col}>{col}</SelectItem>
-            ))}
-          </SelectContent>
-        </Select>
+        <div className="flex flex-col gap-1">
+          <span className="text-xs text-muted-foreground font-medium pl-1">Metric</span>
+          <Select value={metric} onValueChange={setMetric}>
+            <SelectTrigger className="w-[220px]">
+              <SelectValue placeholder="Metric" />
+            </SelectTrigger>
+            <SelectContent>
+              {numericColumns.map((col) => (
+                <SelectItem key={col} value={col}>{col}</SelectItem>
+              ))}
+            </SelectContent>
+          </Select>
+        </div>
 
         {/* Aggregation */}
-        <Select value={aggregation} onValueChange={setAggregation}>
-          <SelectTrigger className="w-[180px]">
-            <SelectValue placeholder="Aggregation" />
-          </SelectTrigger>
-          <SelectContent>
-            {["sum", "mean", "max", "min", "count"].map((a) => (
-              <SelectItem key={a} value={a}>{a.charAt(0).toUpperCase() + a.slice(1)}</SelectItem>
-            ))}
-          </SelectContent>
-        </Select>
+        <div className="flex flex-col gap-1">
+          <span className="text-xs text-muted-foreground font-medium pl-1">Aggregation</span>
+          <Select value={aggregation} onValueChange={setAggregation}>
+            <SelectTrigger className="w-[160px]">
+              <SelectValue placeholder="Aggregation" />
+            </SelectTrigger>
+            <SelectContent>
+              {["sum", "mean", "max", "min", "count"].map((a) => (
+                <SelectItem key={a} value={a}>{a.charAt(0).toUpperCase() + a.slice(1)}</SelectItem>
+              ))}
+            </SelectContent>
+          </Select>
+        </div>
 
         {/* ── Year filter ── */}
-        <Select
-          value={selectedYear}
-          onValueChange={(val) => {
-            setSelectedYear(val);
-            // Reset month when year changes to "all" for a clean state
-            if (val === "all") setSelectedMonth("all");
-          }}
-        >
-          <SelectTrigger className="w-[160px]">
-            <SelectValue placeholder="Year" />
-          </SelectTrigger>
-          <SelectContent>
-            <SelectItem value="all">All Years</SelectItem>
-            {availableYears.map((year) => (
-              <SelectItem key={year} value={year}>{year}</SelectItem>
-            ))}
-          </SelectContent>
-        </Select>
-
-        {/* ── Month filter (only enabled when a year is selected) ── */}
-        <Select
-          value={selectedMonth}
-          onValueChange={setSelectedMonth}
-          disabled={selectedYear === "all"}
-        >
-          <SelectTrigger
-            className={`w-[160px] ${selectedYear === "all" ? "opacity-50 cursor-not-allowed" : ""}`}
+        <div className="flex flex-col gap-1">
+          <span className="text-xs text-muted-foreground font-medium pl-1">Year</span>
+          <Select
+            value={selectedYear}
+            onValueChange={setSelectedYear}
           >
-            <SelectValue placeholder="Month" />
-          </SelectTrigger>
-          <SelectContent>
-            <SelectItem value="all">All Months</SelectItem>
-            {MONTHS.map((m) => (
-              <SelectItem key={m.value} value={m.value}>{m.label}</SelectItem>
-            ))}
-          </SelectContent>
-        </Select>
+            <SelectTrigger className="w-[140px]">
+              <SelectValue placeholder="All Years" />
+            </SelectTrigger>
+            <SelectContent>
+              <SelectItem value="all">All Years</SelectItem>
+              {availableYears.map((year) => (
+                <SelectItem key={year} value={year}>{year}</SelectItem>
+              ))}
+            </SelectContent>
+          </Select>
+        </div>
+
+        {/* ── Month filter (available for all years OR filtered by year) ── */}
+        <div className="flex flex-col gap-1">
+          <span className="text-xs text-muted-foreground font-medium pl-1">
+            Month {selectedYear === "all" ? "(select year first)" : ""}
+          </span>
+          <Select
+            value={selectedMonth}
+            onValueChange={setSelectedMonth}
+            disabled={availableMonths.length === 0}
+          >
+            <SelectTrigger
+              className={`w-[180px] ${availableMonths.length === 0 ? "opacity-50 cursor-not-allowed" : ""}`}
+            >
+              <SelectValue placeholder="All Months" />
+            </SelectTrigger>
+            <SelectContent>
+              <SelectItem value="all">All Months</SelectItem>
+              {availableMonths.map((m) => (
+                <SelectItem key={m} value={m}>{labelForMonth(m)}</SelectItem>
+              ))}
+            </SelectContent>
+          </Select>
+        </div>
+
+        {/* Clear filters button – only visible when filters are active */}
+        {(selectedYear !== "all" || selectedMonth !== "all") && (
+          <div className="flex flex-col gap-1">
+            <span className="text-xs text-transparent pl-1 select-none">Clear</span>
+            <Button
+              variant="outline"
+              size="sm"
+              className="h-10"
+              onClick={() => { setSelectedYear("all"); setSelectedMonth("all"); }}
+            >
+              ✕ Clear filters
+            </Button>
+          </div>
+        )}
       </div>
 
       {/* Active filter badge */}
       {activePeriodLabel && (
         <div className="flex items-center gap-2">
           <span className="inline-flex items-center gap-2 rounded-full border border-primary/30 bg-primary/10 px-3 py-1 text-xs font-medium text-primary">
-            Filtered: {activePeriodLabel}
-            <button
-              className="ml-1 rounded-full hover:text-destructive transition-colors"
-              onClick={() => { setSelectedYear("all"); setSelectedMonth("all"); }}
-              aria-label="Clear date filters"
-            >
-              ✕
-            </button>
+            Showing: {activePeriodLabel}
           </span>
         </div>
       )}
@@ -481,9 +561,7 @@ export default function BusinessAnalytics({ datasetId }: Props) {
       <Card>
         <CardHeader>
           <CardTitle>
-            {activePeriodLabel
-              ? `${activePeriodLabel} — Analytics`
-              : "Business Analytics"}
+            {activePeriodLabel ? `${activePeriodLabel} — Analytics` : "Business Analytics"}
           </CardTitle>
         </CardHeader>
         <CardContent>
