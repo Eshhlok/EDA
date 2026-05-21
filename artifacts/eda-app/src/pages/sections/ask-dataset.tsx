@@ -32,8 +32,7 @@ const API_BASE =
   import.meta.env.VITE_API_URL ||
   "https://eda-xqob.onrender.com";
 
-const { data: univariateData } =
-  useGetUnivariateAnalysis(datasetId);
+
 
 const numericColumns =
   univariateData?.numeric || [];
@@ -110,6 +109,8 @@ export default function AskDataset({
     "What are the top cost drivers?",
 
   ];
+  const { data: univariateData } =
+    useGetUnivariateAnalysis(datasetId);
 
   async function fetchTopCategory() {
 
