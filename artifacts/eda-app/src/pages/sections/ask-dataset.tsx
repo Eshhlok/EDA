@@ -272,6 +272,7 @@ export default function AskDataset({
             flex
             flex-col
             overflow-hidden
+            min-h-0
           "
         >
 
@@ -388,8 +389,10 @@ export default function AskDataset({
             className="
               flex-1
               overflow-y-auto
+              overflow-x-hidden
               p-4
               space-y-4
+              min-h-0
             "
           >
 
