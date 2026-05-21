@@ -136,7 +136,51 @@ def run_analysis(intent: str, dataset_id: str):
             "columns": columns,
             "outlier_percentage": outlier_pct,
         }
+    if intent == "correlation_analysis":
 
+        numeric_df = df.select_dtypes(include=[np.number])
+
+        if numeric_df.shape[1] < 2:
+            return {
+                "correlation_strength": 0
+            }
+
+        corr = numeric_df.corr().abs()
+
+        upper = corr.where(
+            np.triu(np.ones(corr.shape), k=1).astype(bool)
+        )
+
+        max_corr = upper.max().max()
+
+        return {
+            "rows": rows,
+            "columns": columns,
+            "correlation_strength": round(float(max_corr), 2),
+        }
+    if intent == "forecasting_readiness":
+
+        missing_pct = calculate_missing_percentage(df)
+
+        numeric_cols = len(
+            df.select_dtypes(include=[np.number]).columns
+        )
+
+        readiness = max(
+            0,
+            round(
+                100
+                - missing_pct
+                + min(numeric_cols * 2, 20),
+                2,
+            ),
+        )
+
+        return {
+            "forecast_readiness": readiness,
+            "numeric_columns": numeric_cols,
+            "missing_percentage": missing_pct,
+        }
     # -------------------------------
     # DATASET OVERVIEW
     # -------------------------------
