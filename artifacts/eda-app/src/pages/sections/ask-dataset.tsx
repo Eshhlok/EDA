@@ -1,5 +1,7 @@
 import { useState } from "react";
+
 import { useGetUnivariateAnalysis } from "@workspace/api-client-react";
+
 import {
   Card,
   CardContent,
@@ -32,50 +34,6 @@ const API_BASE =
   import.meta.env.VITE_API_URL ||
   "https://eda-xqob.onrender.com";
 
-
-
-const numericColumns =
-  univariateData?.numeric || [];
-
-const categoricalColumns =
-  univariateData?.categorical || [];
-
-const detectedMetric =
-
-  numericColumns.find((c) =>
-
-    c.column.toLowerCase().includes("amount") ||
-
-    c.column.toLowerCase().includes("cost") ||
-
-    c.column.toLowerCase().includes("sales") ||
-
-    c.column.toLowerCase().includes("revenue")
-
-  )?.column
-
-  ||
-
-  numericColumns[0]?.column;
-
-const detectedCategory =
-
-  categoricalColumns.find((c) =>
-
-    c.column.toLowerCase().includes("department") ||
-
-    c.column.toLowerCase().includes("category") ||
-
-    c.column.toLowerCase().includes("center") ||
-
-    c.column.toLowerCase().includes("region")
-
-  )?.column
-
-  ||
-
-  categoricalColumns[0]?.column; 
-  
 export default function AskDataset({
   datasetId,
 }: Props) {
@@ -98,6 +56,55 @@ export default function AskDataset({
       },
     ]);
 
+  /* DATASET METADATA */
+
+  const { data: univariateData } =
+    useGetUnivariateAnalysis(datasetId);
+
+  const numericColumns =
+    univariateData?.numeric || [];
+
+  const categoricalColumns =
+    univariateData?.categorical || [];
+
+  /* SMART COLUMN DETECTION */
+
+  const detectedMetric =
+
+    numericColumns.find((c) =>
+
+      c.column.toLowerCase().includes("amount") ||
+
+      c.column.toLowerCase().includes("cost") ||
+
+      c.column.toLowerCase().includes("sales") ||
+
+      c.column.toLowerCase().includes("revenue")
+
+    )?.column
+
+    ||
+
+    numericColumns[0]?.column;
+
+  const detectedCategory =
+
+    categoricalColumns.find((c) =>
+
+      c.column.toLowerCase().includes("department") ||
+
+      c.column.toLowerCase().includes("category") ||
+
+      c.column.toLowerCase().includes("center") ||
+
+      c.column.toLowerCase().includes("region")
+
+    )?.column
+
+    ||
+
+    categoricalColumns[0]?.column;
+
   const suggestions = [
 
     "Which category contributes the most?",
@@ -109,17 +116,24 @@ export default function AskDataset({
     "What are the top cost drivers?",
 
   ];
-  const { data: univariateData } =
-    useGetUnivariateAnalysis(datasetId);
+
+  /* REAL ANALYTICS FETCH */
 
   async function fetchTopCategory() {
 
     try {
 
+      if (
+        !detectedCategory ||
+        !detectedMetric
+      ) {
+        return null;
+      }
+
       const response =
         await fetch(
 
-          `${API_BASE}/api/datasets/${datasetId}/group_by=${encodeURIComponent(detectedCategory || "")}&metric=${encodeURIComponent(detectedMetric || "")}&aggregation=sum`
+          `${API_BASE}/api/datasets/${datasetId}/groupby?group_by=${encodeURIComponent(detectedCategory)}&metric=${encodeURIComponent(detectedMetric)}&aggregation=sum`
 
         );
 
@@ -145,6 +159,8 @@ export default function AskDataset({
 
     }
   }
+
+  /* CHAT ENGINE */
 
   async function handleAsk(
     question: string
@@ -192,6 +208,11 @@ export default function AskDataset({
         response =
 
           `${topCategory.label} contributes the highest operational value concentration with approximately ${topCategory.value.toLocaleString()} total aggregated activity.`;
+
+      } else {
+
+        response =
+          "I could not determine the dominant category from the current dataset.";
 
       }
 
