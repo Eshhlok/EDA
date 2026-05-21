@@ -168,7 +168,7 @@ export default function BusinessAnalytics({ datasetId }: Props) {
       col.toLowerCase() === "year" || col.toLowerCase().endsWith("_year")
     );
 
-  // Month column – look for "month" in name; prefers categorical
+  // Month column – look for "month" in name; prefers categorical (must be before metricColumns)
   const monthColumn =
     categoricalColumns.find((col) =>
       col.toLowerCase() === "month" || col.toLowerCase().endsWith("_month")
@@ -176,6 +176,16 @@ export default function BusinessAnalytics({ datasetId }: Props) {
     numericColumns.find((col) =>
       col.toLowerCase() === "month" || col.toLowerCase().endsWith("_month")
     );
+
+  // ── Exclude year/date-like integer columns from the metric dropdown ────────
+  // Year is int64 in this dataset – grouping it by itself breaks the year fetch.
+  const DATE_LIKE_PATTERN = /^(year|month|quarter|week|day|id|date)$/i;
+  const metricColumns = numericColumns.filter(
+    (col) =>
+      !DATE_LIKE_PATTERN.test(col.trim()) &&
+      col !== yearColumn &&
+      col !== monthColumn
+  );
 
   const groupableColumns = [
     ...categoricalColumns.filter(
@@ -196,10 +206,10 @@ export default function BusinessAnalytics({ datasetId }: Props) {
       setGroupBy(initial);
       setRootGroupBy(initial);
     }
-    if (numericColumns.length > 0 && !metric) {
-      setMetric(numericColumns[0]);
+    if (metricColumns.length > 0 && !metric) {
+      setMetric(metricColumns[0]);
     }
-  }, [groupableColumns.join(","), numericColumns.join(",")]);
+  }, [groupableColumns.join(","), metricColumns.join(",")]);
 
   // ── Fetch distinct year values (works even when Year is numeric) ───────────
   useEffect(() => {
@@ -431,7 +441,7 @@ export default function BusinessAnalytics({ datasetId }: Props) {
               <SelectValue placeholder="Metric" />
             </SelectTrigger>
             <SelectContent>
-              {numericColumns.map((col) => (
+              {metricColumns.map((col) => (
                 <SelectItem key={col} value={col}>{col}</SelectItem>
               ))}
             </SelectContent>
