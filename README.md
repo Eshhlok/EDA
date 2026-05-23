@@ -1,3 +1,9 @@
+<p align="center">
+  <img src="https://github.com/user-attachments/assets/901f14ce-bc29-41ea-8108-5a8045f10fed" width="100%" />
+
+
+</p>
+
 # EDAFlow
 
 > AI-Powered Conversational Analytics & Business Intelligence Platform
