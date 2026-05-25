@@ -28,7 +28,8 @@ def _read_df(content: bytes, filename: str) -> tuple[pd.DataFrame, str, str]:
             df = pd.read_csv(
                 io.BytesIO(content),
                 encoding=encoding,
-                low_memory=False
+                low_memory=False,
+                engine="pyarrow"
             )
 
         elif fmt == "tsv":
@@ -36,7 +37,8 @@ def _read_df(content: bytes, filename: str) -> tuple[pd.DataFrame, str, str]:
                 io.BytesIO(content),
                 sep="\t",
                 encoding=encoding,
-                low_memory=False
+                low_memory=False,
+                engine="pyarrow"
             )
 
         elif fmt == "xlsx":
