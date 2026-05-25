@@ -18,7 +18,9 @@ export default function Home() {
   const { data: datasets, isLoading: datasetsLoading } = useListDatasets();
   const uploadDataset = useUploadDataset();
   const [uploadProgress, setUploadProgress] = useState(0);
-
+  const uploadCompleteSound = new Audio(
+  "/notifiaction.mp3"
+);
   const onDrop = useCallback((acceptedFiles: File[]) => {
     if (acceptedFiles.length === 0) return;
     const file = acceptedFiles[0];
@@ -35,6 +37,10 @@ export default function Home() {
         onSuccess: (data) => {
           clearInterval(interval);
           setUploadProgress(100);
+          uploadCompleteSound.volume = 0.35;
+
+          uploadCompleteSound.play().catch(() => {});
+
           queryClient.invalidateQueries({ queryKey: getListDatasetsQueryKey() });
           setTimeout(() => {
             setLocation(`/datasets/${data.id}/overview`);
