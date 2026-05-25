@@ -27,7 +27,7 @@ def _read_df(content: bytes, filename: str) -> tuple[pd.DataFrame, str, str]:
         if fmt == "csv":
             df = pd.read_csv(
                 io.BytesIO(content),
-                encoding=encoding,
+                
                 low_memory=False,
                 engine="pyarrow"
             )
@@ -36,7 +36,7 @@ def _read_df(content: bytes, filename: str) -> tuple[pd.DataFrame, str, str]:
             df = pd.read_csv(
                 io.BytesIO(content),
                 sep="\t",
-                encoding=encoding,
+                
                 low_memory=False,
                 engine="pyarrow"
             )
@@ -60,6 +60,12 @@ def _read_df(content: bytes, filename: str) -> tuple[pd.DataFrame, str, str]:
             )
 
     except Exception as e:
+        print("UPLOAD PARSE ERROR:", repr(e))
+        df = pd.read_csv(
+        io.BytesIO(content),
+        encoding=encoding,
+        low_memory=False,
+        )
         raise HTTPException(
             status_code=400,
             detail=f"Failed to parse file: {str(e)}"
