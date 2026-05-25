@@ -28,7 +28,7 @@ def _read_df(content: bytes, filename: str) -> tuple[pd.DataFrame, str, str]:
             df = pd.read_csv(
                 io.BytesIO(content),
                 
-                low_memory=False,
+                
                 engine="pyarrow"
             )
 
@@ -37,7 +37,7 @@ def _read_df(content: bytes, filename: str) -> tuple[pd.DataFrame, str, str]:
                 io.BytesIO(content),
                 sep="\t",
                 
-                low_memory=False,
+                
                 engine="pyarrow"
             )
 
