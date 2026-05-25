@@ -26,7 +26,7 @@ def _load_entry(dataset_id: str) -> Optional[dict]:
         return None
     with open(meta) as f:
         entry = json.load(f)
-    entry["df"] = pd.read_csv(csv, low_memory=False)
+    entry["df"] = pd.read_csv(csv,engine="pyarrow", low_memory=False)
     return entry
 
 
