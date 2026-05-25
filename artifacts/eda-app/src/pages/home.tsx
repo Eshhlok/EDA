@@ -173,9 +173,17 @@ export default function Home() {
               <p className="text-2xl font-semibold tracking-tight text-foreground">
                 {isDragActive ? "Drop the file here" : "Drag & drop your dataset"}
               </p>
-              <p className="text-sm text-muted-foreground mt-1">
-                Supports CSV, Excel, JSON, Parquet, and TSV files
-              </p>
+              <div className="space-y-1 mt-1">
+
+                <p className="text-sm text-muted-foreground">
+                  Supports CSV, Excel, JSON, Parquet, and TSV files
+                </p>
+
+                <p className="text-xs text-amber-500/80">
+                  Large Excel files may process slowly. CSV format is recommended for faster analytics.
+                </p>
+
+              </div>
             </div>
 
             {uploadDataset.isPending && (
