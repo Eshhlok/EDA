@@ -161,25 +161,50 @@ export default function BusinessAnalytics({ datasetId }: Props) {
       const aLabel = String(a.label).trim();
       const bLabel = String(b.label).trim();
 
-      // ── YYYY-MM sorting ───────────────────
-      const aYYYYMM =
-        aLabel.match(/^(\d{4})-(\d{2})$/);
+      // ── YYYY-MM SORTING ─────────────────
+      const aMatch = aLabel.match(/^(\d{4})-(\d{2})$/);
+      const bMatch = bLabel.match(/^(\d{4})-(\d{2})$/);
 
-      const bYYYYMM =
-        bLabel.match(/^(\d{4})-(\d{2})$/);
+      if (aMatch && bMatch) {
 
-      if (aYYYYMM && bYYYYMM) {
+        const aYear = Number(aMatch[1]);
+        const aMonth = Number(aMatch[2]);
+
+        const bYear = Number(bMatch[1]);
+        const bMonth = Number(bMatch[2]);
 
         return (
-          Number(aYYYYMM[1]) * 100 +
-          Number(aYYYYMM[2])
+          aYear * 100 + aMonth
         ) - (
-          Number(bYYYYMM[1]) * 100 +
-          Number(bYYYYMM[2])
+          bYear * 100 + bMonth
         );
       }
 
-      // ── Month sorting ───────────────────
+      // ── YEAR SORTING ───────────────────
+      if (
+        /^\d{4}$/.test(aLabel) &&
+        /^\d{4}$/.test(bLabel)
+      ) {
+
+        return Number(aLabel) - Number(bLabel);
+      }
+
+      // ── MONTH NAME SORTING ─────────────
+      const MONTH_ORDER = [
+        "January",
+        "February",
+        "March",
+        "April",
+        "May",
+        "June",
+        "July",
+        "August",
+        "September",
+        "October",
+        "November",
+        "December",
+      ];
+
       if (
         MONTH_ORDER.includes(aLabel) &&
         MONTH_ORDER.includes(bLabel)
@@ -191,54 +216,10 @@ export default function BusinessAnalytics({ datasetId }: Props) {
         );
       }
 
-      // ── Quarter sorting ─────────────────
-      if (
-        QUARTER_ORDER.includes(aLabel) &&
-        QUARTER_ORDER.includes(bLabel)
-      ) {
-
-        return (
-          QUARTER_ORDER.indexOf(aLabel) -
-          QUARTER_ORDER.indexOf(bLabel)
-        );
-      }
-
-      // ── Year sorting ────────────────────
-      if (
-        /^\d{4}$/.test(aLabel) &&
-        /^\d{4}$/.test(bLabel)
-      ) {
-
-        return (
-          Number(aLabel) -
-          Number(bLabel)
-        );
-      }
-
-      // ── Datetime sorting ────────────────
-      const aDate =
-        new Date(aLabel);
-
-      const bDate =
-        new Date(bLabel);
-
-      if (
-        !isNaN(aDate.getTime()) &&
-        !isNaN(bDate.getTime())
-      ) {
-
-        return (
-          aDate.getTime() -
-          bDate.getTime()
-        );
-      }
-
       return 0;
 
     });
-
   })();
-
   const forecastData = (() => {
     if (!data?.data?.length) return [];
     const base = sortedChartData.map((d) => ({ label: d.label, value: d.value, forecast: null as number | null }));
