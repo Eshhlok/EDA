@@ -130,9 +130,118 @@ export default function BusinessAnalytics({ datasetId }: Props) {
     ];
   })();
 
+  const sortedChartData = (() => {
+
+    if (!data?.data) return [];
+
+    const MONTH_ORDER = [
+      "January",
+      "February",
+      "March",
+      "April",
+      "May",
+      "June",
+      "July",
+      "August",
+      "September",
+      "October",
+      "November",
+      "December",
+    ];
+
+    const QUARTER_ORDER = [
+      "Q1",
+      "Q2",
+      "Q3",
+      "Q4",
+    ];
+
+    return [...data.data].sort((a, b) => {
+
+      const aLabel = String(a.label).trim();
+      const bLabel = String(b.label).trim();
+
+      // ── YYYY-MM sorting ───────────────────
+      const aYYYYMM =
+        aLabel.match(/^(\d{4})-(\d{2})$/);
+
+      const bYYYYMM =
+        bLabel.match(/^(\d{4})-(\d{2})$/);
+
+      if (aYYYYMM && bYYYYMM) {
+
+        return (
+          Number(aYYYYMM[1]) * 100 +
+          Number(aYYYYMM[2])
+        ) - (
+          Number(bYYYYMM[1]) * 100 +
+          Number(bYYYYMM[2])
+        );
+      }
+
+      // ── Month sorting ───────────────────
+      if (
+        MONTH_ORDER.includes(aLabel) &&
+        MONTH_ORDER.includes(bLabel)
+      ) {
+
+        return (
+          MONTH_ORDER.indexOf(aLabel) -
+          MONTH_ORDER.indexOf(bLabel)
+        );
+      }
+
+      // ── Quarter sorting ─────────────────
+      if (
+        QUARTER_ORDER.includes(aLabel) &&
+        QUARTER_ORDER.includes(bLabel)
+      ) {
+
+        return (
+          QUARTER_ORDER.indexOf(aLabel) -
+          QUARTER_ORDER.indexOf(bLabel)
+        );
+      }
+
+      // ── Year sorting ────────────────────
+      if (
+        /^\d{4}$/.test(aLabel) &&
+        /^\d{4}$/.test(bLabel)
+      ) {
+
+        return (
+          Number(aLabel) -
+          Number(bLabel)
+        );
+      }
+
+      // ── Datetime sorting ────────────────
+      const aDate =
+        new Date(aLabel);
+
+      const bDate =
+        new Date(bLabel);
+
+      if (
+        !isNaN(aDate.getTime()) &&
+        !isNaN(bDate.getTime())
+      ) {
+
+        return (
+          aDate.getTime() -
+          bDate.getTime()
+        );
+      }
+
+      return 0;
+
+    });
+
+  })();
+
   const forecastData = (() => {
     if (!data?.data?.length) return [];
-    const base = data.data.map((d) => ({ label: d.label, value: d.value, forecast: null as number | null }));
+    const base = sortedChartData.map((d) => ({ label: d.label, value: d.value, forecast: null as number | null }));
     if (base.length < 2) return base;
     const last = base[base.length - 1].value;
     const prev = base[base.length - 2].value;
@@ -592,7 +701,7 @@ export default function BusinessAnalytics({ datasetId }: Props) {
               <ResponsiveContainer width="100%" height="100%">
                 {chartType === "bar" ? (
                   <BarChart
-                    data={data?.data || []}
+                    data={sortedChartData}
                     onClick={(state: any) => { if (state?.activeLabel) handleDrillDown(state.activeLabel); }}
                     margin={{ top: 0, right: 10, left: 0, bottom: 60 }}
                     barCategoryGap="8%"
