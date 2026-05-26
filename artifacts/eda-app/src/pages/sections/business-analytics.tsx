@@ -220,19 +220,50 @@ export default function BusinessAnalytics({ datasetId }: Props) {
 
     });
   })();
+
   const forecastData = (() => {
-    if (!data?.data?.length) return [];
-    const base = sortedChartData.map((d) => ({ label: d.label, value: d.value, forecast: null as number | null }));
-    if (base.length < 2) return base;
-    const last = base[base.length - 1].value;
-    const prev = base[base.length - 2].value;
+
+    if (!sortedChartData?.length)
+      return [];
+
+    const chronological = [...sortedChartData];
+
+    const base = chronological.map((d) => ({
+      label: d.label,
+      value: d.value,
+      forecast: null as number | null,
+    }));
+
+    if (base.length < 2)
+      return base;
+
+    const last =
+      base[base.length - 1].value;
+
+    const prev =
+      base[base.length - 2].value;
+
     const trend = last - prev;
+
     const future = [];
+
     for (let i = 1; i <= 3; i++) {
-      future.push({ label: `Forecast ${i}`, value: null as number | null, forecast: last + trend * i });
+
+      future.push({
+        label: `Forecast ${i}`,
+        value: null as number | null,
+        forecast: last + trend * i,
+      });
+
     }
-    return [...base, ...future];
+
+    return [
+      ...base,
+      ...future,
+    ];
+
   })();
+
 
   const insights = (() => {
     if (!data?.data?.length) return [];
