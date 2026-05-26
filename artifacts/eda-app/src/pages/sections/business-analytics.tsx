@@ -726,7 +726,7 @@ export default function BusinessAnalytics({ datasetId }: Props) {
                   </BarChart>
                 ) : (
                   <LineChart
-                    data={showForecast ? forecastData : data?.data || []}
+                    data={showForecast ? forecastData: sortedChartData}
                     margin={{ top: 0, right: 10, left: 0, bottom: 60 }}
                   >
                     <CartesianGrid strokeDasharray="3 3" vertical={false} />
