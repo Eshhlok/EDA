@@ -27,6 +27,7 @@ app.include_router(export.router, prefix="/api")
 app.include_router(copilot.router, prefix="/api")
 
 @app.get("/api/healthz")
+@app.head("/api/healthz")
 def health_check():
     return {"status": "ok"}
 
